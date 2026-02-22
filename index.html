@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Term Sheet Analyzer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink:       #0d1117;
+    --ink-dim:   #4a5568;
+    --ink-muted: #8896a8;
+    --paper:     #f8f7f4;
+    --surface:   #ffffff;
+    --border:    #e2ddd6;
+    --border-strong: #c9c2b8;
+    --accent:    #1a4a6b;
+    --accent-light: #e8f0f7;
+    --accent-mid: #2d6a9f;
+    --gold:      #c8973a;
+    --gold-light:#fdf6e8;
+    --red:       #c0392b;
+    --red-light: #fdf0ee;
+    --green:     #1e6b3e;
+    --green-light:#edf7f1;
+    --radius:    10px;
+    --shadow:    0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.06);
+    --shadow-lg: 0 4px 24px rgba(0,0,0,0.12);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--ink);
+    padding: 0 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .wordmark {
+    font-family: 'Fraunces', serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: #fff;
+    letter-spacing: -0.01em;
+  }
+  .wordmark span {
+    color: var(--gold);
+  }
+  .header-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    color: #4a5568;
+    text-transform: uppercase;
+  }
+
+  /* ── MAIN LAYOUT ── */
+  .main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 48px 40px 80px;
+  }
+
+  .page-title {
+    font-family: 'Fraunces', serif;
+    font-size: 32px;
+    font-weight: 300;
+    color: var(--ink);
+    letter-spacing: -0.02em;
+    margin-bottom: 6px;
+  }
+  .page-sub {
+    font-size: 14px;
+    color: var(--ink-muted);
+    margin-bottom: 40px;
+  }
+
+  /* ── UPLOAD AREA ── */
+  .upload-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 32px;
+    box-shadow: var(--shadow);
+    margin-bottom: 24px;
+  }
+
+  .upload-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    color: var(--ink-muted);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    display: block;
+  }
+
+  /* Tab switcher */
+  .tabs {
+    display: flex;
+    gap: 2px;
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 3px;
+    width: fit-content;
+    margin-bottom: 20px;
+  }
+  .tab {
+    padding: 7px 18px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink-dim);
+    cursor: pointer;
+    border: none;
+    background: none;
+    transition: all 0.15s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .tab.active {
+    background: var(--surface);
+    color: var(--accent);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  }
+  .tab:hover:not(.active) { color: var(--ink); }
+
+  /* Panels */
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* Paste panel */
+  textarea {
+    width: 100%;
+    height: 220px;
+    padding: 16px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    line-height: 1.7;
+    color: var(--ink);
+    background: var(--paper);
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  textarea:focus { border-color: var(--accent); background: var(--surface); }
+  textarea::placeholder { color: var(--ink-muted); }
+
+  /* Upload panel */
+  .dropzone {
+    border: 2px dashed var(--border);
+    border-radius: var(--radius);
+    padding: 48px 32px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--paper);
+    position: relative;
+  }
+  .dropzone:hover, .dropzone.dragging {
+    border-color: var(--accent-mid);
+    background: var(--accent-light);
+  }
+  .dropzone input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+  }
+  .dropzone-icon { font-size: 32px; margin-bottom: 12px; }
+  .dropzone-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+  .dropzone-sub {
+    font-size: 13px;
+    color: var(--ink-muted);
+  }
+  .dropzone-formats {
+    margin-top: 12px;
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+  }
+  .fmt-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--ink-dim);
+  }
+  .file-selected {
+    display: none;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: var(--green-light);
+    border: 1px solid #a8d5b8;
+    border-radius: var(--radius);
+    margin-top: 12px;
+    font-size: 13px;
+    color: var(--green);
+  }
+  .file-selected.visible { display: flex; }
+  .file-name { font-weight: 600; }
+  .file-remove {
+    margin-left: auto;
+    cursor: pointer;
+    color: var(--ink-muted);
+    font-size: 16px;
+    background: none;
+    border: none;
+    line-height: 1;
+    padding: 0 4px;
+  }
+
+  /* Analyze button */
+  .analyze-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 20px;
+    padding: 13px 28px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: var(--radius);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(26,74,107,0.3);
+  }
+  .analyze-btn:hover:not(:disabled) {
+    background: var(--accent-mid);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(26,74,107,0.35);
+  }
+  .analyze-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+  .btn-spinner {
+    width: 16px; height: 16px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    display: none;
+  }
+  .analyze-btn.loading .btn-spinner { display: block; }
+  .analyze-btn.loading .btn-text { opacity: 0.7; }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Error */
+  .error-bar {
+    display: none;
+    padding: 12px 16px;
+    background: var(--red-light);
+    border: 1px solid #f0b8b3;
+    border-radius: var(--radius);
+    color: var(--red);
+    font-size: 13px;
+    margin-top: 12px;
+  }
+  .error-bar.visible { display: block; }
+
+  /* ── RESULTS ── */
+  #results { display: none; }
+  #results.visible { display: block; }
+
+  /* Deal header card */
+  .deal-header {
+    background: var(--ink);
+    border-radius: 14px;
+    padding: 28px 32px;
+    margin-bottom: 24px;
+    color: white;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+  }
+  .deal-field-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.14em;
+    color: #64748b;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .deal-field-value {
+    font-size: 15px;
+    font-weight: 500;
+    color: #e2e8f0;
+  }
+  .deal-field-value.strike {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    color: var(--gold);
+  }
+  .deal-field-value.missing {
+    color: #4a5568;
+    font-style: italic;
+    font-size: 13px;
+  }
+
+  /* Missing terms notice */
+  .missing-notice {
+    display: none;
+    padding: 12px 16px;
+    background: var(--gold-light);
+    border: 1px solid #e8c87a;
+    border-radius: var(--radius);
+    font-size: 13px;
+    color: #7a5a1a;
+    margin-bottom: 24px;
+  }
+  .missing-notice.visible { display: block; }
+  .missing-notice strong { font-weight: 600; }
+
+  /* Category sections */
+  .category {
+    margin-bottom: 28px;
+  }
+  .category-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .category-name {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    font-weight: 500;
+  }
+  .category-count {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--ink-muted);
+    background: var(--paper);
+    border: 1px solid var(--border);
+    padding: 1px 7px;
+    border-radius: 20px;
+  }
+
+  /* Term cards */
+  .terms-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  @media (max-width: 720px) { .terms-grid { grid-template-columns: 1fr; } }
+
+  .term-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    transition: border-color 0.15s;
+  }
+  .term-card:hover { border-color: var(--border-strong); }
+  .term-card.missing-term {
+    background: var(--paper);
+    border-style: dashed;
+    opacity: 0.6;
+  }
+  .term-name {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 500;
+    margin-bottom: 6px;
+  }
+  .term-card.missing-term .term-name { color: var(--ink-muted); }
+  .term-summary {
+    font-size: 13px;
+    color: var(--ink);
+    line-height: 1.65;
+  }
+  .term-card.missing-term .term-summary {
+    color: var(--ink-muted);
+    font-style: italic;
+  }
+
+  /* Engine status */
+  .engine-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-muted);
+    margin-top: 8px;
+  }
+  .status-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--green);
+    flex-shrink: 0;
+  }
+  .status-dot.processing {
+    background: var(--gold);
+    animation: pulse 1s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  /* Proceed button */
+  .proceed-bar {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px;
+    background: var(--accent-light);
+    border: 1px solid #b8d0e8;
+    border-radius: 14px;
+    margin-top: 32px;
+  }
+  .proceed-bar.visible { display: flex; }
+  .proceed-text { font-size: 14px; color: var(--accent); font-weight: 500; }
+  .proceed-sub { font-size: 12px; color: var(--ink-muted); margin-top: 2px; }
+  .proceed-btn {
+    padding: 10px 24px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    opacity: 0.4;
+    pointer-events: none;
+  }
+  .proceed-btn.ready {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .coming-soon {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--ink-muted);
+    letter-spacing: 0.08em;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wordmark">Clear<span>Path</span></div>
+  <div class="header-tag">Term Sheet Analyzer · Engine 1</div>
+</header>
+
+<div class="main">
+
+  <h1 class="page-title">Term Sheet Analyzer</h1>
+  <p class="page-sub">Upload or paste a VPPA/PPA term sheet. Engine 1 will read every term and restate it in plain English.</p>
+
+  <!-- UPLOAD SECTION -->
+  <div class="upload-section">
+    <span class="upload-label">Input — choose one</span>
+
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('paste')">Paste Text</button>
+      <button class="tab" onclick="switchTab('file')">Upload File</button>
+    </div>
+
+    <!-- PASTE PANEL -->
+    <div class="panel active" id="panel-paste">
+      <textarea id="pasteText" placeholder="Paste your term sheet here — plain text, copied from Word or PDF..."></textarea>
+    </div>
+
+    <!-- FILE PANEL -->
+    <div class="panel" id="panel-file">
+      <div class="dropzone" id="dropzone"
+           ondragover="onDragOver(event)"
+           ondragleave="onDragLeave(event)"
+           ondrop="onDrop(event)">
+        <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.txt" onchange="onFileSelect(event)">
+        <div class="dropzone-icon">📄</div>
+        <div class="dropzone-title">Drop file here or click to browse</div>
+        <div class="dropzone-sub">Any format — the file will be converted to text automatically</div>
+        <div class="dropzone-formats">
+          <span class="fmt-badge">PDF</span>
+          <span class="fmt-badge">DOCX</span>
+          <span class="fmt-badge">DOC</span>
+          <span class="fmt-badge">TXT</span>
+        </div>
+      </div>
+      <div class="file-selected" id="fileSelected">
+        <span>📎</span>
+        <span class="file-name" id="fileName"></span>
+        <button class="file-remove" onclick="clearFile()">✕</button>
+      </div>
+    </div>
+
+    <div class="error-bar" id="errorBar"></div>
+
+    <button class="analyze-btn" id="analyzeBtn" onclick="runEngine1()">
+      <div class="btn-spinner"></div>
+      <span class="btn-text">Extract Terms</span>
+    </button>
+
+    <div class="engine-status" id="engineStatus" style="display:none">
+      <div class="status-dot processing" id="statusDot"></div>
+      <span id="statusText">Reading term sheet...</span>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="results">
+
+    <!-- Deal header -->
+    <div class="deal-header" id="dealHeader"></div>
+
+    <!-- Missing terms -->
+    <div class="missing-notice" id="missingNotice"></div>
+
+    <!-- Term summaries by category -->
+    <div id="termCategories"></div>
+
+    <!-- Proceed to Engine 2 -->
+    <div class="proceed-bar visible">
+      <div>
+        <div class="proceed-text">Extraction complete — ready for scoring</div>
+        <div class="proceed-sub">Engine 2 will score each term 0–100 against VPPA market standards</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span class="coming-soon">ENGINE 2 — COMING SOON</span>
+        <button class="proceed-btn" id="proceedBtn">Score Terms →</button>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+// ─── STATE ───────────────────────────────────────────────────
+let currentTab = 'paste';
+let selectedFile = null;
+let extractedData = null;
+
+// ─── TABS ────────────────────────────────────────────────────
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach((t, i) => {
+    t.classList.toggle('active', (i === 0 && tab === 'paste') || (i === 1 && tab === 'file'));
+  });
+  document.getElementById('panel-paste').classList.toggle('active', tab === 'paste');
+  document.getElementById('panel-file').classList.toggle('active', tab === 'file');
+  clearError();
+}
+
+// ─── FILE HANDLING ───────────────────────────────────────────
+function onDragOver(e) {
+  e.preventDefault();
+  document.getElementById('dropzone').classList.add('dragging');
+}
+function onDragLeave(e) {
+  document.getElementById('dropzone').classList.remove('dragging');
+}
+function onDrop(e) {
+  e.preventDefault();
+  document.getElementById('dropzone').classList.remove('dragging');
+  const file = e.dataTransfer.files[0];
+  if (file) setFile(file);
+}
+function onFileSelect(e) {
+  const file = e.target.files[0];
+  if (file) setFile(file);
+}
+function setFile(file) {
+  const allowed = ['application/pdf','application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document','text/plain'];
+  const ext = file.name.split('.').pop().toLowerCase();
+  if (!allowed.includes(file.type) && !['pdf','doc','docx','txt'].includes(ext)) {
+    showError('Unsupported file type. Please upload a PDF, DOCX, DOC, or TXT file.');
+    return;
+  }
+  selectedFile = file;
+  document.getElementById('fileName').textContent = file.name;
+  document.getElementById('fileSelected').classList.add('visible');
+  clearError();
+}
+function clearFile() {
+  selectedFile = null;
+  document.getElementById('fileSelected').classList.remove('visible');
+  document.getElementById('fileInput').value = '';
+}
+
+// ─── FILE → TEXT ─────────────────────────────────────────────
+async function fileToText(file) {
+  const ext = file.name.split('.').pop().toLowerCase();
+
+  if (ext === 'txt') {
+    return await file.text();
+  }
+
+  if (ext === 'pdf') {
+    // Use PDF.js via CDN for client-side PDF text extraction
+    return await extractPdfText(file);
+  }
+
+  if (ext === 'doc' || ext === 'docx') {
+    return await extractDocxText(file);
+  }
+
+  throw new Error('Unsupported file format');
+}
+
+async function extractPdfText(file) {
+  // Load PDF.js dynamically
+  if (!window.pdfjsLib) {
+    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js');
+    window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+      'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  }
+
+  const arrayBuffer = await file.arrayBuffer();
+  const pdf = await window.pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  const pages = [];
+
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const page = await pdf.getPage(i);
+    const content = await page.getTextContent();
+    const pageText = content.items.map(item => item.str).join(' ');
+    pages.push(pageText);
+  }
+
+  return pages.join('\n\n');
+}
+
+async function extractDocxText(file) {
+  // Load mammoth.js dynamically for DOCX extraction
+  if (!window.mammoth) {
+    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js');
+  }
+
+  const arrayBuffer = await file.arrayBuffer();
+  const result = await window.mammoth.extractRawText({ arrayBuffer });
+  return result.value;
+}
+
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = src;
+    s.onload = resolve;
+    s.onerror = () => reject(new Error(`Failed to load ${src}`));
+    document.head.appendChild(s);
+  });
+}
+
+// ─── MAIN ENGINE 1 FUNCTION ──────────────────────────────────
+async function runEngine1() {
+  clearError();
+
+  let text = '';
+
+  if (currentTab === 'paste') {
+    text = document.getElementById('pasteText').value.trim();
+    if (!text) { showError('Please paste your term sheet text.'); return; }
+    if (text.length < 100) { showError('Text is too short — please paste the full term sheet.'); return; }
+  } else {
+    if (!selectedFile) { showError('Please select a file to upload.'); return; }
+    setStatus('Reading file...', true);
+    try {
+      text = await fileToText(selectedFile);
+    } catch (err) {
+      showError('Could not read file: ' + err.message);
+      clearStatus();
+      return;
+    }
+    if (!text || text.trim().length < 100) {
+      showError('Could not extract text from file. Try copying and pasting the text directly.');
+      clearStatus();
+      return;
+    }
+  }
+
+  // Show loading state
+  const btn = document.getElementById('analyzeBtn');
+  btn.disabled = true;
+  btn.classList.add('loading');
+  btn.querySelector('.btn-text').textContent = 'Extracting...';
+  setStatus('Reading term sheet — this takes about 5 seconds...', true);
+
+  // Hide old results
+  document.getElementById('results').classList.remove('visible');
+  document.getElementById('results').style.display = 'none';
+
+  try {
+    const response = await fetch('/api/extract', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.ok) {
+      throw new Error(data.message || data.error || `Server error ${response.status}`);
+    }
+
+    extractedData = data.extraction;
+    renderResults(data.extraction);
+
+    setStatus('Extraction complete', false);
+
+  } catch (err) {
+    showError('Extraction failed: ' + err.message);
+    clearStatus();
+  } finally {
+    btn.disabled = false;
+    btn.classList.remove('loading');
+    btn.querySelector('.btn-text').textContent = 'Extract Terms';
+  }
+}
+
+// ─── RENDER RESULTS ──────────────────────────────────────────
+function renderResults(data) {
+  const { deal, terms, missing = [] } = data;
+
+  // Deal header
+  renderDealHeader(deal);
+
+  // Missing notice
+  const missingEl = document.getElementById('missingNotice');
+  if (missing.length > 0) {
+    missingEl.innerHTML = `<strong>Not addressed in document (${missing.length} terms):</strong> ${missing.map(humanTermName).join(', ')}`;
+    missingEl.classList.add('visible');
+  } else {
+    missingEl.classList.remove('visible');
+  }
+
+  // Term categories
+  renderTermCategories(terms, missing);
+
+  // Show results
+  const resultsEl = document.getElementById('results');
+  resultsEl.style.display = 'block';
+  resultsEl.classList.add('visible');
+
+  // Scroll to results
+  setTimeout(() => resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+}
+
+function renderDealHeader(deal) {
+  const fields = [
+    { label: 'Project', value: deal.project },
+    { label: 'Buyer', value: deal.buyer },
+    { label: 'Seller / Developer', value: deal.seller },
+    { label: 'ISO / Market', value: deal.iso },
+    { label: 'Technology', value: deal.technology },
+    { label: 'Capacity', value: deal.capacity },
+    { label: 'Strike Price', value: deal.strikePrice ? `$${parseFloat(deal.strikePrice).toFixed(2)}/MWh` : null, cls: 'strike' },
+    { label: 'Contract Term', value: deal.term },
+    { label: 'Target COD', value: deal.cod },
+  ];
+
+  document.getElementById('dealHeader').innerHTML = fields.map(f => `
+    <div>
+      <div class="deal-field-label">${f.label}</div>
+      <div class="deal-field-value ${f.value ? (f.cls || '') : 'missing'}">${f.value || 'Not specified'}</div>
+    </div>
+  `).join('');
+}
+
+const CATEGORIES = [
+  {
+    name: 'Pricing & Settlement',
+    keys: ['strike', 'settlement', 'interval', 'negprice', 'invoice', 'basis', 'marketdisrupt']
+  },
+  {
+    name: 'Curtailment',
+    keys: ['scheduling', 'curtailment', 'nonecocurtail', 'basiscurtail']
+  },
+  {
+    name: 'Project Development',
+    keys: ['interconnection', 'conditions', 'delay', 'availability', 'production', 'permits', 'cod']
+  },
+  {
+    name: 'Credit & Collateral',
+    keys: ['buyercredit', 'sellercredit']
+  },
+  {
+    name: 'Contract Terms',
+    keys: ['assignment', 'forcemajeure', 'default', 'termination', 'changeinlaw', 'reputation']
+  },
+  {
+    name: 'Environmental & Incentives',
+    keys: ['recs', 'incentives']
+  },
+  {
+    name: 'Legal & Miscellaneous',
+    keys: ['govlaw', 'confidentiality', 'exclusivity', 'expenses', 'accounting', 'publicity']
+  },
+];
+
+const TERM_NAMES = {
+  strike: 'Strike Price',
+  settlement: 'Settlement Point',
+  interval: 'Settlement Interval',
+  negprice: 'Negative Prices',
+  invoice: 'Invoicing & Payment',
+  basis: 'Basis Risk',
+  marketdisrupt: 'Market Disruption',
+  scheduling: 'Scheduling Control',
+  curtailment: 'Economic Curtailment',
+  nonecocurtail: 'Non-Economic Curtailment',
+  basiscurtail: 'Basis Curtailment',
+  interconnection: 'Interconnection Agreement',
+  conditions: 'Conditions Precedent',
+  delay: 'Delay & COD Damages',
+  availability: 'Availability Guarantee',
+  production: 'Production Guarantee',
+  permits: 'Permitting Status',
+  cod: 'COD Definition',
+  buyercredit: 'Buyer Credit Support',
+  sellercredit: 'Seller Credit Support',
+  assignment: 'Assignment Rights',
+  forcemajeure: 'Force Majeure',
+  default: 'Events of Default',
+  termination: 'Early Termination',
+  changeinlaw: 'Change in Law',
+  reputation: 'Reputational Provisions',
+  recs: 'RECs & Attributes',
+  incentives: 'Tax Credits & Incentives',
+  govlaw: 'Governing Law',
+  confidentiality: 'Confidentiality',
+  exclusivity: 'Exclusivity',
+  expenses: 'Expenses & Fees',
+  accounting: 'Accounting Treatment',
+  publicity: 'Publicity & Press',
+};
+
+function humanTermName(key) {
+  return TERM_NAMES[key] || key;
+}
+
+function renderTermCategories(terms, missing) {
+  const container = document.getElementById('termCategories');
+  container.innerHTML = CATEGORIES.map(cat => {
+    const cards = cat.keys.map(key => {
+      const summary = terms[key];
+      const isMissing = !summary || missing.includes(key);
+      return `
+        <div class="term-card ${isMissing ? 'missing-term' : ''}">
+          <div class="term-name">${humanTermName(key)}</div>
+          <div class="term-summary">${isMissing ? 'Not addressed in this document' : escHtml(summary)}</div>
+        </div>
+      `;
+    }).join('');
+
+    const presentCount = cat.keys.filter(k => terms[k] && !missing.includes(k)).length;
+
+    return `
+      <div class="category">
+        <div class="category-header">
+          <span class="category-name">${cat.name}</span>
+          <span class="category-count">${presentCount}/${cat.keys.length}</span>
+        </div>
+        <div class="terms-grid">${cards}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ─── UI HELPERS ──────────────────────────────────────────────
+function showError(msg) {
+  const el = document.getElementById('errorBar');
+  el.textContent = msg;
+  el.classList.add('visible');
+}
+function clearError() {
+  document.getElementById('errorBar').classList.remove('visible');
+}
+function setStatus(msg, processing) {
+  const el = document.getElementById('engineStatus');
+  const dot = document.getElementById('statusDot');
+  el.style.display = 'flex';
+  el.querySelector('#statusText').textContent = msg;
+  dot.className = 'status-dot' + (processing ? ' processing' : '');
+}
+function clearStatus() {
+  document.getElementById('engineStatus').style.display = 'none';
+}
+</script>
+
+</body>
+</html>
