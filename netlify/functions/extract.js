@@ -1,14 +1,13 @@
 // Engine 1: Term Sheet Extraction
-// Takes raw term sheet text, returns structured plain-English summaries
-// Model: claude-haiku-4-5 — fast, cheap, mechanical extraction task
+// Uses @anthropic-ai/sdk — no raw fetch needed
 
-const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages';
+const Anthropic = require('@anthropic-ai/sdk');
 
 const SYSTEM_PROMPT = `You are an expert energy procurement analyst. Your job is to read a VPPA or PPA term sheet and restate every term in plain, simple English that a non-lawyer can understand.
 
 Do not score, evaluate, or judge anything. Just describe what the document says.
 
-Return ONLY valid JSON in this exact structure — no prose, no markdown:
+Return ONLY valid JSON — no prose, no markdown fences — in this exact structure:
 
 {
   "deal": {
@@ -24,126 +23,124 @@ Return ONLY valid JSON in this exact structure — no prose, no markdown:
     "structure": "Virtual PPA or Physical PPA or null"
   },
   "terms": {
-    "strike":         "Plain English: what is the price, any escalation, fixed or floating component?",
-    "settlement":     "Plain English: how is settlement calculated — hub, zonal, or nodal? What price index?",
-    "interval":       "Plain English: what settlement interval — 5-min, hourly, monthly? Day-ahead or real-time?",
-    "negprice":       "Plain English: what happens when prices go negative? Does buyer pay seller, or is there a floor?",
-    "invoice":        "Plain English: how often are invoices issued, when is payment due, any late fees?",
-    "basis":          "Plain English: who bears the risk if the project's node price differs from the hub price?",
-    "marketdisrupt":  "Plain English: what happens if the market has a disruption event — ERCOT scarcity pricing, ISO emergencies?",
-    "scheduling":     "Plain English: who controls when the project generates — seller, ISO dispatch, or buyer approval?",
-    "curtailment":    "Plain English: if the project is curtailed for economic reasons, who bears the lost revenue?",
-    "nonecocurtail":  "Plain English: if the grid operator curtails the project for reliability reasons, who bears the loss?",
-    "basiscurtail":   "Plain English: if curtailment is caused by congestion or basis issues, who bears the loss?",
-    "interconnection":"Plain English: what is the status of the interconnection agreement, and who bears network upgrade costs?",
-    "conditions":     "Plain English: what conditions must be met before the contract becomes binding?",
-    "delay":          "Plain English: what happens if the project is late — are there delay damages, and who pays?",
-    "availability":   "Plain English: is there a mechanical availability guarantee, and what happens if it's missed?",
-    "production":     "Plain English: is there an energy production guarantee — a minimum MWh commitment per year?",
-    "permits":        "Plain English: what is the permitting status, and is it a condition precedent?",
-    "cod":            "Plain English: how is commercial operation date defined, and who certifies it?",
-    "buyercredit":    "Plain English: what credit support must the buyer provide — guaranty, letter of credit, cash?",
-    "sellercredit":   "Plain English: what credit support must the seller provide — sponsor guaranty, LOC, or just the SPV?",
-    "assignment":     "Plain English: can either party assign or transfer this contract, and under what conditions?",
-    "forcemajeure":   "Plain English: what events excuse performance — how broad is the definition?",
-    "default":        "Plain English: what constitutes an event of default, and how long to cure?",
-    "termination":    "Plain English: if the contract terminates early, who pays whom and how is the payment calculated?",
-    "changeinlaw":    "Plain English: if laws or regulations change — including tax credits — who bears the impact?",
-    "reputation":     "Plain English: can either party exit if the other causes reputational harm?",
-    "recs":           "Plain English: who gets the renewable energy certificates, how are they delivered?",
-    "incentives":     "Plain English: who keeps tax credits (ITC/PTC), transferability value, state incentives?",
-    "govlaw":         "Plain English: what state's law governs, and how are disputes resolved — court or arbitration?",
-    "confidentiality":"Plain English: what must be kept confidential, and can the buyer use this deal for ESG reporting?",
-    "exclusivity":    "Plain English: is the seller committed to selling all output to buyer, any buyer restrictions?",
-    "expenses":       "Plain English: who pays legal fees, registry fees, independent engineer costs?",
-    "accounting":     "Plain English: any provisions about hedge accounting treatment or tax indemnities?",
-    "publicity":      "Plain English: can either party issue press releases or use the other's name/logo?"
+    "strike":          "What is the fixed price per MWh? Any escalation clause? Fixed or floating component?",
+    "settlement":      "How is settlement calculated — hub, zonal, or nodal price? What index is used?",
+    "interval":        "What settlement interval — 5-minute, hourly, monthly? Day-ahead or real-time price?",
+    "negprice":        "What happens when electricity prices go negative? Is there a floor or does buyer pay seller?",
+    "invoice":         "How often are invoices issued? When is payment due? Any late payment fees?",
+    "basis":           "Who bears the risk if the project node price differs from the hub price?",
+    "marketdisrupt":   "What happens if the market has a major disruption — scarcity pricing, ISO emergencies?",
+    "scheduling":      "Who controls when the project generates — seller, ISO dispatch, or buyer approval required?",
+    "curtailment":     "If the project is curtailed for economic reasons, who bears the lost revenue?",
+    "nonecocurtail":   "If the grid operator curtails the project for reliability reasons, who bears the loss?",
+    "basiscurtail":    "If curtailment is caused by congestion or basis issues, who bears the loss?",
+    "interconnection": "What is the status of the grid interconnection agreement? Who pays for network upgrades?",
+    "conditions":      "What conditions must be met before the contract becomes binding?",
+    "delay":           "What happens if the project is late — are there delay damages, and who pays?",
+    "availability":    "Is there a mechanical availability guarantee? What happens if it is missed?",
+    "production":      "Is there an energy production guarantee — a minimum MWh commitment per year?",
+    "permits":         "What is the permitting status? Is it a condition the deal requires before closing?",
+    "cod":             "How is commercial operation date defined? Who certifies that the project has reached COD?",
+    "buyercredit":     "What credit support must the buyer provide — guaranty, letter of credit, or cash?",
+    "sellercredit":    "What credit support must the seller provide — sponsor guaranty, LOC, or just the project company?",
+    "assignment":      "Can either party assign or transfer this contract? Under what conditions?",
+    "forcemajeure":    "What events excuse performance — how broad is the definition?",
+    "default":         "What constitutes an event of default? How long does a party have to fix it?",
+    "termination":     "If the contract ends early, who pays whom and how is the payment calculated?",
+    "changeinlaw":     "If laws or regulations change — including tax credits — who bears the financial impact?",
+    "reputation":      "Can either party exit the deal if the other causes reputational harm?",
+    "recs":            "Who gets the renewable energy certificates? How and when are they delivered?",
+    "incentives":      "Who keeps tax credits (ITC/PTC), transferability value, and state incentives?",
+    "govlaw":          "What state law governs this contract? Are disputes resolved in court or arbitration?",
+    "confidentiality": "What must be kept confidential? Can the buyer use this deal for ESG reporting?",
+    "exclusivity":     "Is the seller committed to selling all output to this buyer? Any buyer restrictions?",
+    "expenses":        "Who pays legal fees, registry fees, and independent engineer costs?",
+    "accounting":      "Any provisions about hedge accounting treatment or tax indemnities?",
+    "publicity":       "Can either party issue press releases or use the other party's name or logo?"
   },
-  "missing": ["list of term keys above that are not addressed at all in the document"]
+  "missing": ["list only the term keys from above that are completely absent from the document"]
 }
 
 Rules:
-- If a term is addressed in the document, describe what it says in 1-3 plain sentences.
-- If a term is not mentioned at all, use null and add the key to "missing".
-- Never use legal jargon without immediately explaining it.
+- If a term is in the document, describe it in 1-3 plain sentences. Be specific — use actual numbers and names from the document.
+- If a term is not mentioned, use null and add the key to missing[].
+- Never use legal jargon without explaining it immediately.
 - Never say "the agreement states" — just state the fact directly.
-- Numbers should be specific: "$70/MWh" not "a fixed price".`;
+- Use specific numbers: "$70/MWh" not "a fixed price". "15 years" not "a long term".`;
+
+const HEADERS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Content-Type': 'application/json'
+};
 
 exports.handler = async (event) => {
-  const headers = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Content-Type',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Content-Type': 'application/json'
-  };
-
-  if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers, body: '' };
-  if (event.httpMethod !== 'POST') return { statusCode: 405, headers, body: JSON.stringify({ error: 'Method not allowed' }) };
-
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) return { statusCode: 500, headers, body: JSON.stringify({ error: 'ANTHROPIC_API_KEY not configured' }) };
+  if (event.httpMethod === 'OPTIONS') {
+    return { statusCode: 200, headers: HEADERS, body: '' };
+  }
+  if (event.httpMethod !== 'POST') {
+    return { statusCode: 405, headers: HEADERS, body: JSON.stringify({ error: 'Method not allowed' }) };
+  }
 
   let body;
   try {
     body = JSON.parse(event.body);
   } catch {
-    return { statusCode: 400, headers, body: JSON.stringify({ error: 'Invalid JSON body' }) };
+    return { statusCode: 400, headers: HEADERS, body: JSON.stringify({ error: 'Invalid request body' }) };
   }
 
   const { text } = body;
   if (!text || text.trim().length < 50) {
-    return { statusCode: 400, headers, body: JSON.stringify({ error: 'Term sheet text is too short or missing' }) };
+    return { statusCode: 400, headers: HEADERS, body: JSON.stringify({ error: 'Term sheet text is missing or too short' }) };
   }
 
-  // Trim to 15k chars — Haiku handles this comfortably within its context window
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) {
+    return { statusCode: 500, headers: HEADERS, body: JSON.stringify({ error: 'ANTHROPIC_API_KEY not configured on server' }) };
+  }
+
+  // Trim long documents — Haiku handles ~15k chars comfortably
   const trimmed = text.length > 15000
-    ? text.substring(0, 13000) + '\n...[document continues — truncated for processing]...\n' + text.substring(text.length - 2000)
+    ? text.substring(0, 13000) + '\n\n[Document truncated for processing — first 13,000 characters shown]\n\n' + text.substring(text.length - 1500)
     : text;
 
   try {
-    const response = await fetch(ANTHROPIC_API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01'
-      },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5',
-        max_tokens: 4000,
-        system: SYSTEM_PROMPT,
-        messages: [{
-          role: 'user',
-          content: `Extract and summarize every term from this VPPA/PPA term sheet in plain English:\n\n${trimmed}`
-        }]
-      })
+    const client = new Anthropic({ apiKey });
+
+    const message = await client.messages.create({
+      model: 'claude-haiku-4-5',
+      max_tokens: 4096,
+      system: SYSTEM_PROMPT,
+      messages: [{
+        role: 'user',
+        content: `Extract and summarize every term from this VPPA/PPA term sheet in plain English:\n\n${trimmed}`
+      }]
     });
 
-    if (!response.ok) {
-      const err = await response.text();
-      throw new Error(`Anthropic API error ${response.status}: ${err.substring(0, 200)}`);
-    }
+    const rawText = message.content?.[0]?.text || '';
 
-    const data = await response.json();
-    const rawText = data.content?.[0]?.text || '';
-
-    // Parse JSON from response
+    // Strip any markdown fences if model adds them
     const jsonMatch = rawText.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error('Model did not return valid JSON');
+    if (!jsonMatch) {
+      console.error('No JSON found in response:', rawText.substring(0, 500));
+      throw new Error('Model did not return valid JSON');
+    }
 
     const result = JSON.parse(jsonMatch[0]);
 
-    // Validate structure
-    if (!result.deal || !result.terms) throw new Error('Response missing required fields');
+    if (!result.deal || !result.terms) {
+      throw new Error('Response missing required deal or terms fields');
+    }
 
-    // Normalize numeric strikePrice
+    // Normalize strike price to number
     if (result.deal.strikePrice != null) {
       result.deal.strikePrice = parseFloat(result.deal.strikePrice) || null;
     }
 
     return {
       statusCode: 200,
-      headers,
+      headers: HEADERS,
       body: JSON.stringify({ ok: true, extraction: result })
     };
 
@@ -151,7 +148,7 @@ exports.handler = async (event) => {
     console.error('Extraction error:', err.message);
     return {
       statusCode: 500,
-      headers,
+      headers: HEADERS,
       body: JSON.stringify({ error: 'Extraction failed', message: err.message })
     };
   }
