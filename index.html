@@ -1258,28 +1258,32 @@ const CATEGORIES = [
     keys: ['escalation', 'interval', 'negprice', 'basis']
   },
   {
-    name: 'Curtailment',
-    keys: ['scheduling', 'curtailment', 'nonecocurtail', 'basiscurtail']
+    name: 'Curtailment & Dispatch',
+    keys: ['scheduling', 'curtailment', 'nonecocurtail']
   },
   {
     name: 'Project Development',
-    keys: ['interconnection', 'conditions', 'delay', 'availability', 'production', 'permits', 'cod']
+    keys: ['interconnection', 'conditions', 'delay', 'permits', 'cod']
+  },
+  {
+    name: 'Performance & Guarantees',
+    keys: ['availability', 'production', 'recs']
   },
   {
     name: 'Credit & Collateral',
     keys: ['buyercredit', 'sellercredit']
   },
   {
-    name: 'Contract Terms',
-    keys: ['invoice', 'assignment', 'forcemajeure', 'marketdisrupt', 'default', 'termination', 'changeinlaw', 'reputation']
+    name: 'Risk & Liability',
+    keys: ['forcemajeure', 'marketdisrupt', 'changeinlaw', 'reputation']
   },
   {
-    name: 'Environmental & Incentives',
-    keys: ['recs', 'incentives']
+    name: 'Contract Terms',
+    keys: ['invoice', 'assignment', 'default', 'termination']
   },
   {
     name: 'Legal & Miscellaneous',
-    keys: ['govlaw', 'confidentiality', 'exclusivity', 'expenses', 'accounting', 'publicity']
+    keys: ['govlaw', 'confidentiality', 'exclusivity', 'expenses', 'incentives', 'accounting', 'publicity']
   },
 ];
 
@@ -1293,7 +1297,6 @@ const TERM_NAMES = {
   scheduling: 'Scheduling Control',
   curtailment: 'Economic Curtailment',
   nonecocurtail: 'Non-Economic Curtailment',
-  basiscurtail: 'Basis Curtailment',
   interconnection: 'Interconnection Agreement',
   conditions: 'Conditions Precedent',
   delay: 'Delay & COD Damages',

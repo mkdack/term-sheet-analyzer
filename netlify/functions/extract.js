@@ -85,10 +85,6 @@ For each term include a "confidence" field: "high" (explicitly stated), "medium"
       "summary": "If the grid operator curtails the project for reliability reasons, who bears the loss?",
       "confidence": "high|medium|low"
     },
-    "basiscurtail": {
-      "summary": "If curtailment is caused by transmission congestion or basis issues, who bears the loss?",
-      "confidence": "high|medium|low"
-    },
     "interconnection": {
       "summary": "What is the interconnection agreement status? Who pays for network upgrades? Is it a condition precedent?",
       "confidence": "high|medium|low"
