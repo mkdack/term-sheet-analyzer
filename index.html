@@ -1,3 +1,4 @@
+<!-- BUILD:1771878996 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1486,16 +1487,20 @@ function humanTermName(key) {
   return TERM_NAMES[key] || key;
 }
 
+function toggleCard(el) {
+  el.classList.toggle('expanded');
+}
+
 function renderTermCategories(terms, missing, lowConfidence = []) {
   const container = document.getElementById('termCategories');
   container.innerHTML = CATEGORIES.map(cat => {
     const cards = cat.keys.map(key => {
-      const termData = terms[key];
-      // Terms now return { summary, confidence } — handle both old and new shape
-      const summary = termData && typeof termData === 'object' ? termData.summary : termData;
+      const termData   = terms[key];
+      const summary    = termData && typeof termData === 'object' ? termData.summary    : termData;
+      const snapshot   = termData && typeof termData === 'object' ? termData.snapshot   : null;
       const confidence = termData && typeof termData === 'object' ? termData.confidence : null;
-      const isMissing = !summary || missing.includes(key);
-      const isLowConf = lowConfidence.includes(key);
+      const isMissing  = !summary || missing.includes(key);
+      const isLowConf  = lowConfidence.includes(key);
 
       let badge = '';
       if (!isMissing && confidence === 'low') {
@@ -1504,13 +1509,21 @@ function renderTermCategories(terms, missing, lowConfidence = []) {
         badge = `<span class="conf-badge conf-medium">~ Inferred</span>`;
       }
 
+      const snapshotText = isMissing ? 'Not addressed' : (snapshot || '—');
+
       return `
-        <div class="term-card ${isMissing ? 'missing-term' : ''} ${isLowConf ? 'low-conf' : ''}">
+        <div class="term-card ${isMissing ? 'missing-term' : 'clickable-card'} ${isLowConf ? 'low-conf' : ''}"
+             ${!isMissing ? 'onclick="toggleCard(this)"' : ''}>
           <div class="term-name-row">
             <div class="term-name">${humanTermName(key)}</div>
             ${badge}
           </div>
-          <div class="term-summary">${isMissing ? 'Not addressed in this document' : escHtml(summary)}</div>
+          <div class="term-snapshot">${escHtml(snapshotText)}</div>
+          ${!isMissing ? `
+          <div class="term-detail">
+            <div class="term-detail-divider"></div>
+            <div class="term-summary">${escHtml(summary)}</div>
+          </div>` : ''}
         </div>
       `;
     }).join('');
