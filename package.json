@@ -1,5 +1,5 @@
 {
-  "name": "term-sheet-analyzer-functions",
+  "name": "term-sheet-analyzer",
   "version": "1.0.0",
   "dependencies": {
     "@anthropic-ai/sdk": "^0.36.3"

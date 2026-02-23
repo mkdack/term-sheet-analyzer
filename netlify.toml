@@ -1,6 +1,6 @@
 [build]
   publish = "."
-  command = "# static site"
+  command = "npm install"
 
 [build.environment]
   NODE_VERSION = "20"
