@@ -37,95 +37,139 @@
 
   /* ── LIGHT THEME — Orbai white ── */
   [data-theme="light"] {
-    --bg:            #f7f7f7;
-    --bg2:           #f0f0f0;
+    --bg:            #e8e8e8;
+    --bg2:           #e0e0e0;
     --surface:       #ffffff;
-    --surface2:      #f7f7f7;
-    --border:        rgba(0,0,0,0.07);
-    --border-strong: rgba(0,0,0,0.13);
-    --text:          #111111;
-    --text-dim:      #555555;
-    --text-muted:    #aaaaaa;
-    --accent:        #111111;
+    --surface2:      #f5f5f5;
+    --border:        rgba(0,0,0,0.08);
+    --border-strong: rgba(0,0,0,0.15);
+    --text:          #1a1a1a;
+    --text-dim:      #4a4a4a;
+    --text-muted:    #909090;
+    --accent:        #1a1a1a;
     --accent-dim:    rgba(0,0,0,0.04);
-    --gold:          #9a6f00;
-    --red:           #c0392b;
-    --red-dim:       rgba(192,57,43,0.07);
-    --green:         #1e6b3e;
-    --green-dim:     rgba(30,107,62,0.07);
-    --amber:         #935f00;
-    --amber-dim:     rgba(147,95,0,0.07);
+    --gold:          #8a5f00;
+    --red:           #b83030;
+    --red-dim:       rgba(184,48,48,0.08);
+    --green:         #1a5c34;
+    --green-dim:     rgba(26,92,52,0.08);
+    --amber:         #835500;
+    --amber-dim:     rgba(131,85,0,0.08);
   }
 
-  /* Light-specific overrides */
+  [data-theme="light"] body { background: #e8e8e8; }
   [data-theme="light"] body::before { display: none; }
 
   [data-theme="light"] header {
-    background: rgba(247,247,247,0.9);
-    border-bottom-color: rgba(0,0,0,0.07);
+    background: rgba(232,232,232,0.92);
+    border-bottom: 1px solid rgba(0,0,0,0.08);
   }
 
+  [data-theme="light"] .page-title { color: #1a1a1a; font-size: 44px; }
+  [data-theme="light"] .page-sub { color: #666; font-size: 15px; }
+
+  /* White floating cards */
   [data-theme="light"] .upload-section,
-  [data-theme="light"] .term-card,
   [data-theme="light"] .deal-header,
   [data-theme="light"] .proceed-bar {
     background: #ffffff;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04);
-    border-color: transparent;
+    border: none;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.07), 0 1px 4px rgba(0,0,0,0.05);
   }
 
-  [data-theme="light"] .deal-field,
-  [data-theme="light"] .deal-header-full {
+  [data-theme="light"] .term-card {
     background: #ffffff;
+    border: none;
+    box-shadow: 0 1px 8px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+    padding: 20px 22px;
   }
-
-  [data-theme="light"] .deal-field-value,
-  [data-theme="light"] .deal-structure-value {
-    color: #111111;
-  }
-
-  [data-theme="light"] .term-summary {
-    color: #444444;
-  }
-
-  [data-theme="light"] .term-card:not(.missing-term) .term-name {
-    color: #999999;
-  }
-
   [data-theme="light"] .term-card:hover:not(.missing-term) {
-    background: #ffffff;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.1), 0 1px 4px rgba(0,0,0,0.06);
-    border-color: transparent;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.11), 0 1px 4px rgba(0,0,0,0.06);
+    transform: translateY(-1px);
+    transition: all 0.15s ease;
   }
-
   [data-theme="light"] .term-card.missing-term {
-    background: #f5f5f5;
-    border: 1px dashed rgba(0,0,0,0.12);
+    background: rgba(0,0,0,0.03);
+    border: 1px dashed rgba(0,0,0,0.1);
     box-shadow: none;
   }
+  [data-theme="light"] .term-card.low-conf {
+    box-shadow: 0 1px 8px rgba(184,48,48,0.1), 0 1px 2px rgba(184,48,48,0.06);
+  }
 
+  /* Deal header internals */
+  [data-theme="light"] .deal-field { background: #fff; }
+  [data-theme="light"] .deal-header-full { background: #fff; }
   [data-theme="light"] .deal-header-bottom,
-  [data-theme="light"] .deal-header-full {
-    border-top-color: rgba(0,0,0,0.06);
-  }
+  [data-theme="light"] .deal-header-full { border-top-color: rgba(0,0,0,0.07); }
+  [data-theme="light"] .deal-field { border-right-color: rgba(0,0,0,0.07); }
+  [data-theme="light"] .deal-field-label { color: #aaa; }
+  [data-theme="light"] .deal-field-value { color: #1a1a1a; font-size: 15px; }
+  [data-theme="light"] .deal-field-value.strike { color: #8a5f00; font-size: 30px; }
+  [data-theme="light"] .deal-field-value.missing { color: #bbb; }
+  [data-theme="light"] .deal-structure-value { color: #1a1a1a; font-size: 17px; }
+  [data-theme="light"] .deal-structure-note { color: #777; }
 
-  [data-theme="light"] .deal-field {
-    border-right-color: rgba(0,0,0,0.06);
-  }
+  /* Term card text */
+  [data-theme="light"] .term-card:not(.missing-term) .term-name { color: #bbb; font-size: 10px; }
+  [data-theme="light"] .term-summary { color: #333; font-size: 14px; line-height: 1.7; }
+  [data-theme="light"] .term-card.missing-term .term-summary { color: #bbb; }
 
-  [data-theme="light"] .proceed-text { color: #111111; }
-  [data-theme="light"] .proceed-sub { color: #999999; }
-  [data-theme="light"] .proceed-btn {
-    border-color: rgba(0,0,0,0.15);
-    color: #aaaaaa;
-  }
+  /* Categories */
+  [data-theme="light"] .category-name { color: #999; font-size: 11px; }
+  [data-theme="light"] .category-count { background: rgba(0,0,0,0.05); border-color: transparent; color: #999; }
+  [data-theme="light"] .category-header { border-bottom-color: rgba(0,0,0,0.08); }
 
-  [data-theme="light"] .notices-stack .notice-pill.warning {
-    background: #fffbf0;
-  }
+  /* Notices */
+  [data-theme="light"] .notice-pill.missing { background: rgba(0,0,0,0.04); border-color: transparent; color: #666; }
+  [data-theme="light"] .notice-pill.warning { background: #fff9ee; border-color: rgba(131,85,0,0.15); color: #835500; }
+  [data-theme="light"] .notice-pill.info { background: rgba(0,0,0,0.03); border-color: transparent; color: #999; }
 
-  [data-theme="light"] .conf-low { background: rgba(192,57,43,0.06); }
-  [data-theme="light"] .conf-medium { background: rgba(147,95,0,0.06); }
+  /* Conf badges */
+  [data-theme="light"] .conf-low { background: rgba(184,48,48,0.07); color: #b83030; border-color: rgba(184,48,48,0.15); }
+  [data-theme="light"] .conf-medium { background: rgba(131,85,0,0.07); color: #835500; border-color: rgba(131,85,0,0.15); }
+
+  /* Proceed bar */
+  [data-theme="light"] .proceed-text { color: #1a1a1a; }
+  [data-theme="light"] .proceed-sub { color: #999; }
+  [data-theme="light"] .coming-soon { color: #bbb; }
+  [data-theme="light"] .proceed-btn { border-color: rgba(0,0,0,0.12); color: #ccc; }
+
+  /* Inputs */
+  [data-theme="light"] .tabs { background: rgba(0,0,0,0.06); border-color: transparent; }
+  [data-theme="light"] .tab.active { background: #fff; color: #1a1a1a; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+  [data-theme="light"] .tab { color: #888; }
+  [data-theme="light"] textarea { background: rgba(0,0,0,0.03); border-color: rgba(0,0,0,0.1); color: #1a1a1a; }
+  [data-theme="light"] textarea:focus { border-color: rgba(0,0,0,0.25); background: #fff; }
+  [data-theme="light"] .dropzone { background: rgba(0,0,0,0.02); border-color: rgba(0,0,0,0.12); }
+  [data-theme="light"] .dropzone:hover { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.2); }
+  [data-theme="light"] .dropzone-title { color: #444; }
+  [data-theme="light"] .fmt-badge { background: rgba(0,0,0,0.05); border-color: transparent; color: #888; }
+
+  /* Upload collapsed bar */
+  [data-theme="light"] .upload-collapsed-bar { background: #fff; }
+  [data-theme="light"] .collapsed-filename { color: #666; }
+  [data-theme="light"] .reanalyze-btn { border-color: rgba(0,0,0,0.15); color: #666; }
+
+  /* Upload label */
+  [data-theme="light"] .upload-label { color: #aaa; }
+
+  /* Analyze button — black */
+  [data-theme="light"] .analyze-btn { background: #1a1a1a; color: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+  [data-theme="light"] .analyze-btn:hover:not(:disabled) { background: #333; }
+
+  /* Engine status */
+  [data-theme="light"] .engine-status { color: #999; }
+
+  /* Error */
+  [data-theme="light"] .error-bar { background: rgba(184,48,48,0.06); border-color: rgba(184,48,48,0.15); color: #b83030; }
+
+  /* Wordmark */
+  [data-theme="light"] .wordmark { color: #1a1a1a; }
+  [data-theme="light"] .wordmark span { color: #8a5f00; }
+  [data-theme="light"] .header-tag { color: #bbb; }
+  [data-theme="light"] .theme-toggle { border-color: rgba(0,0,0,0.15); color: #888; }
+  [data-theme="light"] .toggle-dot { background: #1a1a1a; color: #fff; }
 
   [data-theme="light"] .analyze-btn {
     background: #111;
