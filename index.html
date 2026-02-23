@@ -556,7 +556,69 @@
   }
   .error-bar.visible { display: block; }
 
-  /* ── CUSTOM TERM CARDS ── */
+  .clickable-card {
+    cursor: pointer;
+  }
+  .clickable-card:hover {
+    border-color: var(--border-strong);
+    border-top-color: rgba(255,255,255,0.22);
+    background: var(--surface2);
+  }
+  .term-snapshot {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1.4;
+    margin-top: 2px;
+  }
+  .term-detail {
+    display: none;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .term-detail-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 6px 0 2px;
+  }
+  .term-card.expanded .term-detail {
+    display: flex;
+  }
+  .term-card.expanded .term-snapshot {
+    color: var(--text-dim);
+    font-weight: 400;
+  }
+  .term-card.expanded {
+    border-color: var(--border-strong);
+    border-top-color: rgba(255,255,255,0.22);
+    background: var(--surface2);
+  }
+
+  /* expand indicator */
+  .clickable-card .term-name-row::after {
+    content: '›';
+    font-size: 14px;
+    color: var(--text-muted);
+    transition: transform 0.2s ease;
+    margin-left: auto;
+    padding-left: 8px;
+    flex-shrink: 0;
+  }
+  .clickable-card.expanded .term-name-row::after {
+    transform: rotate(90deg);
+  }
+
+  [data-theme="light"] .clickable-card:hover,
+  [data-theme="light"] .term-card.expanded {
+    background: #fff;
+    border-color: rgba(0,0,0,0.18);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  }
+  [data-theme="light"] .term-snapshot { color: #1a1a1a; }
+  [data-theme="light"] .term-card.expanded .term-snapshot { color: #666; }
+  [data-theme="light"] .term-detail-divider { background: rgba(0,0,0,0.07); }
+
+
   .add-term-btn {
     margin-top: 10px;
     padding: 8px 16px;
