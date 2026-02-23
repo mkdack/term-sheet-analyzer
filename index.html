@@ -396,6 +396,13 @@
     border-style: dashed;
     opacity: 0.6;
   }
+  .term-name-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    gap: 8px;
+  }
   .term-name {
     font-family: 'DM Mono', monospace;
     font-size: 10px;
@@ -403,7 +410,28 @@
     text-transform: uppercase;
     color: var(--accent);
     font-weight: 500;
-    margin-bottom: 6px;
+  }
+  .conf-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-weight: 600;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .conf-low {
+    background: rgba(192,57,43,0.1);
+    color: var(--red);
+    border: 1px solid rgba(192,57,43,0.25);
+  }
+  .conf-medium {
+    background: rgba(200,151,58,0.1);
+    color: var(--gold);
+    border: 1px solid rgba(200,151,58,0.25);
+  }
+  .term-card.low-conf {
+    border-color: rgba(192,57,43,0.3);
   }
   .term-card.missing-term .term-name { color: var(--ink-muted); }
   .term-summary {
@@ -661,7 +689,18 @@ async function extractPdfText(file) {
     pages.push(pageText);
   }
 
-  return pages.join('\n\n');
+  const fullText = pages.join('\n\n');
+
+  // Scanned PDF detection — fewer than 80 chars per page means no embedded text
+  const avgCharsPerPage = fullText.length / pdf.numPages;
+  if (avgCharsPerPage < 80) {
+    throw new Error(
+      'This PDF appears to be a scanned image — no text could be extracted. ' +
+      'Please open the PDF, select all text (Ctrl+A / Cmd+A), copy it, and use the Paste Text tab instead.'
+    );
+  }
+
+  return fullText;
 }
 
 async function extractDocxText(file) {
@@ -753,29 +792,32 @@ async function runEngine1() {
 
 // ─── RENDER RESULTS ──────────────────────────────────────────
 function renderResults(data) {
-  const { deal, terms, missing = [] } = data;
+  const { deal, terms, missing = [], lowConfidence = [], meta = {} } = data;
 
-  // Deal header
   renderDealHeader(deal);
 
-  // Missing notice
+  // Notices bar — missing terms, low confidence, chunk info
   const missingEl = document.getElementById('missingNotice');
-  if (missing.length > 0) {
-    missingEl.innerHTML = `<strong>Not addressed in document (${missing.length} terms):</strong> ${missing.map(humanTermName).join(', ')}`;
+  const notices = [];
+  if (missing.length > 0)
+    notices.push(`<strong>Not addressed in document (${missing.length}):</strong> ${missing.map(humanTermName).join(', ')}`);
+  if (lowConfidence.length > 0)
+    notices.push(`<strong>⚠ Low confidence — verify manually (${lowConfidence.length}):</strong> ${lowConfidence.map(humanTermName).join(', ')}`);
+  if (meta.chunks > 1)
+    notices.push(`Long document (${Math.round(meta.docLength/1000)}k chars) — processed in ${meta.chunks} sections and merged.`);
+
+  if (notices.length > 0) {
+    missingEl.innerHTML = notices.join('<br><br>');
     missingEl.classList.add('visible');
   } else {
     missingEl.classList.remove('visible');
   }
 
-  // Term categories
-  renderTermCategories(terms, missing);
+  renderTermCategories(terms, missing, lowConfidence);
 
-  // Show results
   const resultsEl = document.getElementById('results');
   resultsEl.style.display = 'block';
   resultsEl.classList.add('visible');
-
-  // Scroll to results
   setTimeout(() => resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
 }
 
@@ -894,21 +936,40 @@ function humanTermName(key) {
   return TERM_NAMES[key] || key;
 }
 
-function renderTermCategories(terms, missing) {
+function renderTermCategories(terms, missing, lowConfidence = []) {
   const container = document.getElementById('termCategories');
   container.innerHTML = CATEGORIES.map(cat => {
     const cards = cat.keys.map(key => {
-      const summary = terms[key];
+      const termData = terms[key];
+      // Terms now return { summary, confidence } — handle both old and new shape
+      const summary = termData && typeof termData === 'object' ? termData.summary : termData;
+      const confidence = termData && typeof termData === 'object' ? termData.confidence : null;
       const isMissing = !summary || missing.includes(key);
+      const isLowConf = lowConfidence.includes(key);
+
+      let badge = '';
+      if (!isMissing && confidence === 'low') {
+        badge = `<span class="conf-badge conf-low">⚠ Verify</span>`;
+      } else if (!isMissing && confidence === 'medium') {
+        badge = `<span class="conf-badge conf-medium">~ Inferred</span>`;
+      }
+
       return `
-        <div class="term-card ${isMissing ? 'missing-term' : ''}">
-          <div class="term-name">${humanTermName(key)}</div>
+        <div class="term-card ${isMissing ? 'missing-term' : ''} ${isLowConf ? 'low-conf' : ''}">
+          <div class="term-name-row">
+            <div class="term-name">${humanTermName(key)}</div>
+            ${badge}
+          </div>
           <div class="term-summary">${isMissing ? 'Not addressed in this document' : escHtml(summary)}</div>
         </div>
       `;
     }).join('');
 
-    const presentCount = cat.keys.filter(k => terms[k] && !missing.includes(k)).length;
+    const presentCount = cat.keys.filter(k => {
+      const t = terms[k];
+      const s = t && typeof t === 'object' ? t.summary : t;
+      return s && !missing.includes(k);
+    }).length;
 
     return `
       <div class="category">
