@@ -15,12 +15,15 @@ Return ONLY valid JSON — no prose, no markdown fences — in this exact struct
     "seller": "developer/seller name or null",
     "project": "project name or null",
     "iso": "ERCOT, CAISO, PJM, MISO, SPP, ISO-NE, or NYISO — or null",
+    "settlementPoint": "The specific hub, zone, or node name used for settlement — e.g. 'ERCOT North Hub', 'PJM Western Hub', 'CAISO NP15', or a specific project node name. Extract the exact name from the document, or null if not specified.",
+    "settlementType": "hub or zonal or nodal or null — which level of the grid is used for price settlement",
     "technology": "Solar or Wind or null",
     "capacity": "e.g. 150 MWac or null",
     "strikePrice": number or null,
     "term": "e.g. 15 years or null",
     "cod": "e.g. Q3 2027 or null",
-    "structure": "Virtual PPA or Physical PPA or null"
+    "vppaStructure": "Exactly one of: Fixed for Floating, Upside Share, Discount to Market, Physical PPA, or Other. Fixed for Floating means buyer pays a fixed strike and receives the floating market price. Upside Share means seller shares revenue above a threshold with buyer. Discount to Market means strike is set at a discount to forward market prices. Physical PPA means actual electrons delivered. Use Other if it does not fit any of these.",
+    "vppaStructureNote": "One sentence explaining the specific economics of how this deal structure works based on what the document says, or null"
   },
   "terms": {
     "strike":          "What is the fixed price per MWh? Any escalation clause? Fixed or floating component?",

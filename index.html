@@ -780,24 +780,46 @@ function renderResults(data) {
 }
 
 function renderDealHeader(deal) {
+  // Build settlement point display — combine type + name if both present
+  let settlementDisplay = null;
+  if (deal.settlementPoint || deal.settlementType) {
+    const type = deal.settlementType ? deal.settlementType.charAt(0).toUpperCase() + deal.settlementType.slice(1) : null;
+    const point = deal.settlementPoint || null;
+    if (type && point) settlementDisplay = `${type} — ${point}`;
+    else if (point) settlementDisplay = point;
+    else if (type) settlementDisplay = type;
+  }
+
+  // VPPA structure display
+  let structureDisplay = deal.vppaStructure || null;
+
   const fields = [
-    { label: 'Project', value: deal.project },
-    { label: 'Buyer', value: deal.buyer },
-    { label: 'Seller / Developer', value: deal.seller },
-    { label: 'ISO / Market', value: deal.iso },
-    { label: 'Technology', value: deal.technology },
-    { label: 'Capacity', value: deal.capacity },
-    { label: 'Strike Price', value: deal.strikePrice ? `$${parseFloat(deal.strikePrice).toFixed(2)}/MWh` : null, cls: 'strike' },
-    { label: 'Contract Term', value: deal.term },
-    { label: 'Target COD', value: deal.cod },
+    { label: 'Project',           value: deal.project },
+    { label: 'Buyer',             value: deal.buyer },
+    { label: 'Seller / Developer',value: deal.seller },
+    { label: 'ISO / Market',      value: deal.iso },
+    { label: 'Settlement Point',  value: settlementDisplay },
+    { label: 'Technology',        value: deal.technology },
+    { label: 'Capacity',          value: deal.capacity },
+    { label: 'Strike Price',      value: deal.strikePrice ? `$${parseFloat(deal.strikePrice).toFixed(2)}/MWh` : null, cls: 'strike' },
+    { label: 'Contract Term',     value: deal.term },
+    { label: 'Target COD',        value: deal.cod },
+    { label: 'VPPA Structure',    value: structureDisplay, wide: true },
   ];
 
-  document.getElementById('dealHeader').innerHTML = fields.map(f => `
-    <div>
-      <div class="deal-field-label">${f.label}</div>
-      <div class="deal-field-value ${f.value ? (f.cls || '') : 'missing'}">${f.value || 'Not specified'}</div>
-    </div>
-  `).join('');
+  // Render fields — wide fields span full row
+  const cells = fields.map(f => {
+    const isWide = f.wide ? 'grid-column: 1 / -1;' : '';
+    return `
+      <div style="${isWide}">
+        <div class="deal-field-label">${f.label}</div>
+        <div class="deal-field-value ${f.value ? (f.cls || '') : 'missing'}">${f.value || 'Not specified'}</div>
+        ${f.wide && deal.vppaStructureNote ? `<div style="font-size:12px;color:#64748b;margin-top:4px;">${escHtml(deal.vppaStructureNote)}</div>` : ''}
+      </div>
+    `;
+  }).join('');
+
+  document.getElementById('dealHeader').innerHTML = cells;
 }
 
 const CATEGORIES = [
