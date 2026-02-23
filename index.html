@@ -10,24 +10,24 @@
 <style>
   /* ── RESET & ROOT ── */
   :root {
-    --bg:           #111111;
-    --bg2:          #161616;
-    --surface:      #1c1c1c;
-    --surface2:     #222222;
-    --border:       rgba(255,255,255,0.10);
-    --border-strong:rgba(255,255,255,0.18);
-    --text:         #f2f2f2;
-    --text-dim:     #b0b0b0;
+    --bg:           #0e0e0e;
+    --bg2:          #141414;
+    --surface:      #202020;
+    --surface2:     #282828;
+    --border:       rgba(255,255,255,0.09);
+    --border-strong:rgba(255,255,255,0.16);
+    --text:         #f0f0f0;
+    --text-dim:     #c0c0c0;
     --text-muted:   #606060;
     --accent:       #ffffff;
     --accent-dim:   rgba(255,255,255,0.06);
-    --gold:         #e0b050;
-    --red:          #e86060;
-    --red-dim:      rgba(232,96,96,0.14);
-    --green:        #56c490;
-    --green-dim:    rgba(86,196,144,0.14);
-    --amber:        #f0b84a;
-    --amber-dim:    rgba(240,184,74,0.13);
+    --gold:         #e8b84a;
+    --red:          #f07070;
+    --red-dim:      rgba(240,112,112,0.13);
+    --green:        #5ed49a;
+    --green-dim:    rgba(94,212,154,0.13);
+    --amber:        #f0c050;
+    --amber-dim:    rgba(240,192,80,0.12);
     --radius:       10px;
     --radius-lg:    16px;
     --mono:         'JetBrains Mono', monospace;
@@ -589,6 +589,7 @@
   .deal-header {
     background: var(--surface);
     border: 1px solid var(--border);
+    border-top-color: rgba(255,255,255,0.14);
     border-radius: var(--radius-lg);
     margin-bottom: 16px;
     overflow: hidden;
@@ -614,7 +615,7 @@
     font-family: var(--mono);
     font-size: 9px;
     letter-spacing: 0.12em;
-    color: rgba(255,255,255,0.38);
+    color: rgba(255,255,255,0.45);
     text-transform: uppercase;
     margin-bottom: 6px;
   }
@@ -671,19 +672,19 @@
     font-family: var(--mono);
   }
   .notice-pill.missing {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    color: var(--text-dim);
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.09);
+    color: rgba(255,255,255,0.5);
   }
   .notice-pill.warning {
-    background: var(--amber-dim);
-    border: 1px solid rgba(232,167,74,0.2);
-    color: var(--amber);
+    background: rgba(240,192,80,0.08);
+    border: 1px solid rgba(240,192,80,0.22);
+    color: #f0c050;
   }
   .notice-pill.info {
-    background: rgba(255,255,255,0.03);
-    border: 1px solid var(--border);
-    color: var(--text-muted);
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.09);
+    color: rgba(255,255,255,0.45);
   }
   .notice-icon { flex-shrink: 0; }
   .notice-pill strong { font-weight: 600; }
@@ -703,7 +704,7 @@
     font-size: 10px;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: var(--text-dim);
+    color: rgba(255,255,255,0.55);
     font-weight: 500;
   }
   .category-count {
@@ -727,12 +728,14 @@
   .term-card {
     background: var(--surface);
     border: 1px solid var(--border);
+    border-top-color: rgba(255,255,255,0.13);
     border-radius: var(--radius);
-    padding: 16px 18px;
+    padding: 18px 20px;
     transition: border-color 0.15s, background 0.15s;
   }
   .term-card:hover:not(.missing-term) {
-    border-color: var(--border-strong);
+    border-color: rgba(255,255,255,0.18);
+    border-top-color: rgba(255,255,255,0.25);
     background: var(--surface2);
   }
   .term-card.missing-term {
@@ -758,7 +761,7 @@
     color: var(--text-muted);
     font-weight: 500;
   }
-  .term-card:not(.missing-term) .term-name { color: rgba(255,255,255,0.45); }
+  .term-card:not(.missing-term) .term-name { color: rgba(255,255,255,0.55); }
   .conf-badge {
     font-family: var(--mono);
     font-size: 8px;
@@ -780,9 +783,9 @@
     border: 1px solid rgba(232,167,74,0.2);
   }
   .term-summary {
-    font-size: 13.5px;
+    font-size: 14px;
     color: var(--text-dim);
-    line-height: 1.7;
+    line-height: 1.72;
     font-weight: 400;
   }
   .term-card.missing-term .term-summary {
