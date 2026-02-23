@@ -69,20 +69,63 @@
   [data-theme="light"] .term-card,
   [data-theme="light"] .deal-header,
   [data-theme="light"] .proceed-bar {
+    background: #ffffff;
     box-shadow: 0 2px 12px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04);
     border-color: transparent;
   }
 
+  [data-theme="light"] .deal-field,
+  [data-theme="light"] .deal-header-full {
+    background: #ffffff;
+  }
+
+  [data-theme="light"] .deal-field-value,
+  [data-theme="light"] .deal-structure-value {
+    color: #111111;
+  }
+
+  [data-theme="light"] .term-summary {
+    color: #444444;
+  }
+
+  [data-theme="light"] .term-card:not(.missing-term) .term-name {
+    color: #999999;
+  }
+
   [data-theme="light"] .term-card:hover:not(.missing-term) {
+    background: #ffffff;
     box-shadow: 0 4px 20px rgba(0,0,0,0.1), 0 1px 4px rgba(0,0,0,0.06);
     border-color: transparent;
   }
 
   [data-theme="light"] .term-card.missing-term {
-    background: #f0f0f0;
+    background: #f5f5f5;
     border: 1px dashed rgba(0,0,0,0.12);
     box-shadow: none;
   }
+
+  [data-theme="light"] .deal-header-bottom,
+  [data-theme="light"] .deal-header-full {
+    border-top-color: rgba(0,0,0,0.06);
+  }
+
+  [data-theme="light"] .deal-field {
+    border-right-color: rgba(0,0,0,0.06);
+  }
+
+  [data-theme="light"] .proceed-text { color: #111111; }
+  [data-theme="light"] .proceed-sub { color: #999999; }
+  [data-theme="light"] .proceed-btn {
+    border-color: rgba(0,0,0,0.15);
+    color: #aaaaaa;
+  }
+
+  [data-theme="light"] .notices-stack .notice-pill.warning {
+    background: #fffbf0;
+  }
+
+  [data-theme="light"] .conf-low { background: rgba(192,57,43,0.06); }
+  [data-theme="light"] .conf-medium { background: rgba(147,95,0,0.06); }
 
   [data-theme="light"] .analyze-btn {
     background: #111;
