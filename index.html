@@ -734,6 +734,18 @@ function switchTab(tab) {
   clearError();
 }
 
+function collapseUpload(label) {
+  const section = document.getElementById('uploadSection');
+  section.classList.add('collapsed');
+  document.getElementById('collapsedName').textContent = label || 'Document';
+}
+
+function expandUpload() {
+  document.getElementById('uploadSection').classList.remove('collapsed');
+  document.getElementById('results').style.display = 'none';
+  document.getElementById('results').classList.remove('visible');
+}
+
 // ─── FILE HANDLING ───────────────────────────────────────────
 function onDragOver(e) {
   e.preventDefault();
