@@ -1211,6 +1211,13 @@ function renderDealHeader(deal) {
       <div class="deal-field-value ${value ? cls : 'missing'}">${value || '—'}</div>
     </div>`;
 
+  let settlement = null;
+  if (deal.settlementPoint || deal.settlementType) {
+    const type = deal.settlementType ? deal.settlementType.charAt(0).toUpperCase() + deal.settlementType.slice(1) : null;
+    if (type && deal.settlementPoint) settlement = `${type} · ${deal.settlementPoint}`;
+    else settlement = deal.settlementPoint || type;
+  }
+
   const strikeDisplay = deal.strikePrice
     ? `$${parseFloat(deal.strikePrice).toFixed(2)}/MWh${deal.escalator && deal.escalator.toLowerCase() !== 'none' ? ` + ${deal.escalator}` : ''}`
     : null;
@@ -1222,7 +1229,11 @@ function renderDealHeader(deal) {
       ${f('Seller / Developer', deal.seller)}
     </div>
     <div class="deal-header-bottom">
+      ${f('ISO / Market', deal.iso)}
+      ${f('Settlement Point', settlement)}
       ${f('Technology', deal.technology)}
+    </div>
+    <div class="deal-header-bottom">
       ${f('Total Capacity', deal.capacity)}
       ${f('Buyer Share', deal.buyerSharePct)}
       ${f('Buyer Share (MW)', deal.buyerShareMW)}
