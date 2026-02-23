@@ -38,32 +38,28 @@ For each term include a "confidence" field: "high" (explicitly stated), "medium"
     "buyerShareMW": "Buyer's contracted share in MW (ac), e.g. '90 MWac' — derive from capacity × pct if both known and MW not explicit, or null"
   },
   "terms": {
-    "strike": {
-      "summary": "What is the exact fixed price per MWh? Any escalation? Be specific with numbers.",
-      "confidence": "high|medium|low"
-    },
-    "settlement": {
-      "summary": "How is settlement calculated — hub, zonal, or nodal? What specific price index or node?",
+    "escalation": {
+      "summary": "How does the strike price change over time? State the exact escalation rate or index (e.g. 2% fixed annually, CPI, none). When does it first apply — contract year 2 or after COD? Is there a cap or collar on escalation?",
       "confidence": "high|medium|low"
     },
     "interval": {
-      "summary": "What settlement interval — 5-minute, hourly, monthly? Day-ahead or real-time price?",
+      "summary": "What settlement interval — 5-minute, hourly, monthly? Day-ahead or real-time price? Which market and pricing node?",
       "confidence": "high|medium|low"
     },
     "negprice": {
-      "summary": "What happens when electricity prices go negative? Is there a floor price or does buyer pay seller?",
-      "confidence": "high|medium|low"
-    },
-    "invoice": {
-      "summary": "How often are invoices issued? When is payment due in days? Any late payment fees or interest rate?",
+      "summary": "What happens when electricity prices go negative? Is there a floor price, a curtailment threshold, or does buyer still pay seller the fixed price?",
       "confidence": "high|medium|low"
     },
     "basis": {
-      "summary": "Who bears the risk if the project node price differs from the hub price? Any collar or cap?",
+      "summary": "Who bears the risk if the project node price differs from the hub price? Any basis differential interval provision, collar, or cap on basis exposure?",
       "confidence": "high|medium|low"
     },
     "marketdisrupt": {
-      "summary": "What happens during a major market disruption — scarcity pricing, ISO emergency, force majeure pricing event?",
+      "summary": "What happens during a major market disruption — scarcity pricing, ISO emergency, force majeure pricing event? Any deemed generation or substitute price provisions?",
+      "confidence": "high|medium|low"
+    },
+    "invoice": {
+      "summary": "How often are invoices issued? When is payment due in days after invoice? Any late payment fees or interest rate on overdue amounts?",
       "confidence": "high|medium|low"
     }
   }

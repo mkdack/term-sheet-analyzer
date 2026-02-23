@@ -1255,7 +1255,7 @@ function renderDealHeader(deal) {
 const CATEGORIES = [
   {
     name: 'Pricing & Settlement',
-    keys: ['strike', 'settlement', 'interval', 'negprice', 'invoice', 'basis', 'marketdisrupt']
+    keys: ['escalation', 'interval', 'negprice', 'basis', 'marketdisrupt']
   },
   {
     name: 'Curtailment',
@@ -1271,7 +1271,7 @@ const CATEGORIES = [
   },
   {
     name: 'Contract Terms',
-    keys: ['assignment', 'forcemajeure', 'default', 'termination', 'changeinlaw', 'reputation']
+    keys: ['invoice', 'assignment', 'forcemajeure', 'default', 'termination', 'changeinlaw', 'reputation']
   },
   {
     name: 'Environmental & Incentives',
@@ -1284,8 +1284,7 @@ const CATEGORIES = [
 ];
 
 const TERM_NAMES = {
-  strike: 'Strike Price',
-  settlement: 'Settlement Point',
+  escalation: 'Escalation',
   interval: 'Settlement Interval',
   negprice: 'Negative Prices',
   invoice: 'Invoicing & Payment',
