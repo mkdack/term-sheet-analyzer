@@ -21,3 +21,4 @@
   for = "/*"
   [headers.values]
     Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://api.anthropic.com /.netlify/functions/*;"
+    Cache-Control = "no-cache, no-store, must-revalidate"
