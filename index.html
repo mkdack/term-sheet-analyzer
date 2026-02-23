@@ -101,6 +101,7 @@
   [data-theme="light"] .deal-field { background: #fff; }
   [data-theme="light"] .deal-header-full { background: #fff; }
   [data-theme="light"] .deal-header-bottom,
+  [data-theme="light"] .deal-header-3col,
   [data-theme="light"] .deal-header-full { border-top-color: rgba(0,0,0,0.07); }
   [data-theme="light"] .deal-field { border-right-color: rgba(0,0,0,0.07); }
   [data-theme="light"] .deal-field-label { color: #aaa; }
@@ -594,12 +595,18 @@
     margin-bottom: 16px;
     overflow: hidden;
   }
-  .deal-header-top,
-  .deal-header-bottom {
+  .deal-header-top {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
   }
   .deal-header-bottom {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    border-top: 1px solid var(--border);
+  }
+  .deal-header-3col {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
     border-top: 1px solid var(--border);
   }
   .deal-header-full {
@@ -1204,14 +1211,6 @@ function renderDealHeader(deal) {
       <div class="deal-field-value ${value ? cls : 'missing'}">${value || '—'}</div>
     </div>`;
 
-  // Settlement point: combine type + name
-  let settlement = null;
-  if (deal.settlementPoint || deal.settlementType) {
-    const type = deal.settlementType ? deal.settlementType.charAt(0).toUpperCase() + deal.settlementType.slice(1) : null;
-    if (type && deal.settlementPoint) settlement = `${type} · ${deal.settlementPoint}`;
-    else settlement = deal.settlementPoint || type;
-  }
-
   const strikeDisplay = deal.strikePrice
     ? `$${parseFloat(deal.strikePrice).toFixed(2)}/MWh${deal.escalator && deal.escalator.toLowerCase() !== 'none' ? ` + ${deal.escalator}` : ''}`
     : null;
@@ -1223,11 +1222,12 @@ function renderDealHeader(deal) {
       ${f('Seller / Developer', deal.seller)}
     </div>
     <div class="deal-header-bottom">
-      ${f('ISO / Market', deal.iso)}
-      ${f('Settlement Point', settlement)}
-      ${f('Technology', deal.technology ? deal.technology + (deal.capacity ? ' · ' + deal.capacity : '') : deal.capacity)}
+      ${f('Technology', deal.technology)}
+      ${f('Total Capacity', deal.capacity)}
+      ${f('Buyer Share', deal.buyerSharePct)}
+      ${f('Buyer Share (MW)', deal.buyerShareMW)}
     </div>
-    <div class="deal-header-bottom">
+    <div class="deal-header-3col">
       ${f('Strike Price', strikeDisplay, 'strike')}
       ${f('Contract Term', deal.term)}
       ${f('Target COD', deal.cod)}

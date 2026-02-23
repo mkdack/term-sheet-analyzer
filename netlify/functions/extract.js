@@ -33,7 +33,9 @@ For each term include a "confidence" field: "high" (explicitly stated), "medium"
     "term": "e.g. 15 years or null",
     "cod": "e.g. Q3 2027 or null",
     "vppaStructure": "exactly one of: Fixed for Floating, Upside Share, Discount to Market, Physical PPA, Other — or null",
-    "vppaStructureNote": "one plain-English sentence describing the deal economics, or null"
+    "vppaStructureNote": "one plain-English sentence describing the deal economics, or null",
+    "buyerSharePct": "Buyer's contracted share of project output as a percentage, e.g. '100%', '60%' — or null if not stated",
+    "buyerShareMW": "Buyer's contracted share in MW (ac), e.g. '90 MWac' — derive from capacity × pct if both known and MW not explicit, or null"
   },
   "terms": {
     "strike": {
