@@ -99,6 +99,57 @@
     padding: 32px;
     box-shadow: var(--shadow);
     margin-bottom: 24px;
+    transition: all 0.3s ease;
+  }
+  .upload-section.collapsed {
+    padding: 0;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .upload-section.collapsed .upload-expanded {
+    display: none;
+  }
+  /* Slim bar shown when collapsed */
+  .upload-collapsed-bar {
+    display: none;
+    align-items: center;
+    gap: 14px;
+    padding: 13px 20px;
+    background: var(--surface);
+  }
+  .upload-section.collapsed .upload-collapsed-bar {
+    display: flex;
+  }
+  .collapsed-filename {
+    font-size: 13px;
+    color: var(--ink-dim);
+    font-weight: 500;
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .collapsed-filename span {
+    color: var(--ink-muted);
+    font-weight: 400;
+    margin-right: 6px;
+  }
+  .reanalyze-btn {
+    padding: 6px 14px;
+    background: none;
+    border: 1px solid var(--border-strong);
+    border-radius: 6px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink-dim);
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .reanalyze-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
   }
 
   .upload-label {
@@ -300,50 +351,107 @@
   .deal-header {
     background: var(--ink);
     border-radius: 14px;
-    padding: 28px 32px;
+    padding: 0;
     margin-bottom: 24px;
     color: white;
+    overflow: hidden;
+  }
+  .deal-header-top {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
-    gap: 20px;
+    gap: 0;
   }
+  .deal-header-bottom {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0;
+    border-top: 1px solid rgba(255,255,255,0.07);
+  }
+  .deal-header-full {
+    border-top: 1px solid rgba(255,255,255,0.07);
+    padding: 18px 28px;
+  }
+  .deal-field {
+    padding: 22px 28px;
+    border-right: 1px solid rgba(255,255,255,0.07);
+  }
+  .deal-field:last-child { border-right: none; }
   .deal-field-label {
     font-family: 'DM Mono', monospace;
     font-size: 9px;
     letter-spacing: 0.14em;
-    color: #64748b;
+    color: #4a5568;
     text-transform: uppercase;
-    margin-bottom: 4px;
+    margin-bottom: 5px;
   }
   .deal-field-value {
     font-size: 15px;
     font-weight: 500;
     color: #e2e8f0;
+    line-height: 1.3;
   }
   .deal-field-value.strike {
     font-family: 'Fraunces', serif;
-    font-size: 22px;
+    font-size: 26px;
+    font-weight: 300;
     color: var(--gold);
+    letter-spacing: -0.02em;
   }
   .deal-field-value.missing {
-    color: #4a5568;
+    color: #374151;
     font-style: italic;
     font-size: 13px;
   }
+  .deal-structure-value {
+    font-size: 16px;
+    font-weight: 600;
+    color: #e2e8f0;
+    margin-bottom: 4px;
+  }
+  .deal-structure-note {
+    font-size: 12px;
+    color: #64748b;
+    line-height: 1.5;
+  }
 
-  /* Missing terms notice */
-  .missing-notice {
+  /* Notices */
+  .notices-stack {
     display: none;
-    padding: 12px 16px;
-    background: var(--gold-light);
-    border: 1px solid #e8c87a;
-    border-radius: var(--radius);
-    font-size: 13px;
-    color: #7a5a1a;
+    flex-direction: column;
+    gap: 8px;
     margin-bottom: 24px;
   }
-  .missing-notice.visible { display: block; }
-  .missing-notice strong { font-weight: 600; }
+  .notices-stack.visible { display: flex; }
+  .notice-pill {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 11px 16px;
+    border-radius: var(--radius);
+    font-size: 13px;
+    line-height: 1.55;
+  }
+  .notice-pill.missing {
+    background: var(--paper);
+    border: 1px solid var(--border);
+    color: var(--ink-dim);
+  }
+  .notice-pill.warning {
+    background: #fff9f0;
+    border: 1px solid #f0d9a8;
+    color: #7a5218;
+  }
+  .notice-pill.info {
+    background: var(--accent-light);
+    border: 1px solid #b8d0e8;
+    color: var(--accent);
+  }
+  .notice-icon {
+    flex-shrink: 0;
+    font-size: 13px;
+    margin-top: 1px;
+  }
+  .notice-pill strong { font-weight: 600; }
 
   /* Category sections */
   .category {
@@ -379,7 +487,7 @@
   .terms-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 12px;
+    gap: 10px;
   }
   @media (max-width: 720px) { .terms-grid { grid-template-columns: 1fr; } }
 
@@ -387,14 +495,17 @@
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    padding: 16px 18px;
-    transition: border-color 0.15s;
+    padding: 18px 20px;
+    transition: border-color 0.15s, box-shadow 0.15s;
   }
-  .term-card:hover { border-color: var(--border-strong); }
+  .term-card:hover:not(.missing-term) {
+    border-color: var(--border-strong);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
   .term-card.missing-term {
     background: var(--paper);
     border-style: dashed;
-    opacity: 0.6;
+    opacity: 0.5;
   }
   .term-name-row {
     display: flex;
@@ -466,42 +577,42 @@
   }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
 
-  /* Proceed button */
+  /* Proceed to Engine 2 bar */
   .proceed-bar {
     display: none;
     align-items: center;
     justify-content: space-between;
-    padding: 20px 24px;
-    background: var(--accent-light);
-    border: 1px solid #b8d0e8;
-    border-radius: 14px;
-    margin-top: 32px;
+    padding: 18px 24px;
+    background: var(--ink);
+    border-radius: 12px;
+    margin-top: 36px;
   }
   .proceed-bar.visible { display: flex; }
-  .proceed-text { font-size: 14px; color: var(--accent); font-weight: 500; }
-  .proceed-sub { font-size: 12px; color: var(--ink-muted); margin-top: 2px; }
+  .proceed-text {
+    font-size: 14px;
+    color: #e2e8f0;
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+  .proceed-sub { font-size: 12px; color: #4a5568; }
   .proceed-btn {
-    padding: 10px 24px;
-    background: var(--accent);
-    color: white;
-    border: none;
+    padding: 9px 20px;
+    background: rgba(255,255,255,0.08);
+    color: #64748b;
+    border: 1px solid rgba(255,255,255,0.1);
     border-radius: 8px;
     font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    opacity: 0.4;
-    pointer-events: none;
-  }
-  .proceed-btn.ready {
-    opacity: 1;
-    pointer-events: auto;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: not-allowed;
+    white-space: nowrap;
   }
   .coming-soon {
     font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    color: var(--ink-muted);
-    letter-spacing: 0.08em;
+    font-size: 9px;
+    color: #374151;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
   }
 </style>
 </head>
@@ -515,56 +626,66 @@
 <div class="main">
 
   <h1 class="page-title">Term Sheet Analyzer</h1>
-  <p class="page-sub">Upload or paste a VPPA/PPA term sheet. Engine 1 will read every term and restate it in plain English.</p>
+  <p class="page-sub">Upload or paste a VPPA/PPA term sheet. Engine 1 reads every term and restates it in plain English.</p>
 
   <!-- UPLOAD SECTION -->
-  <div class="upload-section">
-    <span class="upload-label">Input — choose one</span>
+  <div class="upload-section" id="uploadSection">
 
-    <div class="tabs">
-      <button class="tab active" onclick="switchTab('paste')">Paste Text</button>
-      <button class="tab" onclick="switchTab('file')">Upload File</button>
+    <!-- Collapsed bar (shown after extraction) -->
+    <div class="upload-collapsed-bar">
+      <span class="collapsed-filename"><span>📎</span><span id="collapsedName">Document</span></span>
+      <button class="reanalyze-btn" onclick="expandUpload()">↑ Re-analyze</button>
     </div>
 
-    <!-- PASTE PANEL -->
-    <div class="panel active" id="panel-paste">
-      <textarea id="pasteText" placeholder="Paste your term sheet here — plain text, copied from Word or PDF..."></textarea>
-    </div>
+    <!-- Full upload UI -->
+    <div class="upload-expanded">
+      <span class="upload-label">Input — choose one</span>
 
-    <!-- FILE PANEL -->
-    <div class="panel" id="panel-file">
-      <div class="dropzone" id="dropzone"
-           ondragover="onDragOver(event)"
-           ondragleave="onDragLeave(event)"
-           ondrop="onDrop(event)">
-        <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.txt" onchange="onFileSelect(event)">
-        <div class="dropzone-icon">📄</div>
-        <div class="dropzone-title">Drop file here or click to browse</div>
-        <div class="dropzone-sub">Any format — the file will be converted to text automatically</div>
-        <div class="dropzone-formats">
-          <span class="fmt-badge">PDF</span>
-          <span class="fmt-badge">DOCX</span>
-          <span class="fmt-badge">DOC</span>
-          <span class="fmt-badge">TXT</span>
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab('paste')">Paste Text</button>
+        <button class="tab" onclick="switchTab('file')">Upload File</button>
+      </div>
+
+      <!-- PASTE PANEL -->
+      <div class="panel active" id="panel-paste">
+        <textarea id="pasteText" placeholder="Paste your term sheet here — plain text, copied from Word or PDF..."></textarea>
+      </div>
+
+      <!-- FILE PANEL -->
+      <div class="panel" id="panel-file">
+        <div class="dropzone" id="dropzone"
+             ondragover="onDragOver(event)"
+             ondragleave="onDragLeave(event)"
+             ondrop="onDrop(event)">
+          <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.txt" onchange="onFileSelect(event)">
+          <div class="dropzone-icon">📄</div>
+          <div class="dropzone-title">Drop file here or click to browse</div>
+          <div class="dropzone-sub">Any format — the file will be converted to text automatically</div>
+          <div class="dropzone-formats">
+            <span class="fmt-badge">PDF</span>
+            <span class="fmt-badge">DOCX</span>
+            <span class="fmt-badge">DOC</span>
+            <span class="fmt-badge">TXT</span>
+          </div>
+        </div>
+        <div class="file-selected" id="fileSelected">
+          <span>📎</span>
+          <span class="file-name" id="fileName"></span>
+          <button class="file-remove" onclick="clearFile()">✕</button>
         </div>
       </div>
-      <div class="file-selected" id="fileSelected">
-        <span>📎</span>
-        <span class="file-name" id="fileName"></span>
-        <button class="file-remove" onclick="clearFile()">✕</button>
+
+      <div class="error-bar" id="errorBar"></div>
+
+      <button class="analyze-btn" id="analyzeBtn" onclick="runEngine1()">
+        <div class="btn-spinner"></div>
+        <span class="btn-text">Extract Terms</span>
+      </button>
+
+      <div class="engine-status" id="engineStatus" style="display:none">
+        <div class="status-dot processing" id="statusDot"></div>
+        <span id="statusText">Reading term sheet...</span>
       </div>
-    </div>
-
-    <div class="error-bar" id="errorBar"></div>
-
-    <button class="analyze-btn" id="analyzeBtn" onclick="runEngine1()">
-      <div class="btn-spinner"></div>
-      <span class="btn-text">Extract Terms</span>
-    </button>
-
-    <div class="engine-status" id="engineStatus" style="display:none">
-      <div class="status-dot processing" id="statusDot"></div>
-      <span id="statusText">Reading term sheet...</span>
     </div>
   </div>
 
@@ -574,8 +695,8 @@
     <!-- Deal header -->
     <div class="deal-header" id="dealHeader"></div>
 
-    <!-- Missing terms -->
-    <div class="missing-notice" id="missingNotice"></div>
+    <!-- Notices: missing, low-confidence, chunk info -->
+    <div class="notices-stack" id="missingNotice"></div>
 
     <!-- Term summaries by category -->
     <div id="termCategories"></div>
@@ -583,12 +704,12 @@
     <!-- Proceed to Engine 2 -->
     <div class="proceed-bar visible">
       <div>
-        <div class="proceed-text">Extraction complete — ready for scoring</div>
-        <div class="proceed-sub">Engine 2 will score each term 0–100 against VPPA market standards</div>
+        <div class="proceed-text">Extraction complete</div>
+        <div class="proceed-sub">Engine 2 will score each term against VPPA market standards</div>
       </div>
-      <div style="display:flex;align-items:center;gap:12px;">
-        <span class="coming-soon">ENGINE 2 — COMING SOON</span>
-        <button class="proceed-btn" id="proceedBtn">Score Terms →</button>
+      <div style="display:flex;align-items:center;gap:14px;">
+        <span class="coming-soon">Engine 2 — Coming Soon</span>
+        <button class="proceed-btn">Score Terms →</button>
       </div>
     </div>
 
@@ -794,23 +915,40 @@ async function runEngine1() {
 function renderResults(data) {
   const { deal, terms, missing = [], lowConfidence = [], meta = {} } = data;
 
+  // Collapse upload section — show slim bar with doc name
+  const docLabel = (selectedFile ? selectedFile.name : null) || (currentTab === 'paste' ? 'Pasted text' : 'Document');
+  collapseUpload(docLabel);
+
   renderDealHeader(deal);
 
-  // Notices bar — missing terms, low confidence, chunk info
-  const missingEl = document.getElementById('missingNotice');
-  const notices = [];
-  if (missing.length > 0)
-    notices.push(`<strong>Not addressed in document (${missing.length}):</strong> ${missing.map(humanTermName).join(', ')}`);
-  if (lowConfidence.length > 0)
-    notices.push(`<strong>⚠ Low confidence — verify manually (${lowConfidence.length}):</strong> ${lowConfidence.map(humanTermName).join(', ')}`);
-  if (meta.chunks > 1)
-    notices.push(`Long document (${Math.round(meta.docLength/1000)}k chars) — processed in ${meta.chunks} sections and merged.`);
+  // Notices as separate pills
+  const noticesEl = document.getElementById('missingNotice');
+  const pills = [];
 
-  if (notices.length > 0) {
-    missingEl.innerHTML = notices.join('<br><br>');
-    missingEl.classList.add('visible');
+  if (missing.length > 0) {
+    pills.push(`<div class="notice-pill missing">
+      <span class="notice-icon">—</span>
+      <div><strong>Not in document (${missing.length}):</strong> ${missing.map(humanTermName).join(', ')}</div>
+    </div>`);
+  }
+  if (lowConfidence.length > 0) {
+    pills.push(`<div class="notice-pill warning">
+      <span class="notice-icon">⚠</span>
+      <div><strong>Verify manually (${lowConfidence.length}):</strong> ${lowConfidence.map(humanTermName).join(', ')}</div>
+    </div>`);
+  }
+  if (meta.chunks > 1) {
+    pills.push(`<div class="notice-pill info">
+      <span class="notice-icon">↗</span>
+      <div>Long document (${Math.round(meta.docLength/1000)}k chars) — processed in ${meta.chunks} sections and merged.</div>
+    </div>`);
+  }
+
+  if (pills.length > 0) {
+    noticesEl.innerHTML = pills.join('');
+    noticesEl.classList.add('visible');
   } else {
-    missingEl.classList.remove('visible');
+    noticesEl.classList.remove('visible');
   }
 
   renderTermCategories(terms, missing, lowConfidence);
@@ -822,46 +960,47 @@ function renderResults(data) {
 }
 
 function renderDealHeader(deal) {
-  // Build settlement point display — combine type + name if both present
-  let settlementDisplay = null;
+  const f = (label, value, cls = '') => `
+    <div class="deal-field">
+      <div class="deal-field-label">${label}</div>
+      <div class="deal-field-value ${value ? cls : 'missing'}">${value || '—'}</div>
+    </div>`;
+
+  // Settlement point: combine type + name
+  let settlement = null;
   if (deal.settlementPoint || deal.settlementType) {
     const type = deal.settlementType ? deal.settlementType.charAt(0).toUpperCase() + deal.settlementType.slice(1) : null;
-    const point = deal.settlementPoint || null;
-    if (type && point) settlementDisplay = `${type} — ${point}`;
-    else if (point) settlementDisplay = point;
-    else if (type) settlementDisplay = type;
+    if (type && deal.settlementPoint) settlement = `${type} · ${deal.settlementPoint}`;
+    else settlement = deal.settlementPoint || type;
   }
 
-  // VPPA structure display
-  let structureDisplay = deal.vppaStructure || null;
+  const strikeDisplay = deal.strikePrice
+    ? `$${parseFloat(deal.strikePrice).toFixed(2)}/MWh${deal.escalator && deal.escalator.toLowerCase() !== 'none' ? ` + ${deal.escalator}` : ''}`
+    : null;
 
-  const fields = [
-    { label: 'Project',           value: deal.project },
-    { label: 'Buyer',             value: deal.buyer },
-    { label: 'Seller / Developer',value: deal.seller },
-    { label: 'ISO / Market',      value: deal.iso },
-    { label: 'Settlement Point',  value: settlementDisplay },
-    { label: 'Technology',        value: deal.technology },
-    { label: 'Capacity',          value: deal.capacity },
-    { label: 'Strike Price',      value: deal.strikePrice ? `$${parseFloat(deal.strikePrice).toFixed(2)}/MWh` : null, cls: 'strike' },
-    { label: 'Contract Term',     value: deal.term },
-    { label: 'Target COD',        value: deal.cod },
-    { label: 'VPPA Structure',    value: structureDisplay, wide: true },
-  ];
-
-  // Render fields — wide fields span full row
-  const cells = fields.map(f => {
-    const isWide = f.wide ? 'grid-column: 1 / -1;' : '';
-    return `
-      <div style="${isWide}">
-        <div class="deal-field-label">${f.label}</div>
-        <div class="deal-field-value ${f.value ? (f.cls || '') : 'missing'}">${f.value || 'Not specified'}</div>
-        ${f.wide && deal.vppaStructureNote ? `<div style="font-size:12px;color:#64748b;margin-top:4px;">${escHtml(deal.vppaStructureNote)}</div>` : ''}
-      </div>
-    `;
-  }).join('');
-
-  document.getElementById('dealHeader').innerHTML = cells;
+  document.getElementById('dealHeader').innerHTML = `
+    <div class="deal-header-top">
+      ${f('Project', deal.project)}
+      ${f('Buyer', deal.buyer)}
+      ${f('Seller / Developer', deal.seller)}
+    </div>
+    <div class="deal-header-bottom">
+      ${f('ISO / Market', deal.iso)}
+      ${f('Settlement Point', settlement)}
+      ${f('Technology', deal.technology ? deal.technology + (deal.capacity ? ' · ' + deal.capacity : '') : deal.capacity)}
+    </div>
+    <div class="deal-header-bottom">
+      ${f('Strike Price', strikeDisplay, 'strike')}
+      ${f('Contract Term', deal.term)}
+      ${f('Target COD', deal.cod)}
+    </div>
+    ${deal.vppaStructure ? `
+    <div class="deal-header-full">
+      <div class="deal-field-label">VPPA Structure</div>
+      <div class="deal-structure-value">${deal.vppaStructure}</div>
+      ${deal.vppaStructureNote ? `<div class="deal-structure-note">${escHtml(deal.vppaStructureNote)}</div>` : ''}
+    </div>` : ''}
+  `;
 }
 
 const CATEGORIES = [
