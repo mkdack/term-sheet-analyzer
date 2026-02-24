@@ -1412,54 +1412,60 @@ function scoreAll(facts) {
     assetType:  f.deal?.assetType  || 'new_build',
   };
 
-  // Score each term
+  // Returns true if every value in an object is null, undefined, or 'not_specified'
+  // Meaning the mapper found nothing — don't score, don't penalize
+  function isBlank(obj) {
+    if (!obj) return true;
+    return Object.values(obj).every(v =>
+      v == null || v === 'not_specified' || v === '' ||
+      (typeof v === 'object' && isBlank(v))
+    );
+  }
+
+  // Score each term — pass null for blank fact objects so they're excluded from average
   const results = {
     strike:        scoreStrike({ ...ctx, ...f.strike }),
-    floating:      scoreFloating(f.floating || {}),
-    interval:      scoreInterval(f.interval || {}),
-    negprice:      scoreNegPrice(f.negprice || {}),
-    invoice:       scoreInvoice(f.invoice || {}),
-    basis:         scoreBasis(f.basis || {}),
-    marketdisrupt: scoreMarketDisrupt(f.marketdisrupt || {}),
-    scheduling:    scoreScheduling(f.scheduling || {}),
-    curtailment:   scoreCurtailment(f.curtailment || {}),
-    nonecocurtail: scoreNonEcoCurtail(f.nonecocurtail || {}),
-    basiscurtail:  scoreBasisCurtail(f.basiscurtail || {}),
-    ia:            scoreIA(f.ia || {}),
-    cp:            scoreCP(f.cp || {}),
-    delay:         scoreDelay({ ...ctx, ...f.delay }),
-    availmech:     scoreAvailMech({ ...ctx, ...f.availmech }),
-    availguaranteed: scoreAvailGuaranteed({ ...ctx, ...f.availguaranteed }),
-    permit:        scorePermit(f.permit || {}),
-    cod:           scoreCOD(f.cod || {}),
-    buyerpa:       scoreBuyerPA({ ...ctx, ...f.buyerpa }),
-    sellerpa:      scoreSellerPA({ ...ctx, ...f.sellerpa }),
-    assign:        scoreAssign(f.assign || {}),
-    fm:            scoreFM(f.fm || {}),
-    eod:           scoreEOD(f.eod || {}),
-    eterm:         scoreETerm(f.eterm || {}),
-    changeinlaw:   scoreChangeInLaw(f.changeinlaw || {}),
-    reputation:    scoreReputation(f.reputation || {}),
-    product:       scoreProduct(f.product || {}),
-    recs:          scoreRECs(f.recs || {}),
-    incentives:    scoreIncentives(f.incentives || {}),
-    govlaw:        scoreGovLaw(f.govlaw || {}),
-    conf:          scoreConf(f.conf || {}),
-    excl:          scoreExcl(f.excl || {}),
-    expenses:      scoreExpenses(f.expenses || {}),
-    acct:          scoreAcct(f.acct || {}),
-    publicity:     scorePublicity(f.publicity || {}),
+    floating:      isBlank(f.floating)      ? { score: null } : scoreFloating(f.floating),
+    interval:      isBlank(f.interval)      ? { score: null } : scoreInterval(f.interval),
+    negprice:      isBlank(f.negprice)      ? { score: null } : scoreNegPrice(f.negprice),
+    invoice:       isBlank(f.invoice)       ? { score: null } : scoreInvoice(f.invoice),
+    basis:         isBlank(f.basis)         ? { score: null } : scoreBasis(f.basis),
+    marketdisrupt: isBlank(f.marketdisrupt) ? { score: null } : scoreMarketDisrupt(f.marketdisrupt),
+    scheduling:    isBlank(f.scheduling)    ? { score: null } : scoreScheduling(f.scheduling),
+    curtailment:   isBlank(f.curtailment)   ? { score: null } : scoreCurtailment(f.curtailment),
+    nonecocurtail: isBlank(f.nonecocurtail) ? { score: null } : scoreNonEcoCurtail(f.nonecocurtail),
+    basiscurtail:  isBlank(f.basiscurtail)  ? { score: null } : scoreBasisCurtail(f.basiscurtail),
+    ia:            isBlank(f.ia)            ? { score: null } : scoreIA(f.ia),
+    cp:            isBlank(f.cp)            ? { score: null } : scoreCP(f.cp),
+    delay:         isBlank(f.delay)         ? { score: null } : scoreDelay({ ...ctx, ...f.delay }),
+    availmech:     isBlank(f.availmech)     ? { score: null } : scoreAvailMech({ ...ctx, ...f.availmech }),
+    availguaranteed: isBlank(f.availguaranteed) ? { score: null } : scoreAvailGuaranteed({ ...ctx, ...f.availguaranteed }),
+    permit:        isBlank(f.permit)        ? { score: null } : scorePermit(f.permit),
+    cod:           isBlank(f.cod)           ? { score: null } : scoreCOD(f.cod),
+    buyerpa:       isBlank(f.buyerpa)       ? { score: null } : scoreBuyerPA({ ...ctx, ...f.buyerpa }),
+    sellerpa:      isBlank(f.sellerpa)      ? { score: null } : scoreSellerPA({ ...ctx, ...f.sellerpa }),
+    assign:        isBlank(f.assign)        ? { score: null } : scoreAssign(f.assign),
+    fm:            isBlank(f.fm)            ? { score: null } : scoreFM(f.fm),
+    eod:           isBlank(f.eod)           ? { score: null } : scoreEOD(f.eod),
+    eterm:         isBlank(f.eterm)         ? { score: null } : scoreETerm(f.eterm),
+    changeinlaw:   isBlank(f.changeinlaw)   ? { score: null } : scoreChangeInLaw(f.changeinlaw),
+    reputation:    isBlank(f.reputation)    ? { score: null } : scoreReputation(f.reputation),
+    product:       isBlank(f.product)       ? { score: null } : scoreProduct(f.product),
+    recs:          isBlank(f.recs)          ? { score: null } : scoreRECs(f.recs),
+    incentives:    isBlank(f.incentives)    ? { score: null } : scoreIncentives(f.incentives),
+    govlaw:        isBlank(f.govlaw)        ? { score: null } : scoreGovLaw(f.govlaw),
+    conf:          isBlank(f.conf)          ? { score: null } : scoreConf(f.conf),
+    excl:          isBlank(f.excl)          ? { score: null } : scoreExcl(f.excl),
+    expenses:      isBlank(f.expenses)      ? { score: null } : scoreExpenses(f.expenses),
+    acct:          isBlank(f.acct)          ? { score: null } : scoreAcct(f.acct),
+    publicity:     isBlank(f.publicity)     ? { score: null } : scorePublicity(f.publicity),
   };
 
   // Extract flat scores and flags
   const scores = {};
   const termFlags = {};
   for (const [term, result] of Object.entries(results)) {
-    if (result.score == null) {
-      scores[term] = 50; // unsupported combo
-    } else {
-      scores[term] = result.score;
-    }
+    scores[term] = result.score ?? null; // null means not scored — excluded from average
     const flags = result.flags || (result.flag ? [result.flag] : []);
     if (flags.length > 0) termFlags[term] = flags;
   }
