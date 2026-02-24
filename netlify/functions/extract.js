@@ -16,7 +16,8 @@ Return ONLY valid JSON — no prose, no markdown. Use null for absent fields.
 For each term include:
 - "snapshot": 2-4 words capturing the key fact (e.g. "2% fixed, Y2", "Seller bears"). Use "Not addressed" if absent.
 - "summary": plain-English explanation of the full term
-- "confidence": "high" (explicitly stated), "medium" (implied/inferred), or "low" (guessed/unclear)`;
+- "confidence": "high" (explicitly stated), "medium" (implied/inferred), or "low" (guessed/unclear)
+- "sourceText": the exact verbatim sentence(s) from the document that establish this term (1-3 sentences max, copied exactly as written). Use null if the term is not addressed in the document.`;
 
 // Pass A: Deal header + Pricing & Settlement terms (~2500 output tokens)
 const PROMPT_A = SYSTEM_PREFIX + `
@@ -41,16 +42,16 @@ const PROMPT_A = SYSTEM_PREFIX + `
     "buyerShareMW": "buyer contracted share in MWac — derive from capacity x pct if not explicit — or null"
   },
   "terms": {
-    "escalation": { "snapshot": "e.g. '2% fixed, Y2+' or 'None'", "summary": "How strike price escalates — rate or index, when first applies, any cap or collar.", "confidence": "high|medium|low" },
-    "interval": { "snapshot": "e.g. 'Hourly, real-time'", "summary": "Settlement interval, day-ahead or real-time, pricing node.", "confidence": "high|medium|low" },
-    "negprice": { "snapshot": "e.g. '$-5/MWh floor' or 'Buyer pays'", "summary": "What happens when prices go negative — floor, curtailment trigger, or buyer still pays fixed.", "confidence": "high|medium|low" },
-    "basis": { "snapshot": "e.g. 'Seller bears' or 'Buyer bears'", "summary": "Who bears node-to-hub basis risk. Any collar or cap.", "confidence": "high|medium|low" },
-    "scheduling": { "snapshot": "e.g. 'ISO dispatch' or 'Seller controls'", "summary": "Who controls project dispatch.", "confidence": "high|medium|low" },
-    "curtailment": { "snapshot": "e.g. 'Seller bears' or 'Deemed gen'", "summary": "Economic curtailment — who bears lost revenue, any deemed generation.", "confidence": "high|medium|low" },
-    "nonecocurtail": { "snapshot": "e.g. 'Seller bears' or 'Force majeure'", "summary": "Reliability curtailment — who bears the loss.", "confidence": "high|medium|low" },
-    "invoice": { "snapshot": "e.g. 'Monthly, net-30'", "summary": "Invoice frequency, payment due days, late payment fees.", "confidence": "high|medium|low" },
-    "buyercredit": { "snapshot": "e.g. 'LOC, $5M' or 'Parent guaranty'", "summary": "Buyer credit support — type and amount.", "confidence": "high|medium|low" },
-    "sellercredit": { "snapshot": "e.g. 'Sponsor guaranty' or 'SPV only'", "summary": "Seller credit support pre- and post-COD.", "confidence": "high|medium|low" }
+    "escalation": { "snapshot": "e.g. '2% fixed, Y2+' or 'None'", "summary": "How strike price escalates — rate or index, when first applies, any cap or collar.", "confidence": "high|medium|low", "sourceText": "verbatim excerpt or null" },
+    "interval": { "snapshot": "e.g. 'Hourly, real-time'", "summary": "Settlement interval, day-ahead or real-time, pricing node.", "confidence": "high|medium|low", "sourceText": "verbatim excerpt or null" },
+    "negprice": { "snapshot": "e.g. '$-5/MWh floor' or 'Buyer pays'", "summary": "What happens when prices go negative — floor, curtailment trigger, or buyer still pays fixed.", "confidence": "high|medium|low", "sourceText": "verbatim excerpt or null" },
+    "basis": { "snapshot": "e.g. 'Seller bears' or 'Buyer bears'", "summary": "Who bears node-to-hub basis risk. Any collar or cap.", "confidence": "high|medium|low", "sourceText": "verbatim excerpt or null" },
+    "scheduling": { "snapshot": "e.g. 'ISO dispatch' or 'Seller controls'", "summary": "Who controls project dispatch.", "confidence": "high|medium|low", "sourceText": "verbatim excerpt or null" },
+    "curtailment": { "snapshot": "e.g. 'Seller bears' or 'Deemed gen'", "summary": "Economic curtailment — who bears lost revenue, any deemed generation.", "confidence": "high|medium|low", "sourceText": "verbatim excerpt or null" },
+    "nonecocurtail": { "snapshot": "e.g. 'Seller bears' or 'Force majeure'", "summary": "Reliability curtailment — who bears the loss.", "confidence": "high|medium|low", "sourceText": "verbatim excerpt or null" },
+    "invoice": { "snapshot": "e.g. 'Monthly, net-30'", "summary": "Invoice frequency, payment due days, late payment fees.", "confidence": "high|medium|low", "sourceText": "verbatim excerpt or null" },
+    "buyercredit": { "snapshot": "e.g. 'LOC, $5M' or 'Parent guaranty'", "summary": "Buyer credit support — type and amount.", "confidence": "high|medium|low", "sourceText": "verbatim excerpt or null" },
+    "sellercredit": { "snapshot": "e.g. 'Sponsor guaranty' or 'SPV only'", "summary": "Seller credit support pre- and post-COD.", "confidence": "high|medium|low", "sourceText": "verbatim excerpt or null" }
   }
 }`;
 
@@ -59,28 +60,28 @@ const PROMPT_B = SYSTEM_PREFIX + `
 
 {
   "terms": {
-    "interconnection": { "snapshot": "e.g. 'Signed, CP met' or 'Pending'", "summary": "Interconnection status, network upgrade costs, whether it's a condition precedent.", "confidence": "high|medium|low" },
-    "conditions": { "snapshot": "e.g. '3 CPs listed' or 'None'", "summary": "Conditions precedent before contract becomes binding.", "confidence": "high|medium|low" },
-    "delay": { "snapshot": "e.g. '$10k/day, capped' or 'Not addressed'", "summary": "COD delay damages — rate per day and cap.", "confidence": "high|medium|low" },
-    "permits": { "snapshot": "e.g. 'All obtained' or 'Pending, CP'", "summary": "Permitting status — obtained vs pending, condition precedent.", "confidence": "high|medium|low" },
-    "cod": { "snapshot": "e.g. 'IE certified' or 'Self-certified'", "summary": "How COD is defined and certified.", "confidence": "high|medium|low" },
-    "availability": { "snapshot": "e.g. '95%, liquidated' or 'Not addressed'", "summary": "Mechanical availability guarantee — percentage and remedy.", "confidence": "high|medium|low" },
-    "production": { "snapshot": "e.g. 'Annual MWh, LD' or 'Not addressed'", "summary": "Annual energy production guarantee and consequence if missed.", "confidence": "high|medium|low" },
-    "recs": { "snapshot": "e.g. 'Buyer gets all' or 'Seller retains'", "summary": "Who gets RECs, delivery mechanics, failure consequence.", "confidence": "high|medium|low" },
-    "forcemajeure": { "snapshot": "e.g. 'Broad, excl. payment' or 'Narrow'", "summary": "Force majeure definition breadth and whether it excuses payment.", "confidence": "high|medium|low" },
-    "marketdisrupt": { "snapshot": "e.g. 'Substitute price' or 'Not addressed'", "summary": "Major market disruption treatment — scarcity pricing, substitute price.", "confidence": "high|medium|low" },
-    "changeinlaw": { "snapshot": "e.g. 'Buyer bears' or 'Strike adjusts'", "summary": "Who bears impact of law or tax credit changes.", "confidence": "high|medium|low" },
-    "reputation": { "snapshot": "e.g. 'Termination right' or 'Not addressed'", "summary": "Reputational harm exit rights — definition and which party.", "confidence": "high|medium|low" },
-    "assignment": { "snapshot": "e.g. 'Consent required' or 'Lender carve-out'", "summary": "Assignment rights, consent required, lender security interest.", "confidence": "high|medium|low" },
-    "default": { "snapshot": "e.g. '30-day cure' or 'No cross-default'", "summary": "Events of default, cure period, cross-default provisions.", "confidence": "high|medium|low" },
-    "termination": { "snapshot": "e.g. 'Mark-to-market' or 'Fixed payment'", "summary": "Early termination payment calculation.", "confidence": "high|medium|low" },
-    "govlaw": { "snapshot": "e.g. 'NY law, courts'", "summary": "Governing law and dispute resolution.", "confidence": "high|medium|low" },
-    "confidentiality": { "snapshot": "e.g. 'ESG ok, no press'", "summary": "Confidentiality scope — ESG and press release rights.", "confidence": "high|medium|low" },
-    "exclusivity": { "snapshot": "e.g. '60-day exclusivity' or 'None'", "summary": "Exclusivity period.", "confidence": "high|medium|low" },
-    "expenses": { "snapshot": "e.g. 'Each party pays' or 'Shared'", "summary": "Who pays legal, registry, and IE costs.", "confidence": "high|medium|low" },
-    "incentives": { "snapshot": "e.g. 'Seller keeps ITC' or 'Shared'", "summary": "ITC/PTC ownership and transferability.", "confidence": "high|medium|low" },
-    "accounting": { "snapshot": "e.g. 'Hedge accounting' or 'Not addressed'", "summary": "Hedge accounting or tax indemnity provisions.", "confidence": "high|medium|low" },
-    "publicity": { "snapshot": "e.g. 'Mutual approval' or 'Buyer approval'", "summary": "Press release and logo use approval process.", "confidence": "high|medium|low" }
+    "interconnection": { "snapshot": "e.g. 'Signed, CP met' or 'Pending'", "summary": "Interconnection status, network upgrade costs, whether it's a condition precedent.", "confidence": "high|medium|low", "sourceText": "verbatim excerpt or null" },
+    "conditions": { "snapshot": "e.g. '3 CPs listed' or 'None'", "summary": "Conditions precedent before contract becomes binding.", "confidence": "high|medium|low", "sourceText": "verbatim excerpt or null" },
+    "delay": { "snapshot": "e.g. '$10k/day, capped' or 'Not addressed'", "summary": "COD delay damages — rate per day and cap.", "confidence": "high|medium|low", "sourceText": "verbatim excerpt or null" },
+    "permits": { "snapshot": "e.g. 'All obtained' or 'Pending, CP'", "summary": "Permitting status — obtained vs pending, condition precedent.", "confidence": "high|medium|low", "sourceText": "verbatim excerpt or null" },
+    "cod": { "snapshot": "e.g. 'IE certified' or 'Self-certified'", "summary": "How COD is defined and certified.", "confidence": "high|medium|low", "sourceText": "verbatim excerpt or null" },
+    "availability": { "snapshot": "e.g. '95%, liquidated' or 'Not addressed'", "summary": "Mechanical availability guarantee — percentage and remedy.", "confidence": "high|medium|low", "sourceText": "verbatim excerpt or null" },
+    "production": { "snapshot": "e.g. 'Annual MWh, LD' or 'Not addressed'", "summary": "Annual energy production guarantee and consequence if missed.", "confidence": "high|medium|low", "sourceText": "verbatim excerpt or null" },
+    "recs": { "snapshot": "e.g. 'Buyer gets all' or 'Seller retains'", "summary": "Who gets RECs, delivery mechanics, failure consequence.", "confidence": "high|medium|low", "sourceText": "verbatim excerpt or null" },
+    "forcemajeure": { "snapshot": "e.g. 'Broad, excl. payment' or 'Narrow'", "summary": "Force majeure definition breadth and whether it excuses payment.", "confidence": "high|medium|low", "sourceText": "verbatim excerpt or null" },
+    "marketdisrupt": { "snapshot": "e.g. 'Substitute price' or 'Not addressed'", "summary": "Major market disruption treatment — scarcity pricing, substitute price.", "confidence": "high|medium|low", "sourceText": "verbatim excerpt or null" },
+    "changeinlaw": { "snapshot": "e.g. 'Buyer bears' or 'Strike adjusts'", "summary": "Who bears impact of law or tax credit changes.", "confidence": "high|medium|low", "sourceText": "verbatim excerpt or null" },
+    "reputation": { "snapshot": "e.g. 'Termination right' or 'Not addressed'", "summary": "Reputational harm exit rights — definition and which party.", "confidence": "high|medium|low", "sourceText": "verbatim excerpt or null" },
+    "assignment": { "snapshot": "e.g. 'Consent required' or 'Lender carve-out'", "summary": "Assignment rights, consent required, lender security interest.", "confidence": "high|medium|low", "sourceText": "verbatim excerpt or null" },
+    "default": { "snapshot": "e.g. '30-day cure' or 'No cross-default'", "summary": "Events of default, cure period, cross-default provisions.", "confidence": "high|medium|low", "sourceText": "verbatim excerpt or null" },
+    "termination": { "snapshot": "e.g. 'Mark-to-market' or 'Fixed payment'", "summary": "Early termination payment calculation.", "confidence": "high|medium|low", "sourceText": "verbatim excerpt or null" },
+    "govlaw": { "snapshot": "e.g. 'NY law, courts'", "summary": "Governing law and dispute resolution.", "confidence": "high|medium|low", "sourceText": "verbatim excerpt or null" },
+    "confidentiality": { "snapshot": "e.g. 'ESG ok, no press'", "summary": "Confidentiality scope — ESG and press release rights.", "confidence": "high|medium|low", "sourceText": "verbatim excerpt or null" },
+    "exclusivity": { "snapshot": "e.g. '60-day exclusivity' or 'None'", "summary": "Exclusivity period.", "confidence": "high|medium|low", "sourceText": "verbatim excerpt or null" },
+    "expenses": { "snapshot": "e.g. 'Each party pays' or 'Shared'", "summary": "Who pays legal, registry, and IE costs.", "confidence": "high|medium|low", "sourceText": "verbatim excerpt or null" },
+    "incentives": { "snapshot": "e.g. 'Seller keeps ITC' or 'Shared'", "summary": "ITC/PTC ownership and transferability.", "confidence": "high|medium|low", "sourceText": "verbatim excerpt or null" },
+    "accounting": { "snapshot": "e.g. 'Hedge accounting' or 'Not addressed'", "summary": "Hedge accounting or tax indemnity provisions.", "confidence": "high|medium|low", "sourceText": "verbatim excerpt or null" },
+    "publicity": { "snapshot": "e.g. 'Mutual approval' or 'Buyer approval'", "summary": "Press release and logo use approval process.", "confidence": "high|medium|low", "sourceText": "verbatim excerpt or null" }
   }
 }`;
 
@@ -149,7 +150,12 @@ function mergeResults(results) {
       } else {
         const existingRank = CONFIDENCE_RANK[existing.confidence] || 0;
         const newRank = CONFIDENCE_RANK[val.confidence] || 0;
-        if (newRank > existingRank) merged.terms[key] = val;
+        if (newRank > existingRank) {
+          merged.terms[key] = val;
+        } else if (newRank === existingRank && !existing.sourceText && val.sourceText) {
+          // Same confidence but new chunk has source text — keep sourceText
+          merged.terms[key] = val;
+        }
       }
     }
   }

@@ -1254,6 +1254,40 @@
     font-size: 12px;
   }
 
+  /* ── SOURCE TEXT BLOCK ── */
+  .term-source-block {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+  .term-source-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 7px;
+  }
+  .term-source-quote {
+    margin: 0;
+    padding: 10px 14px;
+    border-left: 3px solid var(--border-strong);
+    background: var(--surface2);
+    border-radius: 0 6px 6px 0;
+    font-size: 12.5px;
+    line-height: 1.65;
+    color: var(--text-dim);
+    font-style: italic;
+    font-family: 'Georgia', 'Times New Roman', serif;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  [data-theme="light"] .term-source-quote {
+    color: #444;
+    background: #f7f6f3;
+    border-left-color: #ccc;
+  }
+
   /* ── PROCEED BAR ── */
   .proceed-bar {
     display: none;
@@ -2210,6 +2244,7 @@ function renderTermCategories(terms, missing, lowConfidence = []) {
       const summary    = termData && typeof termData === 'object' ? termData.summary    : termData;
       let   snapshot   = termData && typeof termData === 'object' ? termData.snapshot   : null;
       const confidence = termData && typeof termData === 'object' ? termData.confidence : null;
+      const sourceText = termData && typeof termData === 'object' ? termData.sourceText : null;
       const isMissing  = !summary || missing.includes(key);
       const isLowConf  = lowConfidence.includes(key);
 
@@ -2248,6 +2283,11 @@ function renderTermCategories(terms, missing, lowConfidence = []) {
               <div class="term-detail-divider"></div>
               <div class="term-summary">${escHtml(summary)}</div>
               ${buildInlineRationale(key, termData)}
+              ${sourceText ? `
+              <div class="term-source-block">
+                <div class="term-source-label">📄 Source text</div>
+                <blockquote class="term-source-quote">${escHtml(sourceText)}</blockquote>
+              </div>` : ''}
             </div>
           </div>` : ''}
         </div>
