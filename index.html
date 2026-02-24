@@ -2277,44 +2277,42 @@ const TERM_KEY_MAP = {
   accounting: 'acct', publicity: 'publicity'
 };
 
-// Term weights — based on financial materiality from corporate buyer perspective
-// Tier 1 (4x): direct P&L exposure, quantifiable in dollars
-// Tier 2 (3x): operational risk, meaningful but less quantifiable
-// Tier 3 (2x): legal/structural risk, low frequency but real
-// Tier 4 (1x): soft terms, important but low financial impact
+// Term weights — 3 tiers from corporate buyer perspective
+// Tier 1 (4x): Deal Economics — directly determines P&L
+// Tier 2 (2x): Project Risk — determines whether project delivers
+// Tier 3 (1x): Legal & Admin — important but lower financial impact
 const TERM_WEIGHTS = {
-  // Tier 1 — direct financial exposure
+  // Tier 1 — Deal Economics
   strike:       4,
   basis:        4,
   negprice:     4,
   eterm:        4,
-  delay:        4,
-  // Tier 2 — operational risk
-  curtailment:  3,
-  availmech:    3,
-  availguaranteed: 3,
-  ia:           3,
-  changeinlaw:  3,
-  floating:     3,
-  // Tier 3 — legal/structural
+  floating:     4,
+  // Tier 2 — Project Risk
+  delay:        2,
+  curtailment:  2,
+  availmech:    2,
+  availguaranteed: 2,
+  ia:           2,
+  cod:          2,
+  fm:           2,
+  changeinlaw:  2,
+  cp:           2,
   nonecocurtail: 2,
   basiscurtail:  2,
-  cp:           2,
-  cod:          2,
-  sellerpa:     2,
-  buyerpa:      2,
-  fm:           2,
-  eod:          2,
-  assign:       2,
+  permit:       2,
   marketdisrupt: 2,
-  // Tier 4 — soft terms
-  interval:     1,
-  invoice:      1,
-  permit:       1,
-  reputation:   1,
-  product:      1,
+  // Tier 3 — Legal & Admin
+  sellerpa:     1,
+  buyerpa:      1,
+  assign:       1,
+  eod:          1,
   recs:         1,
   incentives:   1,
+  interval:     1,
+  invoice:      1,
+  reputation:   1,
+  product:      1,
   govlaw:       1,
   conf:         1,
   excl:         1,
@@ -2452,7 +2450,7 @@ function renderRiskPanel(scores, termFlags, overall, overallLabel, overallCls, i
   };
   const verdict = verdictMap[overallLabel] || '';
 
-  const tierLabel = w => w >= 4 ? 'High impact' : w >= 3 ? 'Medium impact' : w >= 2 ? 'Low impact' : 'Minimal impact';
+  const tierLabel = w => w >= 4 ? 'Deal Economics' : w >= 2 ? 'Project Risk' : 'Legal & Admin';
 
   const riskRows = risks.length > 0 ? risks.map(t => `
     <div class="risk-row risk">
