@@ -2129,6 +2129,15 @@ async function runEngine2() {
     facts.strike = facts.strike || {};
     facts.strike.strikePrice = facts.strike.strikePrice ?? extractedData.deal.strikePrice;
 
+    console.log('[Engine2] strike facts:', JSON.stringify({
+      strikePrice:   facts.strike.strikePrice,
+      escalatorPct:  facts.strike.escalatorPct,
+      escalatorType: facts.strike.escalatorType,
+      iso:           facts.deal.iso,
+      technology:    facts.deal.technology,
+      assetType:     facts.strike.assetType,
+    }, null, 2));
+
     const { scores, termFlags, interactions } = window.ScoringEngine.scoreAll(facts);
 
     // Render scores onto cards + overall score into proceedSub
