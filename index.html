@@ -1505,7 +1505,7 @@
   .model-term-block:first-child { border-top:none; }
   .model-term-name { font-family:var(--body); font-size:12px; font-weight:600; color:var(--text); margin-bottom:3px; }
   .model-term-desc { font-family:var(--body); font-size:11px; color:var(--text-muted); margin-bottom:10px; }
-  .score-row { display:flex; align-items:center; gap:10px; padding:6px 0; border-bottom:1px solid var(--border); }
+  .score-row { display:flex; align-items:center; gap:10px; padding:6px 0; border-bottom:1px solid var(--border); overflow:visible; }
   .score-row:last-child { border-bottom:none; }
   .score-row-label { font-family:var(--body); font-size:11px; color:var(--text-dim); flex:1; min-width:200px; }
   .score-row-label.mod { color:var(--gold); }
@@ -1513,7 +1513,7 @@
   .score-num { width:52px; padding:3px 6px; background:var(--bg2); border:1px solid var(--border); border-radius:4px; font-family:var(--mono); font-size:11px; color:var(--text); text-align:right; }
   .score-num:focus { outline:none; border-color:var(--text-muted); }
   .score-num.mod { border-color:var(--gold); color:var(--gold); }
-  .score-preview { min-width:130px; text-align:right; flex-shrink:0; }
+  .score-preview { width:140px; min-width:140px; text-align:right; flex-shrink:0; overflow:visible; }
   .matrix-wrap { overflow-x:auto; }
   .mtx { width:100%; border-collapse:collapse; font-size:11px; }
   .mtx th { font-family:var(--mono); font-size:8px; letter-spacing:.06em; text-transform:uppercase; color:var(--text-muted); padding:4px 8px; border-bottom:1px solid var(--border); text-align:center; }
