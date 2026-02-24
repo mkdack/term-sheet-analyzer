@@ -823,6 +823,109 @@
     font-size: 12px;
     color: var(--red);
   }
+
+  /* ── RISK SUMMARY PANEL ── */
+  .risk-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-top-color: rgba(255,255,255,0.14);
+    border-radius: var(--radius-lg);
+    margin-bottom: 24px;
+    overflow: hidden;
+  }
+  .risk-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    cursor: pointer;
+    user-select: none;
+    transition: background var(--dur-fast) var(--ease-out-quart);
+  }
+  .risk-panel-header:hover { background: var(--surface2); }
+  .risk-panel-title {
+    display: flex;
+    align-items: center;
+    font-family: var(--display);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: -0.01em;
+  }
+  .risk-panel-toggle {
+    font-size: 14px;
+    color: var(--text-muted);
+  }
+  .risk-panel-body {
+    padding: 0 20px 18px;
+    border-top: 1px solid var(--border);
+  }
+  .risk-verdict {
+    font-family: var(--body);
+    font-size: 13px;
+    color: var(--text-dim);
+    padding: 14px 0 12px;
+    line-height: 1.55;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 14px;
+  }
+  .risk-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+  .risk-column-header {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+  }
+  .risk-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .risk-row:last-child { border-bottom: none; }
+  .risk-row-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .risk-term-name {
+    font-family: var(--body);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .risk-tier {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+  }
+  .risk-flag {
+    font-family: var(--body);
+    font-size: 11px;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+  .risk-none {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-style: italic;
+    padding: 8px 0;
+  }
+  .risk-interactions {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+  }
+
     margin-top: 10px;
     padding: 8px 16px;
     background: none;
@@ -2174,6 +2277,53 @@ const TERM_KEY_MAP = {
   accounting: 'acct', publicity: 'publicity'
 };
 
+// Term weights — based on financial materiality from corporate buyer perspective
+// Tier 1 (4x): direct P&L exposure, quantifiable in dollars
+// Tier 2 (3x): operational risk, meaningful but less quantifiable
+// Tier 3 (2x): legal/structural risk, low frequency but real
+// Tier 4 (1x): soft terms, important but low financial impact
+const TERM_WEIGHTS = {
+  // Tier 1 — direct financial exposure
+  strike:       4,
+  basis:        4,
+  negprice:     4,
+  eterm:        4,
+  delay:        4,
+  // Tier 2 — operational risk
+  curtailment:  3,
+  availmech:    3,
+  availguaranteed: 3,
+  ia:           3,
+  changeinlaw:  3,
+  floating:     3,
+  // Tier 3 — legal/structural
+  nonecocurtail: 2,
+  basiscurtail:  2,
+  cp:           2,
+  cod:          2,
+  sellerpa:     2,
+  buyerpa:      2,
+  fm:           2,
+  eod:          2,
+  assign:       2,
+  marketdisrupt: 2,
+  // Tier 4 — soft terms
+  interval:     1,
+  invoice:      1,
+  permit:       1,
+  reputation:   1,
+  product:      1,
+  recs:         1,
+  incentives:   1,
+  govlaw:       1,
+  conf:         1,
+  excl:         1,
+  expenses:     1,
+  acct:         1,
+  publicity:    1,
+  scheduling:   1,
+};
+
 function scoreLabel(score) {
   if (score <= 25) return { label: 'Favorable', cls: 'score-favorable' };
   if (score <= 45) return { label: 'Mostly Favorable', cls: 'score-mostly-favorable' };
@@ -2237,25 +2387,141 @@ function renderScores(scores, termFlags, interactions) {
   });
   } // end grid view
 
-  // Render overall score in proceed bar — include any scored custom terms
-  const termScores = Object.values(scores).filter(s => s != null);
+  // ── WEIGHTED OVERALL SCORE ──────────────────────────────────
+  let weightedSum = 0, weightedTotal = 0;
+  for (const [e2key, score] of Object.entries(scores)) {
+    if (score == null) continue;
+    const w = TERM_WEIGHTS[e2key] || 1;
+    weightedSum   += score * w;
+    weightedTotal += w;
+  }
 
-  // Pull scores from any custom term cards that have been scored
+  // Custom term scores (unweighted — treat as Tier 3)
   const customScores = [];
   document.querySelectorAll('.custom-term-card').forEach(card => {
     const s = card.dataset.score;
-    if (s != null && s !== '') customScores.push(Number(s));
+    if (s != null && s !== '') {
+      const n = Number(s);
+      customScores.push(n);
+      weightedSum   += n * 2;
+      weightedTotal += 2;
+    }
   });
 
-  const allScores = [...termScores, ...customScores];
-  const overall = Math.round(allScores.reduce((a, b) => a + b, 0) / allScores.length);
+  const overall = weightedTotal > 0 ? Math.round(weightedSum / weightedTotal) : 50;
   const { label: overallLabel, cls: overallCls } = scoreLabel(overall);
   const customNote = customScores.length > 0
-    ? `<span style="margin-left:10px;color:var(--text-muted);font-size:11px;">(+${customScores.length} custom)</span>`
+    ? `<span style="margin-left:8px;color:var(--text-muted);font-size:11px;">(+${customScores.length} custom)</span>`
     : '';
 
   const sub = document.getElementById('proceedSub');
-  sub.innerHTML = `Overall: <span class="score-badge ${overallCls}" style="margin-left:6px;">${overallLabel} · ${overall}/100</span>${customNote}
+  sub.innerHTML = `Weighted score: <span class="score-badge ${overallCls}" style="margin-left:6px;">${overallLabel} · ${overall}/100</span>${customNote}
     ${interactions.length > 0 ? `<span style="margin-left:10px;color:var(--text-dim);font-size:12px;">⚑ ${interactions.length} cross-term issue${interactions.length > 1 ? 's' : ''}</span>` : ''}`;
+
+  // ── RISK SUMMARY PANEL ──────────────────────────────────────
+  renderRiskPanel(scores, termFlags, overall, overallLabel, overallCls, interactions);
+}
+
+function renderRiskPanel(scores, termFlags, overall, overallLabel, overallCls, interactions) {
+  // Build scored term list with names, weights, flags
+  const e1ByE2 = {};
+  for (const [e1, e2] of Object.entries(TERM_KEY_MAP)) e1ByE2[e2] = e1;
+
+  const scoredTerms = Object.entries(scores)
+    .filter(([k, v]) => v != null)
+    .map(([e2key, score]) => ({
+      e2key,
+      e1key: e1ByE2[e2key],
+      name: TERM_NAMES[e1ByE2[e2key]] || e2key,
+      score,
+      weight: TERM_WEIGHTS[e2key] || 1,
+      flag: (termFlags[e2key] || [])[0] || null,
+    }))
+    .sort((a, b) => (b.score * b.weight) - (a.score * a.weight));
+
+  const risks     = scoredTerms.filter(t => t.score > 55).slice(0, 3);
+  const strengths = [...scoredTerms].sort((a,b) => a.score - b.score).filter(t => t.score <= 45).slice(0, 3);
+
+  // Verdict sentence based on overall score and top risks
+  const verdictMap = {
+    'Favorable':          'This deal is well-structured for the buyer — proceed with confidence.',
+    'Mostly Favorable':   'This deal leans buyer-favorable with a few terms worth tightening before signing.',
+    'Market':             'This is a market-standard deal — no major red flags, but some terms have room for improvement.',
+    'Unfavorable':        'This deal has meaningful buyer risk. Several terms need negotiation before signing.',
+    'Highly Unfavorable': 'Significant buyer exposure across multiple high-stakes terms. Do not sign without substantial changes.',
+  };
+  const verdict = verdictMap[overallLabel] || '';
+
+  const tierLabel = w => w >= 4 ? 'High impact' : w >= 3 ? 'Medium impact' : w >= 2 ? 'Low impact' : 'Minimal impact';
+
+  const riskRows = risks.length > 0 ? risks.map(t => `
+    <div class="risk-row risk">
+      <div class="risk-row-left">
+        <span class="risk-term-name">${escHtml(t.name)}</span>
+        <span class="risk-tier">${tierLabel(t.weight)}</span>
+      </div>
+      <div class="risk-row-right">
+        <span class="score-badge ${scoreLabel(t.score).cls}">${scoreLabel(t.score).label}</span>
+        ${t.flag ? `<div class="risk-flag">${escHtml(t.flag)}</div>` : ''}
+      </div>
+    </div>`).join('') : '<div class="risk-none">No high-risk terms identified.</div>';
+
+  const strengthRows = strengths.length > 0 ? strengths.map(t => `
+    <div class="risk-row strength">
+      <div class="risk-row-left">
+        <span class="risk-term-name">${escHtml(t.name)}</span>
+        <span class="risk-tier">${tierLabel(t.weight)}</span>
+      </div>
+      <div class="risk-row-right">
+        <span class="score-badge ${scoreLabel(t.score).cls}">${scoreLabel(t.score).label}</span>
+        ${t.flag ? `<div class="risk-flag">${escHtml(t.flag)}</div>` : ''}
+      </div>
+    </div>`).join('') : '<div class="risk-none">No standout strengths identified.</div>';
+
+  // Show/hide existing panel
+  let panel = document.getElementById('riskPanel');
+  if (!panel) {
+    panel = document.createElement('div');
+    panel.id = 'riskPanel';
+    panel.className = 'risk-panel';
+    // Insert after proceed bar
+    const proceedBar = document.getElementById('proceedBar');
+    proceedBar.insertAdjacentElement('afterend', panel);
+  }
+
+  panel.innerHTML = `
+    <div class="risk-panel-header" onclick="toggleRiskPanel()">
+      <div class="risk-panel-title">
+        <span>Deal Risk Summary</span>
+        <span class="score-badge ${overallCls}" style="margin-left:8px;">${overallLabel} · ${overall}/100</span>
+      </div>
+      <span class="risk-panel-toggle" id="riskPanelToggle">▾</span>
+    </div>
+    <div class="risk-panel-body" id="riskPanelBody">
+      <div class="risk-verdict">${escHtml(verdict)}</div>
+      <div class="risk-columns">
+        <div class="risk-column">
+          <div class="risk-column-header">⚑ Top Risks</div>
+          ${riskRows}
+        </div>
+        <div class="risk-column">
+          <div class="risk-column-header">✓ Strengths</div>
+          ${strengthRows}
+        </div>
+      </div>
+      ${interactions.length > 0 ? `
+      <div class="risk-interactions">
+        <div class="risk-column-header">⚡ Cross-Term Issues</div>
+        ${interactions.slice(0,3).map(i => `<div class="risk-flag" style="margin-top:6px;">• ${escHtml(i.description || i)}</div>`).join('')}
+      </div>` : ''}
+    </div>`;
+}
+
+function toggleRiskPanel() {
+  const body   = document.getElementById('riskPanelBody');
+  const toggle = document.getElementById('riskPanelToggle');
+  const open   = body.style.display !== 'none';
+  body.style.display   = open ? 'none' : 'block';
+  toggle.textContent   = open ? '▸' : '▾';
 }
 </script>
