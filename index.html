@@ -1194,16 +1194,19 @@
   .score-legend .score-badge { margin-left: 0; }
   .proceed-btn {
     padding: 8px 18px;
-    background: transparent;
-    color: var(--text-muted);
-    border: 1px solid var(--border);
+    background: var(--text);
+    color: var(--bg);
+    border: 1px solid transparent;
     border-radius: 8px;
     font-family: var(--body);
     font-size: 12px;
-    font-weight: 500;
-    cursor: not-allowed;
+    font-weight: 600;
+    cursor: pointer;
     white-space: nowrap;
+    transition: opacity var(--dur-fast) var(--ease-out-quart);
   }
+  .proceed-btn:hover { opacity: 0.85; }
+  .proceed-btn:disabled { opacity: 0.4; cursor: not-allowed; }
   .coming-soon {
     font-family: var(--mono);
     font-size: 9px;
