@@ -116,7 +116,7 @@
   [data-theme="light"] .deal-field { border-right-color: rgba(0,0,0,0.07); }
   [data-theme="light"] .deal-field-label { color: #aaa; }
   [data-theme="light"] .deal-field-value { color: #1a1a1a; font-size: 15px; }
-  [data-theme="light"] .deal-field-value.strike { color: #8a5f00; font-size: 30px; }
+  [data-theme="light"] .deal-field-value.strike { color: var(--gold); font-size: 17px; }
   [data-theme="light"] .deal-field-value.missing { color: #bbb; }
   [data-theme="light"] .deal-structure-value { color: #1a1a1a; font-size: 17px; }
   [data-theme="light"] .deal-structure-note { color: #777; }
@@ -917,10 +917,10 @@
   }
   .deal-header-full {
     border-top: 1px solid var(--border);
-    padding: 18px 24px;
+    padding: 12px 18px;
   }
   .deal-field {
-    padding: 20px 24px;
+    padding: 12px 18px;
     border-right: 1px solid var(--border);
   }
   .deal-field:last-child { border-right: none; }
@@ -928,42 +928,41 @@
     font-family: var(--mono);
     font-size: 9px;
     letter-spacing: 0.12em;
-    color: rgba(255,255,255,0.45);
+    color: rgba(255,255,255,0.35);
     text-transform: uppercase;
-    margin-bottom: 6px;
+    margin-bottom: 4px;
   }
   .deal-field-value {
-    font-size: 15px;
+    font-size: 13px;
     font-weight: 500;
     color: var(--text);
     line-height: 1.3;
   }
   .deal-field-value.strike {
     font-family: var(--display);
-    font-size: 28px;
+    font-size: 17px;
     font-weight: 700;
     color: var(--gold);
-    letter-spacing: -0.03em;
+    letter-spacing: -0.02em;
   }
   .deal-field-value.missing {
     color: var(--text-muted);
     font-style: italic;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 300;
   }
   .deal-structure-value {
-    font-family: var(--display);
-    font-size: 16px;
-    font-weight: 700;
+    font-family: var(--body);
+    font-size: 13px;
+    font-weight: 600;
     color: var(--text);
-    margin-bottom: 4px;
-    letter-spacing: -0.01em;
+    margin-bottom: 2px;
   }
   .deal-structure-note {
     font-size: 12px;
     color: var(--text-dim);
-    line-height: 1.55;
-    font-weight: 300;
+    line-height: 1.5;
+    font-weight: 400;
   }
 
   /* ── NOTICES ── */
