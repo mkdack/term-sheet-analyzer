@@ -1257,9 +1257,9 @@
   /* ── PROCEED BAR ── */
   .proceed-bar {
     display: none;
-    align-items: center;
-    justify-content: space-between;
-    padding: 14px 22px;
+    flex-direction: column;
+    gap: 12px;
+    padding: 18px 22px;
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
@@ -1270,31 +1270,142 @@
     box-shadow: 0 4px 24px oklch(0% 0 0 / 0.2);
   }
   .proceed-bar.visible { display: flex; }
-  .proceed-text {
-    font-family: var(--display);
-    font-size: 14px;
-    color: var(--text);
-    font-weight: 600;
-    margin-bottom: 2px;
-    letter-spacing: -0.01em;
+  .proceed-left {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
   }
-  .proceed-sub { font-size: 12px; color: var(--text-muted); font-weight: 300; }
-  .score-legend {
+  .proceed-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    justify-content: space-between;
+  }
+  .proceed-score-block {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+  }
+  .proceed-score-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+  .proceed-score-display {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+  .proceed-score-num {
+    font-family: var(--display);
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.04em;
+    line-height: 1;
+  }
+  .proceed-score-num.scored { color: var(--text); }
+  .proceed-score-band {
+    font-family: var(--body);
+    font-size: 13px;
+    color: var(--text-muted);
+    font-weight: 400;
+  }
+  .proceed-legend {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
-    gap: 6px;
-    margin-top: 8px;
+    gap: 5px;
   }
-  .legend-label {
+  .proceed-legend .score-badge { margin-left: 0; opacity: 0.6; font-size: 9px; }
+  .proceed-sub { font-size: 12px; color: var(--text-muted); font-weight: 400; }
+
+  /* ── FILTER BAR ── */
+  .filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+    padding: 12px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+  .filter-group {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    flex-wrap: wrap;
+  }
+  .filter-group-label {
     font-family: var(--mono);
     font-size: 9px;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--text-muted);
-    margin-right: 2px;
+    margin-right: 3px;
+    white-space: nowrap;
   }
-  .score-legend .score-badge { margin-left: 0; }
+  .filter-bar .filter-group + .filter-group {
+    padding-left: 12px;
+    border-left: 1px solid var(--border);
+  }
+  .filter-btn {
+    padding: 3px 9px;
+    border-radius: 4px;
+    border: 1px solid transparent;
+    font-family: var(--body);
+    font-size: 10px;
+    font-weight: 500;
+    cursor: pointer;
+    opacity: 0.5;
+    transition: opacity var(--dur-fast) var(--ease-out-quart),
+                border-color var(--dur-fast) var(--ease-out-quart);
+    background: transparent;
+  }
+  .filter-btn:hover { opacity: 0.8; }
+  .filter-btn.active { opacity: 1; border-color: currentColor; }
+
+  /* Score filter buttons inherit score badge colors */
+  .filter-btn.score-favorable       { color: var(--green); }
+  .filter-btn.score-mostly-favorable { color: oklch(72% 0.15 155 / 0.85); }
+  .filter-btn.score-market          { color: var(--text-dim); }
+  .filter-btn.score-unfavorable     { color: var(--amber); }
+  .filter-btn.score-bad             { color: var(--red); }
+
+  /* Tier filter buttons */
+  .filter-btn.tier-economics { color: var(--gold); }
+  .filter-btn.tier-risk      { color: var(--amber); }
+  .filter-btn.tier-admin     { color: var(--text-dim); }
+
+  .filter-clear {
+    margin-left: auto;
+    padding: 3px 9px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    background: transparent;
+    font-family: var(--body);
+    font-size: 10px;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: color var(--dur-fast) var(--ease-out-quart);
+  }
+  .filter-clear:hover { color: var(--text); }
+
+  /* Hidden by filter */
+  .term-card.filter-hidden { display: none; }
+  .category.filter-empty .terms-grid::after {
+    content: 'No terms match current filters';
+    display: block;
+    padding: 16px;
+    font-size: 12px;
+    color: var(--text-muted);
+    font-style: italic;
+  }
   .proceed-btn {
     padding: 8px 18px;
     background: var(--text);
@@ -1443,19 +1554,25 @@
 
     <!-- Engine 2 bar — above deal header -->
     <div class="proceed-bar visible" id="proceedBar">
-      <div>
-        <div class="proceed-text">Extraction complete</div>
-        <div class="proceed-sub" id="proceedSub">Engine 2 will score each term against VPPA market standards</div>
-        <div class="score-legend">
-          <span class="legend-label">Buyer score — lower is better:</span>
-          <span class="score-badge score-favorable">0–25 Favorable</span>
-          <span class="score-badge score-mostly-favorable">26–45 Mostly Favorable</span>
-          <span class="score-badge score-market">46–55 Market</span>
-          <span class="score-badge score-unfavorable">56–75 Unfavorable</span>
-          <span class="score-badge score-bad">76–100 Highly Unfavorable</span>
+      <div class="proceed-left">
+        <div class="proceed-score-block" id="proceedScoreBlock">
+          <div class="proceed-score-label">Weighted Score</div>
+          <div class="proceed-score-display" id="proceedScoreDisplay">
+            <span class="proceed-score-num" id="proceedScoreNum">—</span>
+            <span class="proceed-score-band" id="proceedScoreBand">Run Engine 2 to score</span>
+          </div>
+        </div>
+        <div class="proceed-legend">
+          <span class="legend-label">Lower is better →</span>
+          <span class="score-badge score-favorable">Favorable</span>
+          <span class="score-badge score-mostly-favorable">Mostly Favorable</span>
+          <span class="score-badge score-market">Market</span>
+          <span class="score-badge score-unfavorable">Unfavorable</span>
+          <span class="score-badge score-bad">Highly Unfavorable</span>
         </div>
       </div>
-      <div style="display:flex;align-items:center;gap:14px;">
+      <div class="proceed-right">
+        <div class="proceed-sub" id="proceedSub"></div>
         <button class="proceed-btn" id="scoreBtn" onclick="runEngine2()">Score Terms →</button>
       </div>
     </div>
@@ -1471,6 +1588,26 @@
       <button class="view-btn active" id="btnGrid" onclick="setView('grid')">Grid</button>
       <button class="view-btn" id="btnList" onclick="setView('list')">List</button>
     </div>
+
+    <!-- Filter bar — score + tier -->
+    <div class="filter-bar" id="filterBar" style="display:none;">
+      <div class="filter-group">
+        <span class="filter-group-label">Score</span>
+        <button class="filter-btn score-favorable"   data-filter="score" data-val="favorable"        onclick="toggleFilter(this)">Favorable</button>
+        <button class="filter-btn score-mostly-favorable" data-filter="score" data-val="mostly-favorable" onclick="toggleFilter(this)">Mostly Favorable</button>
+        <button class="filter-btn score-market"      data-filter="score" data-val="market"           onclick="toggleFilter(this)">Market</button>
+        <button class="filter-btn score-unfavorable" data-filter="score" data-val="unfavorable"      onclick="toggleFilter(this)">Unfavorable</button>
+        <button class="filter-btn score-bad"         data-filter="score" data-val="highly-unfavorable" onclick="toggleFilter(this)">Highly Unfavorable</button>
+      </div>
+      <div class="filter-group">
+        <span class="filter-group-label">Tier</span>
+        <button class="filter-btn tier-economics" data-filter="tier" data-val="economics" onclick="toggleFilter(this)">Deal Economics</button>
+        <button class="filter-btn tier-risk"      data-filter="tier" data-val="risk"      onclick="toggleFilter(this)">Project Risk</button>
+        <button class="filter-btn tier-admin"     data-filter="tier" data-val="admin"     onclick="toggleFilter(this)">Legal & Admin</button>
+      </div>
+      <button class="filter-clear" id="filterClear" style="display:none;" onclick="clearFilters()">Clear filters</button>
+    </div>
+
     <div id="termCategories"></div>
 
     <!-- Custom Terms -->
@@ -1765,8 +1902,11 @@ function renderResults(data) {
   renderTermCategories(terms, missing, lowConfidence);
   initCustomTerms();
 
-  // Show view toggle
+  // Show view toggle + filter bar
   document.getElementById('viewControls').style.display = 'flex';
+  document.getElementById('filterBar').style.display = 'flex';
+  // Tag cards with tier immediately (score band tags applied after Engine 2)
+  applyFilterTags({});
   setView(currentView);
 
   const resultsEl = document.getElementById('results');
@@ -2409,12 +2549,31 @@ function renderScores(scores, termFlags, interactions) {
   const overall = weightedTotal > 0 ? Math.round(weightedSum / weightedTotal) : 50;
   const { label: overallLabel, cls: overallCls } = scoreLabel(overall);
   const customNote = customScores.length > 0
-    ? `<span style="margin-left:8px;color:var(--text-muted);font-size:11px;">(+${customScores.length} custom)</span>`
+    ? `+${customScores.length} custom term${customScores.length > 1 ? 's' : ''} included`
     : '';
 
-  const sub = document.getElementById('proceedSub');
-  sub.innerHTML = `Weighted score: <span class="score-badge ${overallCls}" style="margin-left:6px;">${overallLabel} · ${overall}/100</span>${customNote}
-    ${interactions.length > 0 ? `<span style="margin-left:10px;color:var(--text-dim);font-size:12px;">⚑ ${interactions.length} cross-term issue${interactions.length > 1 ? 's' : ''}</span>` : ''}`;
+  // Update the prominent score display
+  const numEl  = document.getElementById('proceedScoreNum');
+  const bandEl = document.getElementById('proceedScoreBand');
+  const subEl  = document.getElementById('proceedSub');
+
+  numEl.textContent  = overall;
+  numEl.className    = `proceed-score-num`;
+  numEl.style.color  = getScoreColor(overall);
+  bandEl.textContent = overallLabel;
+  bandEl.className   = `proceed-score-band`;
+
+  subEl.textContent = customNote
+    ? customNote
+    : interactions.length > 0
+      ? `⚑ ${interactions.length} cross-term issue${interactions.length > 1 ? 's' : ''} detected`
+      : 'Weighted by financial materiality';
+
+  // Show filter bar
+  document.getElementById('filterBar').style.display = 'flex';
+
+  // Tag each card with score class and tier for filtering
+  applyFilterTags(scores);
 
   // ── RISK SUMMARY PANEL ──────────────────────────────────────
   renderRiskPanel(scores, termFlags, overall, overallLabel, overallCls, interactions);
@@ -2521,5 +2680,92 @@ function toggleRiskPanel() {
   const open   = body.style.display !== 'none';
   body.style.display   = open ? 'none' : 'block';
   toggle.textContent   = open ? '▸' : '▾';
+}
+
+// ── SCORE COLOR ───────────────────────────────────────────────
+function getScoreColor(score) {
+  if (score <= 25) return 'var(--green)';
+  if (score <= 45) return 'oklch(72% 0.12 155)';
+  if (score <= 55) return 'var(--text-dim)';
+  if (score <= 75) return 'var(--amber)';
+  return 'var(--red)';
+}
+
+// ── FILTERS ───────────────────────────────────────────────────
+// Which e2keys belong to which tier
+const TIER_MAP = {
+  economics: ['strike','basis','negprice','eterm','floating'],
+  risk:      ['delay','curtailment','availmech','availguaranteed','ia','cod','fm','changeinlaw','cp','nonecocurtail','basiscurtail','permit','marketdisrupt'],
+  admin:     ['sellerpa','buyerpa','assign','eod','recs','incentives','interval','invoice','reputation','product','govlaw','conf','excl','expenses','acct','publicity','scheduling'],
+};
+
+// Reverse map: e2key → tier
+const E2_TIER = {};
+for (const [tier, keys] of Object.entries(TIER_MAP)) keys.forEach(k => E2_TIER[k] = tier);
+
+let activeFilters = { score: new Set(), tier: new Set() };
+
+function applyFilterTags(scores) {
+  // Tag each term card with data-score-band and data-tier
+  document.querySelectorAll('.term-card:not(.missing-term)').forEach(card => {
+    const nameEl = card.querySelector('.term-name');
+    if (!nameEl) return;
+    const cardName = nameEl.textContent.trim();
+    const e1key = Object.keys(TERM_NAMES).find(k => TERM_NAMES[k] === cardName);
+    if (!e1key) return;
+    const e2key = TERM_KEY_MAP[e1key];
+    if (!e2key) return;
+
+    const score = scores[e2key];
+    const { cls } = score != null ? scoreLabel(score) : { cls: 'unscored' };
+    // Convert cls to filter val
+    const bandVal = cls === 'score-favorable' ? 'favorable'
+      : cls === 'score-mostly-favorable' ? 'mostly-favorable'
+      : cls === 'score-market' ? 'market'
+      : cls === 'score-unfavorable' ? 'unfavorable'
+      : cls === 'score-bad' ? 'highly-unfavorable'
+      : null;
+
+    card.dataset.scoreBand = bandVal || '';
+    card.dataset.tier = E2_TIER[e2key] || 'admin';
+  });
+}
+
+function toggleFilter(btn) {
+  const type = btn.dataset.filter;
+  const val  = btn.dataset.val;
+  if (activeFilters[type].has(val)) {
+    activeFilters[type].delete(val);
+    btn.classList.remove('active');
+  } else {
+    activeFilters[type].add(val);
+    btn.classList.add('active');
+  }
+  applyFilters();
+}
+
+function clearFilters() {
+  activeFilters = { score: new Set(), tier: new Set() };
+  document.querySelectorAll('.filter-btn.active').forEach(b => b.classList.remove('active'));
+  applyFilters();
+}
+
+function applyFilters() {
+  const hasScore = activeFilters.score.size > 0;
+  const hasTier  = activeFilters.tier.size > 0;
+  const clearBtn = document.getElementById('filterClear');
+  clearBtn.style.display = (hasScore || hasTier) ? 'block' : 'none';
+
+  document.querySelectorAll('.term-card:not(.missing-term)').forEach(card => {
+    const matchScore = !hasScore || activeFilters.score.has(card.dataset.scoreBand);
+    const matchTier  = !hasTier  || activeFilters.tier.has(card.dataset.tier);
+    card.classList.toggle('filter-hidden', !(matchScore && matchTier));
+  });
+
+  // Show/hide empty category sections
+  document.querySelectorAll('.category').forEach(cat => {
+    const visible = [...cat.querySelectorAll('.term-card:not(.missing-term):not(.filter-hidden)')].length;
+    cat.classList.toggle('filter-empty', visible === 0 && (hasScore || hasTier));
+  });
 }
 </script>
