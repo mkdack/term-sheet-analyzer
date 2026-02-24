@@ -1113,11 +1113,16 @@
     display: none;
     align-items: center;
     justify-content: space-between;
-    padding: 16px 22px;
+    padding: 14px 22px;
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
-    margin-top: 40px;
+    margin-top: 16px;
+    margin-bottom: 28px;
+    position: sticky;
+    top: 70px;
+    z-index: 50;
+    box-shadow: 0 4px 24px oklch(0% 0 0 / 0.2);
   }
   .proceed-bar.visible { display: flex; }
   .proceed-text {
@@ -1275,6 +1280,17 @@
     <!-- Deal header -->
     <div class="deal-header" id="dealHeader"></div>
 
+    <!-- Engine 2 bar — right under deal header -->
+    <div class="proceed-bar visible" id="proceedBar">
+      <div>
+        <div class="proceed-text">Extraction complete</div>
+        <div class="proceed-sub" id="proceedSub">Engine 2 will score each term against VPPA market standards</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;">
+        <button class="proceed-btn" id="scoreBtn" onclick="runEngine2()">Score Terms →</button>
+      </div>
+    </div>
+
     <!-- Notices: missing, low-confidence, chunk info -->
     <div class="notices-stack" id="missingNotice"></div>
 
@@ -1294,17 +1310,6 @@
         </div>
         <div class="terms-grid" id="customTermsGrid"></div>
         <button class="add-term-btn" onclick="addCustomTerm()">+ Add Term</button>
-      </div>
-    </div>
-
-    <!-- Proceed to Engine 2 -->
-    <div class="proceed-bar visible" id="proceedBar">
-      <div>
-        <div class="proceed-text">Extraction complete</div>
-        <div class="proceed-sub" id="proceedSub">Engine 2 will score each term against VPPA market standards</div>
-      </div>
-      <div style="display:flex;align-items:center;gap:14px;">
-        <button class="proceed-btn" id="scoreBtn" onclick="runEngine2()">Score Terms →</button>
       </div>
     </div>
 
