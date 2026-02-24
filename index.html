@@ -630,6 +630,106 @@
   [data-theme="light"] .term-detail-divider { background: rgba(0,0,0,0.07); }
   [data-theme="light"] .clickable-card .term-name-row::after { color: var(--gold); }
 
+  /* ── VIEW TOGGLE ── */
+  .view-controls {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 24px;
+  }
+  .view-btn {
+    padding: 5px 14px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: none;
+    color: var(--text-dim);
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .view-btn:hover { color: var(--text); border-color: var(--border-strong); }
+  .view-btn.active { background: var(--card); color: var(--text); border-color: var(--border-strong); }
+  [data-theme="light"] .view-btn.active { background: #fff; }
+
+  /* ── LIST VIEW ── */
+  .list-section { margin-bottom: 32px; }
+  .list-section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 0 10px 0;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 2px;
+  }
+  .list-section-name {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+  .list-section-count {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    opacity: 0.5;
+  }
+  .list-row {
+    display: grid;
+    grid-template-columns: 180px 1fr auto;
+    align-items: start;
+    gap: 16px;
+    padding: 12px 4px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.1s;
+    border-radius: 4px;
+  }
+  .list-row:hover { background: var(--card); }
+  .list-row.missing-row { opacity: 0.4; cursor: default; }
+  .list-row.missing-row:hover { background: none; }
+  .list-row-name {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: 0.02em;
+    padding-top: 2px;
+  }
+  .list-row-content { display: flex; flex-direction: column; gap: 4px; }
+  .list-row-snapshot {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1.4;
+  }
+  .list-row-summary {
+    font-size: 12px;
+    color: var(--text-dim);
+    line-height: 1.5;
+    display: none;
+  }
+  .list-row.expanded .list-row-summary { display: block; }
+  .list-row.expanded .list-row-snapshot { color: var(--text-dim); }
+  .list-row-score { display: flex; align-items: center; padding-top: 3px; }
+  .list-row-flag {
+    margin-top: 8px;
+    padding: 6px 10px;
+    border-radius: 5px;
+    font-size: 11px;
+    color: #f97316;
+    background: rgba(249,115,22,0.08);
+    border-left: 2px solid #f97316;
+    line-height: 1.5;
+    display: none;
+  }
+  .list-row.expanded .list-row-flag { display: block; }
+  [data-theme="light"] .list-row:hover { background: #f5f5f5; }
+
   /* ── SCORE BADGES ── */
   .score-badge {
     display: inline-flex;
@@ -1130,6 +1230,10 @@
     <div class="notices-stack" id="missingNotice"></div>
 
     <!-- Term summaries by category -->
+    <div class="view-controls" id="viewControls" style="display:none;">
+      <button class="view-btn active" id="btnGrid" onclick="setView('grid')">Grid</button>
+      <button class="view-btn" id="btnList" onclick="setView('list')">List</button>
+    </div>
     <div id="termCategories"></div>
 
     <!-- Custom Terms -->
@@ -1435,6 +1539,10 @@ function renderResults(data) {
   renderTermCategories(terms, missing, lowConfidence);
   initCustomTerms();
 
+  // Show view toggle
+  document.getElementById('viewControls').style.display = 'flex';
+  setView(currentView);
+
   const resultsEl = document.getElementById('results');
   resultsEl.style.display = 'block';
   resultsEl.classList.add('visible');
@@ -1711,6 +1819,80 @@ function toggleTheme() {
 }
 
 (function() { applyTheme(localStorage.getItem('theme') || 'dark'); })();
+
+// ─── VIEW TOGGLE ──────────────────────────────────────────────
+let currentView = 'grid';
+let lastScores = null;
+let lastTermFlags = null;
+
+function setView(view) {
+  currentView = view;
+  document.getElementById('btnGrid').classList.toggle('active', view === 'grid');
+  document.getElementById('btnList').classList.toggle('active', view === 'list');
+
+  const container = document.getElementById('termCategories');
+  if (view === 'grid') {
+    if (extractedData) renderTermCategories(extractedData.terms, extractedData.missing || [], extractedData.lowConfidence || []);
+    if (lastScores) renderScores(lastScores, lastTermFlags || {}, []);
+  } else {
+    if (extractedData) renderListView(extractedData.terms, extractedData.missing || [], lastScores, lastTermFlags || {});
+  }
+}
+
+// ─── LIST VIEW RENDERER ───────────────────────────────────────
+function renderListView(terms, missing, scores, termFlags) {
+  const container = document.getElementById('termCategories');
+
+  container.innerHTML = CATEGORIES.map(cat => {
+    const rows = cat.keys.map(key => {
+      const termData   = terms[key];
+      const summary    = termData?.summary || null;
+      const snapshot   = termData?.snapshot || null;
+      const isMissing  = !summary || missing.includes(key);
+
+      const e2key = TERM_KEY_MAP[key];
+      const score = scores && e2key ? scores[e2key] : null;
+      const flags = termFlags && e2key ? (termFlags[e2key] || []) : [];
+      const scoreBadge = score != null ? (() => {
+        const { label, cls } = scoreLabel(score);
+        return `<span class="score-badge ${cls}">${label}</span>`;
+      })() : '';
+
+      const flagHtml = flags.length > 0 ? `<div class="list-row-flag">⚑ ${escHtml(flags[0])}</div>` : '';
+
+      return `
+        <div class="list-row ${isMissing ? 'missing-row' : ''}" ${!isMissing ? 'onclick="toggleListRow(this)"' : ''}>
+          <div class="list-row-name">${humanTermName(key)}</div>
+          <div class="list-row-content">
+            <div class="list-row-snapshot">${isMissing ? 'Not addressed' : escHtml(snapshot || '—')}</div>
+            <div class="list-row-summary">${isMissing ? '' : escHtml(summary || '')}</div>
+            ${flagHtml}
+          </div>
+          <div class="list-row-score">${scoreBadge}</div>
+        </div>
+      `;
+    }).join('');
+
+    const presentCount = cat.keys.filter(k => {
+      const t = terms[k];
+      return t?.summary && !missing.includes(k);
+    }).length;
+
+    return `
+      <div class="list-section">
+        <div class="list-section-header">
+          <span class="list-section-name">${cat.name}</span>
+          <span class="list-section-count">${presentCount}/${cat.keys.length}</span>
+        </div>
+        ${rows}
+      </div>
+    `;
+  }).join('');
+}
+
+function toggleListRow(el) {
+  el.classList.toggle('expanded');
+}
 </script>
 
 <script src="/scoring-engine.js"></script>
@@ -1788,7 +1970,18 @@ function scoreLabel(score) {
 }
 
 function renderScores(scores, termFlags, interactions) {
-  // Add scores to each card
+  // Store for view switching
+  lastScores = scores;
+  lastTermFlags = termFlags;
+
+  // If in list view, re-render with scores
+  if (currentView === 'list') {
+    renderListView(extractedData.terms, extractedData.missing || [], scores, termFlags);
+    // Still update the overall score in proceed bar below
+  }
+
+  // Grid view: overlay badges on cards
+  if (currentView === 'grid') {
   document.querySelectorAll('.term-card:not(.missing-term)').forEach(card => {
     const nameEl = card.querySelector('.term-name');
     if (!nameEl) return;
@@ -1829,6 +2022,7 @@ function renderScores(scores, termFlags, interactions) {
       }
     }
   });
+  } // end grid view
 
   // Render overall score in proceed bar
   const termScores = Object.values(scores).filter(s => s != null);
