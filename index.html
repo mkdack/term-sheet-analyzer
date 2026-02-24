@@ -630,26 +630,6 @@
   [data-theme="light"] .term-detail-divider { background: rgba(0,0,0,0.07); }
   [data-theme="light"] .clickable-card .term-name-row::after { color: var(--gold); }
 
-  /* ── CARD ENTRANCE ANIMATION ── */
-  @keyframes cardEntrance {
-    from { opacity: 0; transform: translateY(12px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-  .term-card {
-    animation: cardEntrance 0.35s ease both;
-  }
-  .term-card:nth-child(1)  { animation-delay: 0.00s; }
-  .term-card:nth-child(2)  { animation-delay: 0.06s; }
-  .term-card:nth-child(3)  { animation-delay: 0.12s; }
-  .term-card:nth-child(4)  { animation-delay: 0.18s; }
-  .term-card:nth-child(5)  { animation-delay: 0.24s; }
-  .term-card:nth-child(6)  { animation-delay: 0.30s; }
-  .term-card:nth-child(7)  { animation-delay: 0.36s; }
-  .term-card:nth-child(8)  { animation-delay: 0.42s; }
-  .category {
-    animation: cardEntrance 0.4s ease both;
-  }
-
   /* ── SCAN PULSE ── */
   @keyframes scanPulse {
     0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(212,168,75,0.7); }
