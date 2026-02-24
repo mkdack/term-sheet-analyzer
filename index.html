@@ -1981,6 +1981,9 @@ async function extractAndScoreCustomTerm(id) {
     card.dataset.scoreCls  = scoreCls;
     card.dataset.flag      = data.flag || '';
 
+    // If Engine 2 has already run, refresh the overall score to include this term
+    if (lastScores) renderScores(lastScores, lastTermFlags || {}, []);
+
   } catch (err) {
     resultEl.innerHTML = `<div class="custom-result-error">Failed: ${escHtml(err.message)}</div>`;
     btn.textContent = 'Extract & Score';
@@ -2222,13 +2225,25 @@ function renderScores(scores, termFlags, interactions) {
   });
   } // end grid view
 
-  // Render overall score in proceed bar
+  // Render overall score in proceed bar — include any scored custom terms
   const termScores = Object.values(scores).filter(s => s != null);
-  const overall = Math.round(termScores.reduce((a, b) => a + b, 0) / termScores.length);
+
+  // Pull scores from any custom term cards that have been scored
+  const customScores = [];
+  document.querySelectorAll('.custom-term-card').forEach(card => {
+    const s = card.dataset.score;
+    if (s != null && s !== '') customScores.push(Number(s));
+  });
+
+  const allScores = [...termScores, ...customScores];
+  const overall = Math.round(allScores.reduce((a, b) => a + b, 0) / allScores.length);
   const { label: overallLabel, cls: overallCls } = scoreLabel(overall);
+  const customNote = customScores.length > 0
+    ? `<span style="margin-left:10px;color:var(--text-muted);font-size:11px;">(+${customScores.length} custom)</span>`
+    : '';
 
   const sub = document.getElementById('proceedSub');
-  sub.innerHTML = `Overall: <span class="score-badge ${overallCls}" style="margin-left:6px;">${overallLabel} · ${overall}/100</span>
+  sub.innerHTML = `Overall: <span class="score-badge ${overallCls}" style="margin-left:6px;">${overallLabel} · ${overall}/100</span>${customNote}
     ${interactions.length > 0 ? `<span style="margin-left:10px;color:var(--text-dim);font-size:12px;">⚑ ${interactions.length} cross-term issue${interactions.length > 1 ? 's' : ''}</span>` : ''}`;
 }
 </script>
