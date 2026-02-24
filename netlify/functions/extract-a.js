@@ -1,4 +1,4 @@
-// Pass A: Deal header + first 10 terms
+// extract-a.js — sourceText build 1771967607
 const Anthropic = require('@anthropic-ai/sdk');
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
@@ -11,7 +11,7 @@ const HEADERS = {
 
 const PROMPT_A = `You are an expert energy procurement analyst extracting facts from a VPPA/PPA term sheet.
 Return ONLY valid JSON — no prose, no markdown. Use null for absent fields.
-For each term include "snapshot" (2-4 words), "summary" (plain English), and "confidence" (high/medium/low).
+For each term include "snapshot" (2-4 words), "summary" (plain English), "confidence" (high/medium/low), and "sourceText" (the exact verbatim sentence(s) from the document for this term, 1-3 sentences max, or null if not addressed).
 
 {
   "deal": {
@@ -33,16 +33,16 @@ For each term include "snapshot" (2-4 words), "summary" (plain English), and "co
     "buyerShareMW": "buyer contracted share in MWac — derive from capacity x pct if not explicit — or null"
   },
   "terms": {
-    "escalation": { "snapshot": "e.g. '2% fixed, Y2+' or 'None'", "summary": "How strike price escalates — rate or index, when first applies, any cap or collar.", "confidence": "high|medium|low" },
-    "interval": { "snapshot": "e.g. 'Hourly, real-time'", "summary": "Settlement interval, day-ahead or real-time, pricing node.", "confidence": "high|medium|low" },
-    "negprice": { "snapshot": "e.g. '$-5/MWh floor' or 'Buyer pays'", "summary": "What happens when prices go negative.", "confidence": "high|medium|low" },
-    "basis": { "snapshot": "e.g. 'Seller bears' or 'Buyer bears'", "summary": "Who bears node-to-hub basis risk. Any collar or cap.", "confidence": "high|medium|low" },
-    "scheduling": { "snapshot": "e.g. 'ISO dispatch' or 'Seller controls'", "summary": "Who controls project dispatch.", "confidence": "high|medium|low" },
-    "curtailment": { "snapshot": "e.g. 'Seller bears' or 'Deemed gen'", "summary": "Economic curtailment — who bears lost revenue, any deemed generation.", "confidence": "high|medium|low" },
-    "nonecocurtail": { "snapshot": "e.g. 'Seller bears' or 'Force majeure'", "summary": "Reliability curtailment — who bears the loss.", "confidence": "high|medium|low" },
-    "invoice": { "snapshot": "e.g. 'Monthly, net-30'", "summary": "Invoice frequency, payment due days, late payment fees.", "confidence": "high|medium|low" },
-    "buyercredit": { "snapshot": "e.g. 'LOC, $5M' or 'Parent guaranty'", "summary": "Buyer credit support — type and amount.", "confidence": "high|medium|low" },
-    "sellercredit": { "snapshot": "e.g. 'Sponsor guaranty' or 'SPV only'", "summary": "Seller credit support pre- and post-COD.", "confidence": "high|medium|low" }
+    "escalation": { "snapshot": "e.g. '2% fixed, Y2+' or 'None'", "summary": "How strike price escalates — rate or index, when first applies, any cap or collar.", "confidence": "high|medium|low", "sourceText": "verbatim excerpt or null" },
+    "interval": { "snapshot": "e.g. 'Hourly, real-time'", "summary": "Settlement interval, day-ahead or real-time, pricing node.", "confidence": "high|medium|low", "sourceText": "verbatim excerpt or null" },
+    "negprice": { "snapshot": "e.g. '$-5/MWh floor' or 'Buyer pays'", "summary": "What happens when prices go negative.", "confidence": "high|medium|low", "sourceText": "verbatim excerpt or null" },
+    "basis": { "snapshot": "e.g. 'Seller bears' or 'Buyer bears'", "summary": "Who bears node-to-hub basis risk. Any collar or cap.", "confidence": "high|medium|low", "sourceText": "verbatim excerpt or null" },
+    "scheduling": { "snapshot": "e.g. 'ISO dispatch' or 'Seller controls'", "summary": "Who controls project dispatch.", "confidence": "high|medium|low", "sourceText": "verbatim excerpt or null" },
+    "curtailment": { "snapshot": "e.g. 'Seller bears' or 'Deemed gen'", "summary": "Economic curtailment — who bears lost revenue, any deemed generation.", "confidence": "high|medium|low", "sourceText": "verbatim excerpt or null" },
+    "nonecocurtail": { "snapshot": "e.g. 'Seller bears' or 'Force majeure'", "summary": "Reliability curtailment — who bears the loss.", "confidence": "high|medium|low", "sourceText": "verbatim excerpt or null" },
+    "invoice": { "snapshot": "e.g. 'Monthly, net-30'", "summary": "Invoice frequency, payment due days, late payment fees.", "confidence": "high|medium|low", "sourceText": "verbatim excerpt or null" },
+    "buyercredit": { "snapshot": "e.g. 'LOC, $5M' or 'Parent guaranty'", "summary": "Buyer credit support — type and amount.", "confidence": "high|medium|low", "sourceText": "verbatim excerpt or null" },
+    "sellercredit": { "snapshot": "e.g. 'Sponsor guaranty' or 'SPV only'", "summary": "Seller credit support pre- and post-COD.", "confidence": "high|medium|low", "sourceText": "verbatim excerpt or null" }
   }
 }`;
 
