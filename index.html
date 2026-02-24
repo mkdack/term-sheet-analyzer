@@ -778,7 +778,51 @@
     animation: scanPulse 1.2s ease-in-out infinite !important;
   }
 
-  .add-term-btn {
+  .custom-term-score-btn {
+    padding: 5px 12px;
+    border-radius: 6px;
+    border: none;
+    background: var(--text);
+    color: var(--bg);
+    font-family: var(--body);
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity var(--dur-fast) var(--ease-out-quart);
+  }
+  .custom-term-score-btn:hover { opacity: 0.8; }
+  .custom-term-score-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .custom-term-result {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+  .custom-result-snapshot {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .custom-result-snap-text {
+    font-family: var(--body);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .custom-result-summary {
+    font-size: 12px;
+    color: var(--text-dim);
+    line-height: 1.55;
+  }
+  .custom-result-loading {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-style: italic;
+  }
+  .custom-result-error {
+    font-size: 12px;
+    color: var(--red);
+  }
     margin-top: 10px;
     padding: 8px 16px;
     background: none;
@@ -840,7 +884,7 @@
     font-weight: 400;
   }
   .custom-term-body-input::placeholder { color: var(--text-muted); opacity: 0.4; font-style: italic; }
-  .custom-term-footer { display: flex; justify-content: flex-end; }
+  .custom-term-footer { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
   .custom-term-remove {
     font-size: 11px;
     color: var(--text-muted);
@@ -1853,16 +1897,92 @@ function addCustomTerm() {
   card.className = 'custom-term-card';
   card.id = `custom-term-${id}`;
   card.innerHTML = `
-    <input class="custom-term-label-input" placeholder="Term label" maxlength="60"
+    <input class="custom-term-label-input" placeholder="Term label (optional)" maxlength="60"
            oninput="updateCustomTermCount()" />
     <div class="custom-term-divider"></div>
-    <textarea class="custom-term-body-input" placeholder="Paste or type term details here..."
-              rows="3" oninput="autoResizeTextarea(this)"></textarea>
+    <textarea class="custom-term-body-input" placeholder="Paste the raw term sheet language here..."
+              rows="4" oninput="autoResizeTextarea(this)"></textarea>
     <div class="custom-term-footer">
+      <button class="custom-term-score-btn" onclick="extractAndScoreCustomTerm(${id})">Extract & Score</button>
       <button class="custom-term-remove" onclick="removeCustomTerm(${id})">Remove</button>
-    </div>`;
+    </div>
+    <div class="custom-term-result" id="custom-result-${id}" style="display:none;"></div>`;
   grid.appendChild(card);
   updateCustomTermCount();
+}
+
+async function extractAndScoreCustomTerm(id) {
+  const card = document.getElementById(`custom-term-${id}`);
+  const label = card.querySelector('.custom-term-label-input').value.trim();
+  const text  = card.querySelector('.custom-term-body-input').value.trim();
+  const resultEl = document.getElementById(`custom-result-${id}`);
+  const btn = card.querySelector('.custom-term-score-btn');
+
+  if (!text || text.length < 20) {
+    resultEl.style.display = 'block';
+    resultEl.innerHTML = `<div class="custom-result-error">Paste some term text first.</div>`;
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Analyzing...';
+  resultEl.style.display = 'block';
+  resultEl.innerHTML = `<div class="custom-result-loading">Reading term...</div>`;
+
+  // Build deal context string for better scoring
+  const dealContext = extractedData?.deal
+    ? `ISO: ${extractedData.deal.iso || 'unknown'}, Technology: ${extractedData.deal.technology || 'unknown'}, Strike: ${extractedData.deal.strikePrice ? '$' + extractedData.deal.strikePrice + '/MWh' : 'unknown'}`
+    : null;
+
+  try {
+    const res = await fetch('/api/extract-custom', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ label, text, dealContext })
+    });
+    const data = await res.json();
+    if (!res.ok || !data.ok) throw new Error(data.message || data.error || 'Failed');
+
+    // Update label input if AI cleaned it up and user left it blank
+    if (!label && data.label) {
+      card.querySelector('.custom-term-label-input').value = data.label;
+      updateCustomTermCount();
+    }
+
+    // Determine score badge class
+    const scoreClsMap = {
+      'Favorable': 'score-favorable',
+      'Mostly Favorable': 'score-mostly-favorable',
+      'Market': 'score-market',
+      'Unfavorable': 'score-unfavorable',
+      'Highly Unfavorable': 'score-bad'
+    };
+    const scoreCls = scoreClsMap[data.scoreLabel] || 'score-market';
+
+    resultEl.innerHTML = `
+      <div class="custom-result-snapshot">
+        <span class="custom-result-snap-text">${escHtml(data.snapshot || '')}</span>
+        <span class="score-badge ${scoreCls}" style="margin-left:auto;">${escHtml(data.scoreLabel)} · ${data.score}/100</span>
+      </div>
+      <div class="custom-result-summary">${escHtml(data.summary || '')}</div>
+      ${data.flag ? `<div class="score-flag" style="margin-top:8px;">⚑ ${escHtml(data.flag)}</div>` : ''}`;
+
+    btn.textContent = 'Re-score';
+    btn.disabled = false;
+
+    // Store result on card for list view
+    card.dataset.snapshot  = data.snapshot || '';
+    card.dataset.summary   = data.summary  || '';
+    card.dataset.score     = data.score;
+    card.dataset.scoreLabel = data.scoreLabel;
+    card.dataset.scoreCls  = scoreCls;
+    card.dataset.flag      = data.flag || '';
+
+  } catch (err) {
+    resultEl.innerHTML = `<div class="custom-result-error">Failed: ${escHtml(err.message)}</div>`;
+    btn.textContent = 'Extract & Score';
+    btn.disabled = false;
+  }
 }
 
 function removeCustomTerm(id) {
