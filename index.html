@@ -1116,8 +1116,7 @@
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
-    margin-top: 16px;
-    margin-bottom: 28px;
+    margin-bottom: 16px;
     position: sticky;
     top: 70px;
     z-index: 50;
@@ -1276,10 +1275,7 @@
   <!-- RESULTS -->
   <div id="results">
 
-    <!-- Deal header -->
-    <div class="deal-header" id="dealHeader"></div>
-
-    <!-- Engine 2 bar — right under deal header -->
+    <!-- Engine 2 bar — above deal header -->
     <div class="proceed-bar visible" id="proceedBar">
       <div>
         <div class="proceed-text">Extraction complete</div>
@@ -1289,6 +1285,9 @@
         <button class="proceed-btn" id="scoreBtn" onclick="runEngine2()">Score Terms →</button>
       </div>
     </div>
+
+    <!-- Deal header -->
+    <div class="deal-header" id="dealHeader"></div>
 
     <!-- Notices: missing, low-confidence, chunk info -->
     <div class="notices-stack" id="missingNotice"></div>
