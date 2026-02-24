@@ -2509,6 +2509,7 @@ function renderListView(terms, missing, scores, termFlags) {
       const termData   = terms[key];
       const summary    = termData?.summary || null;
       const snapshot   = termData?.snapshot || null;
+      const sourceText = termData?.sourceText || null;
       const isMissing  = !summary || missing.includes(key);
 
       const e2key = TERM_KEY_MAP[key];
@@ -2540,6 +2541,11 @@ function renderListView(terms, missing, scores, termFlags) {
             <div class="list-row-snapshot">${isMissing ? 'Not addressed' : escHtml(snapshot || '—')}</div>
             <div class="list-row-summary">${isMissing ? '' : escHtml(summary || '')}</div>
             ${flagHtml}
+            ${!isMissing && sourceText ? `
+            <div class="term-source-block">
+              <div class="term-source-label">📄 Source text</div>
+              <blockquote class="term-source-quote">${escHtml(sourceText)}</blockquote>
+            </div>` : ''}
           </div>
           <div class="list-row-score">${scoreBadge}</div>
         </div>
