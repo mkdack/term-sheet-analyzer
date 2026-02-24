@@ -1551,7 +1551,80 @@
   .weight-input { width:42px; padding:3px 5px; background:var(--surface); border:1px solid var(--border); border-radius:4px; font-family:var(--mono); font-size:11px; color:var(--text); text-align:center; }
   .weight-input:focus { outline:none; border-color:var(--text-muted); }
   .weight-input.mod { border-color:var(--gold); color:var(--gold); }
+  /* ── KNOWLEDGE BASE PAGE ──────────────────────────────────── */
+  .kb-hero { padding: 48px 0 32px; }
+  .kb-hero h1 { font-family: var(--display); font-size: clamp(36px,5vw,56px); font-weight: 800; letter-spacing: -0.03em; color: var(--text); margin: 0 0 8px; }
+  .kb-hero p  { font-family: var(--body); font-size: 14px; color: var(--text-dim); margin: 0; }
+
+  .kb-toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; flex-wrap: wrap; }
+  .kb-search { flex: 1; min-width: 200px; padding: 8px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; font-family: var(--body); font-size: 13px; color: var(--text); outline: none; }
+  .kb-search:focus { border-color: var(--border-strong); }
+  .kb-search::placeholder { color: var(--text-muted); }
+  .kb-filter-btn { padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border); background: transparent; font-family: var(--mono); font-size: 10px; letter-spacing: .06em; text-transform: uppercase; color: var(--text-muted); cursor: pointer; transition: all var(--dur-fast) var(--ease-out-quart); white-space: nowrap; }
+  .kb-filter-btn:hover { color: var(--text); border-color: var(--border-strong); }
+  .kb-filter-btn.active { background: var(--text); color: var(--bg); border-color: var(--text); }
+  .kb-filter-btn.tier-economics.active { background: var(--gold); border-color: var(--gold); color: #000; }
+  .kb-filter-btn.tier-risk.active      { background: var(--amber); border-color: var(--amber); color: #000; }
+  .kb-count { font-family: var(--mono); font-size: 10px; letter-spacing: .06em; color: var(--text-muted); margin-left: auto; white-space: nowrap; }
+
+  .kb-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 12px; }
+
+  .kb-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; transition: border-color var(--dur-fast) var(--ease-out-quart); cursor: pointer; }
+  .kb-card:hover { border-color: var(--border-strong); }
+  .kb-card.expanded { border-color: var(--border-strong); }
+
+  .kb-card-header { padding: 16px 18px; display: flex; align-items: flex-start; gap: 10px; }
+  .kb-card-meta { flex: 1; min-width: 0; }
+  .kb-card-title { font-family: var(--body); font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .kb-card-concept-preview { font-family: var(--body); font-size: 11px; color: var(--text-muted); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .kb-card-badges { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+  .kb-tier-badge { padding: 2px 7px; border-radius: 4px; font-family: var(--mono); font-size: 8px; letter-spacing: .08em; text-transform: uppercase; font-weight: 600; white-space: nowrap; }
+  .kb-tier-badge.tier-economics { background: oklch(75% 0.12 75 / 0.15); color: var(--gold); }
+  .kb-tier-badge.tier-risk      { background: oklch(75% 0.14 55 / 0.15); color: var(--amber); }
+  .kb-tier-badge.tier-admin     { background: var(--surface2); color: var(--text-dim); }
+  .kb-weight-badge { font-family: var(--mono); font-size: 8px; color: var(--text-muted); }
+  .kb-expand-icon { font-size: 11px; color: var(--text-muted); padding-top: 2px; flex-shrink: 0; transition: transform var(--dur-fast) var(--ease-out-quart); }
+  .kb-card.expanded .kb-expand-icon { transform: rotate(90deg); }
+
+  .kb-card-body { display: none; padding: 0 18px 18px; border-top: 1px solid var(--border); }
+  .kb-card.expanded .kb-card-body { display: block; }
+
+  .kb-section { margin-top: 16px; }
+  .kb-section-label { font-family: var(--mono); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; }
+  .kb-concept-text { font-family: var(--body); font-size: 12px; color: var(--text-dim); line-height: 1.65; }
+  .kb-why-text { font-family: var(--body); font-size: 12px; color: var(--text-dim); line-height: 1.65; }
+
+  .kb-scoring-table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 4px; }
+  .kb-scoring-table th { font-family: var(--mono); font-size: 8px; letter-spacing: .07em; text-transform: uppercase; color: var(--text-muted); padding: 5px 8px; border-bottom: 1px solid var(--border); text-align: left; }
+  .kb-scoring-table td { padding: 7px 8px; border-bottom: 1px solid var(--border); vertical-align: top; color: var(--text-dim); font-family: var(--body); line-height: 1.5; }
+  .kb-scoring-table tr:last-child td { border-bottom: none; }
+  .kb-scoring-table td:first-child { white-space: nowrap; font-weight: 500; color: var(--text); width: 160px; }
+  .kb-score-pill { display: inline-block; padding: 1px 6px; border-radius: 4px; font-family: var(--mono); font-size: 9px; font-weight: 600; letter-spacing: .04em; margin-left: 6px; vertical-align: middle; }
+
+  .kb-watch-list { list-style: none; padding: 0; margin: 0; }
+  .kb-watch-list li { font-family: var(--body); font-size: 11px; color: var(--text-dim); line-height: 1.5; padding: 4px 0 4px 16px; position: relative; border-bottom: 1px solid var(--border); }
+  .kb-watch-list li:last-child { border-bottom: none; }
+  .kb-watch-list li::before { content: "⚠"; position: absolute; left: 0; font-size: 9px; color: var(--amber); top: 5px; }
+
+  .kb-example-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px; }
+  .kb-example-box { padding: 10px 12px; border-radius: 6px; }
+  .kb-example-box.favorable { background: oklch(72% 0.15 145 / 0.08); border: 1px solid oklch(72% 0.15 145 / 0.2); }
+  .kb-example-box.unfavorable { background: oklch(65% 0.2 25 / 0.08); border: 1px solid oklch(65% 0.2 25 / 0.2); }
+  .kb-example-label { font-family: var(--mono); font-size: 8px; letter-spacing: .08em; text-transform: uppercase; font-weight: 700; margin-bottom: 6px; }
+  .kb-example-box.favorable .kb-example-label { color: oklch(72% 0.15 145); }
+  .kb-example-box.unfavorable .kb-example-label { color: oklch(65% 0.2 25); }
+  .kb-example-text { font-family: var(--mono); font-size: 10px; color: var(--text-dim); line-height: 1.55; font-style: italic; }
+
+  .kb-no-results { text-align: center; padding: 60px 20px; color: var(--text-muted); font-family: var(--body); font-size: 13px; }
+
+  /* ── INLINE RATIONALE on score cards ─────────────────────────── */
+  .term-rationale { margin-top: 8px; padding: 8px 10px; background: var(--bg2); border-radius: 6px; border-left: 2px solid var(--border-strong); }
+  .term-rationale-text { font-family: var(--body); font-size: 10px; color: var(--text-dim); line-height: 1.55; }
+  .term-rationale-link { display: inline-block; margin-top: 4px; font-family: var(--mono); font-size: 9px; letter-spacing: .06em; text-transform: uppercase; color: var(--text-muted); cursor: pointer; }
+  .term-rationale-link:hover { color: var(--text); }
+
 </style>
+<script src="knowledge-base.js"></script>
 </head>
 <body>
 
@@ -1561,6 +1634,7 @@
     <nav class="main-nav">
       <button class="nav-btn active" id="navAnalyzer" onclick="switchPage('analyzer')">Analyzer</button>
       <button class="nav-btn" id="navModel" onclick="switchPage('model')">Scoring Model</button>
+      <button class="nav-btn" id="navKB" onclick="switchPage('kb')">Knowledge Base</button>
     </nav>
     <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">
       <div class="toggle-dot" id="toggleDot">◑</div>
@@ -2173,6 +2247,7 @@ function renderTermCategories(terms, missing, lowConfidence = []) {
             <div class="term-detail-inner">
               <div class="term-detail-divider"></div>
               <div class="term-summary">${escHtml(summary)}</div>
+              ${buildInlineRationale(key, termData)}
             </div>
           </div>` : ''}
         </div>
@@ -2964,15 +3039,21 @@ function applyFilters() {
 </div>
 
 
+<div class="main" id="pageKB" style="display:none;"></div>
+
+
 
 <script>
 // ── PAGE SWITCHING ────────────────────────────────────────────
 function switchPage(page) {
   document.getElementById('pageAnalyzer').style.display = page==='analyzer' ? 'block' : 'none';
   document.getElementById('pageModel').style.display    = page==='model'    ? 'block' : 'none';
+  document.getElementById('pageKB').style.display       = page==='kb'       ? 'block' : 'none';
   document.getElementById('navAnalyzer').classList.toggle('active', page==='analyzer');
   document.getElementById('navModel').classList.toggle('active', page==='model');
+  document.getElementById('navKB').classList.toggle('active', page==='kb');
   if (page==='model') renderModelPage();
+  if (page==='kb') renderKBPage();
 }
 
 // ── PERSISTENCE ───────────────────────────────────────────────
@@ -3330,6 +3411,228 @@ function renderModelPage() {
     {buyer_right:'Buyer termination right',mutual:'Mutual right',none:'No right',not_specified:'Not specified'});
 
   weightsEd();
+}
+
+
+// ══════════════════════════════════════════════════════════════
+// KNOWLEDGE BASE — PAGE + INLINE RATIONALE
+// ══════════════════════════════════════════════════════════════
+
+// Score pill helper
+function scorePill(score) {
+  const n = parseInt(score);
+  const isRange = typeof score === 'string' && score.includes('–');
+  let cls = 'score-band-neutral';
+  if (!isRange) {
+    if (n <= 30)      cls = 'score-band-favorable';
+    else if (n <= 55) cls = 'score-band-mostly-favorable';
+    else if (n <= 70) cls = 'score-band-unfavorable';
+    else              cls = 'score-band-highly-unfavorable';
+  }
+  return `<span class="kb-score-pill ${cls}">${score}</span>`;
+}
+
+// ── INLINE RATIONALE ──────────────────────────────────────────
+// Called from term card render; returns HTML string or ''
+function buildInlineRationale(e1key, termData) {
+  if (!window.KB) return '';
+  // map e1key → e2key via TERM_KEY_MAP
+  const e2key = (typeof TERM_KEY_MAP !== 'undefined' && TERM_KEY_MAP[e1key]) || e1key;
+  const entry = window.KB[e2key];
+  if (!entry) return '';
+
+  // Pick the most relevant scoring row based on the extracted value
+  const rationale = pickRationale(entry, termData);
+  if (!rationale) return '';
+
+  return `<div class="term-rationale">
+    <div class="term-rationale-text">${rationale}</div>
+    <span class="term-rationale-link" onclick="event.stopPropagation();switchPage('kb');setTimeout(()=>openKBCard('${e2key}'),80)">
+      → Full explanation in Knowledge Base
+    </span>
+  </div>`;
+}
+
+// Pick the best scoring rationale for the extracted value
+function pickRationale(entry, termData) {
+  if (!entry.scoring || !entry.scoring.length) return null;
+  const score = termData && termData.score;
+  if (score == null) return null;
+
+  // Find scoring row whose score range contains the actual score
+  let best = null;
+  let bestDist = Infinity;
+  for (const row of entry.scoring) {
+    const rowScore = parseRowScore(row.score);
+    if (rowScore === null) continue;
+    const dist = Math.abs(rowScore - score);
+    if (dist < bestDist) { bestDist = dist; best = row; }
+  }
+  return best ? `<strong>${best.label}:</strong> ${best.rationale}` : null;
+}
+
+function parseRowScore(s) {
+  if (typeof s === 'number') return s;
+  if (typeof s === 'string') {
+    if (s.includes('–')) {
+      const parts = s.split('–').map(x => parseInt(x.trim()));
+      return (parts[0] + parts[1]) / 2;
+    }
+    return parseInt(s) || null;
+  }
+  return null;
+}
+
+// ── KB PAGE ───────────────────────────────────────────────────
+let kbFilter = 'all';
+let kbSearch = '';
+let kbRendered = false;
+
+function renderKBPage() {
+  const el = document.getElementById('pageKB');
+  if (!el) return;
+  if (!window.KB) {
+    el.innerHTML = '<div class="main"><p style="color:var(--text-muted);padding:40px">Knowledge Base loading…</p></div>';
+    return;
+  }
+
+  el.innerHTML = `
+    <div class="kb-hero">
+      <h1>Knowledge Base</h1>
+      <p>Plain-English guide to every VPPA/PPA term — what it is, why it matters, how it's scored, and what to watch for.</p>
+    </div>
+    <div class="kb-toolbar">
+      <input class="kb-search" type="search" placeholder="Search terms…" id="kbSearchInput"
+        oninput="kbSearch=this.value;renderKBCards()" autocomplete="off">
+      <button class="kb-filter-btn active" id="kbAll"        onclick="setKBFilter('all')">All Terms</button>
+      <button class="kb-filter-btn tier-economics" id="kbEcon" onclick="setKBFilter('economics')">Deal Economics</button>
+      <button class="kb-filter-btn tier-risk"      id="kbRisk" onclick="setKBFilter('risk')">Project Risk</button>
+      <button class="kb-filter-btn tier-admin"     id="kbAdmin" onclick="setKBFilter('admin')">Legal & Admin</button>
+      <span class="kb-count" id="kbCount"></span>
+    </div>
+    <div class="kb-grid" id="kbGrid"></div>
+  `;
+  renderKBCards();
+}
+
+function setKBFilter(f) {
+  kbFilter = f;
+  ['All','Econ','Risk','Admin'].forEach(id => {
+    const btn = document.getElementById('kb'+id);
+    if (btn) btn.classList.remove('active');
+  });
+  const map = {all:'kbAll',economics:'kbEcon',risk:'kbRisk',admin:'kbAdmin'};
+  const btn = document.getElementById(map[f]);
+  if (btn) btn.classList.add('active');
+  renderKBCards();
+}
+
+function renderKBCards() {
+  const grid = document.getElementById('kbGrid');
+  const countEl = document.getElementById('kbCount');
+  if (!grid || !window.KB) return;
+
+  const query = kbSearch.toLowerCase().trim();
+  const entries = Object.values(window.KB).filter(e => {
+    if (kbFilter !== 'all' && e.tier !== kbFilter) return false;
+    if (!query) return true;
+    return e.title.toLowerCase().includes(query) ||
+           e.concept.toLowerCase().includes(query) ||
+           e.whyMatters.toLowerCase().includes(query) ||
+           (e.watchFor || []).some(w => w.toLowerCase().includes(query));
+  });
+
+  // Sort: economics → risk → admin, then alphabetical
+  const tierOrder = {economics:0, risk:1, admin:2};
+  entries.sort((a,b) => {
+    const td = (tierOrder[a.tier]||2) - (tierOrder[b.tier]||2);
+    return td !== 0 ? td : a.title.localeCompare(b.title);
+  });
+
+  if (countEl) countEl.textContent = `${entries.length} term${entries.length!==1?'s':''}`;
+
+  if (!entries.length) {
+    grid.innerHTML = `<div class="kb-no-results">No terms match "${escHtml(kbSearch)}"</div>`;
+    return;
+  }
+
+  grid.innerHTML = entries.map(e => buildKBCard(e)).join('');
+}
+
+function buildKBCard(e) {
+  const scoringRows = (e.scoring||[]).map(row =>
+    `<tr>
+      <td>${escHtml(row.label)}${scorePill(row.score)}</td>
+      <td>${escHtml(row.rationale)}</td>
+    </tr>`
+  ).join('');
+
+  const watchItems = (e.watchFor||[]).map(w =>
+    `<li>${escHtml(w)}</li>`
+  ).join('');
+
+  const hasExamples = e.favorable || e.unfavorable;
+
+  return `<div class="kb-card" id="kb-card-${e.id}" onclick="toggleKBCard('${e.id}')">
+    <div class="kb-card-header">
+      <div class="kb-card-meta">
+        <div class="kb-card-title">${escHtml(e.title)}</div>
+        <div class="kb-card-concept-preview">${escHtml(e.concept)}</div>
+      </div>
+      <div class="kb-card-badges">
+        <span class="kb-tier-badge tier-${e.tier}">${e.tier==='economics'?'T1 Economics':e.tier==='risk'?'T2 Risk':'T3 Admin'}</span>
+        <span class="kb-weight-badge">${'★'.repeat(e.weight||1)}</span>
+      </div>
+      <div class="kb-expand-icon">▶</div>
+    </div>
+    <div class="kb-card-body">
+      <div class="kb-section">
+        <div class="kb-section-label">What it is</div>
+        <div class="kb-concept-text">${escHtml(e.concept)}</div>
+      </div>
+      <div class="kb-section">
+        <div class="kb-section-label">Why it matters</div>
+        <div class="kb-why-text">${escHtml(e.whyMatters)}</div>
+      </div>
+      ${scoringRows ? `<div class="kb-section">
+        <div class="kb-section-label">How it's scored</div>
+        <table class="kb-scoring-table">
+          <thead><tr><th>Scenario</th><th>Rationale</th></tr></thead>
+          <tbody>${scoringRows}</tbody>
+        </table>
+      </div>` : ''}
+      ${watchItems ? `<div class="kb-section">
+        <div class="kb-section-label">What to watch for</div>
+        <ul class="kb-watch-list">${watchItems}</ul>
+      </div>` : ''}
+      ${hasExamples ? `<div class="kb-section">
+        <div class="kb-section-label">Example contract language</div>
+        <div class="kb-example-grid">
+          ${e.favorable ? `<div class="kb-example-box favorable">
+            <div class="kb-example-label">✓ Buyer-Favorable</div>
+            <div class="kb-example-text">${escHtml(e.favorable)}</div>
+          </div>` : ''}
+          ${e.unfavorable ? `<div class="kb-example-box unfavorable">
+            <div class="kb-example-label">✗ Buyer-Unfavorable</div>
+            <div class="kb-example-text">${escHtml(e.unfavorable)}</div>
+          </div>` : ''}
+        </div>
+      </div>` : ''}
+    </div>
+  </div>`;
+}
+
+function toggleKBCard(id) {
+  const card = document.getElementById('kb-card-'+id);
+  if (card) card.classList.toggle('expanded');
+}
+
+function openKBCard(id) {
+  // scroll to and open a specific KB card
+  const card = document.getElementById('kb-card-'+id);
+  if (!card) { renderKBCards(); setTimeout(()=>openKBCard(id),50); return; }
+  card.classList.add('expanded');
+  card.scrollIntoView({ behavior:'smooth', block:'center' });
 }
 
 window.addEventListener('load', ()=>{ loadSavedModel(); updateModelStatus(); });
