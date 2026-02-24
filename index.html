@@ -7,67 +7,76 @@
 <title>Term Sheet Analyzer</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Instrument+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   /* ── RESET & ROOT ── */
   :root {
-    --bg:           #0e0e0e;
-    --bg2:          #141414;
-    --surface:      #202020;
-    --surface2:     #282828;
-    --border:       rgba(255,255,255,0.09);
-    --border-strong:rgba(255,255,255,0.16);
-    --text:         #f0f0f0;
-    --text-dim:     #c0c0c0;
-    --text-muted:   #606060;
-    --accent:       #ffffff;
-    --accent-dim:   rgba(255,255,255,0.06);
-    --gold:         #e8b84a;
-    --red:          #f07070;
-    --red-dim:      rgba(240,112,112,0.13);
-    --green:        #5ed49a;
-    --green-dim:    rgba(94,212,154,0.13);
-    --amber:        #f0c050;
-    --amber-dim:    rgba(240,192,80,0.12);
+    /* OKLCH-based palette — tinted toward cool blue-slate */
+    --bg:           oklch(11% 0.008 250);
+    --bg2:          oklch(13% 0.008 250);
+    --surface:      oklch(17% 0.008 250);
+    --surface2:     oklch(20% 0.008 250);
+    --border:       oklch(100% 0 0 / 0.08);
+    --border-strong:oklch(100% 0 0 / 0.15);
+    --text:         oklch(93% 0.005 250);
+    --text-dim:     oklch(72% 0.006 250);
+    --text-muted:   oklch(45% 0.006 250);
+    --accent:       oklch(93% 0.005 250);
+    --accent-dim:   oklch(100% 0 0 / 0.05);
+    --gold:         oklch(75% 0.12 75);
+    --red:          oklch(66% 0.18 22);
+    --red-dim:      oklch(66% 0.18 22 / 0.12);
+    --green:        oklch(72% 0.15 155);
+    --green-dim:    oklch(72% 0.15 155 / 0.12);
+    --amber:        oklch(78% 0.14 85);
+    --amber-dim:    oklch(78% 0.14 85 / 0.12);
     --radius:       10px;
     --radius-lg:    16px;
+    /* Fonts: distinctive pairing, no Inter */
     --mono:         'JetBrains Mono', monospace;
     --display:      'Syne', sans-serif;
-    --body:         'Inter', sans-serif;
+    --body:         'Instrument Sans', sans-serif;
+    /* Motion tokens */
+    --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+    --ease-out-expo:  cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-in-out:    cubic-bezier(0.65, 0, 0.35, 1);
+    --dur-fast:   150ms;
+    --dur-mid:    250ms;
+    --dur-slow:   400ms;
   }
 
   /* ── LIGHT THEME — Orbai white ── */
   [data-theme="light"] {
-    --bg:            #e8e8e8;
-    --bg2:           #e0e0e0;
-    --surface:       #ffffff;
-    --surface2:      #f5f5f5;
-    --border:        rgba(0,0,0,0.08);
-    --border-strong: rgba(0,0,0,0.15);
-    --text:          #1a1a1a;
-    --text-dim:      #4a4a4a;
-    --text-muted:    #909090;
-    --accent:        #1a1a1a;
-    --accent-dim:    rgba(0,0,0,0.04);
-    --gold:          #8a5f00;
-    --red:           #b83030;
-    --red-dim:       rgba(184,48,48,0.08);
-    --green:         #1a5c34;
-    --green-dim:     rgba(26,92,52,0.08);
-    --amber:         #835500;
-    --amber-dim:     rgba(131,85,0,0.08);
+    --bg:            oklch(90% 0.006 250);
+    --bg2:           oklch(87% 0.006 250);
+    --surface:       oklch(99% 0.003 250);
+    --surface2:      oklch(95% 0.005 250);
+    --border:        oklch(0% 0 0 / 0.07);
+    --border-strong: oklch(0% 0 0 / 0.14);
+    --text:          oklch(18% 0.008 250);
+    --text-dim:      oklch(38% 0.008 250);
+    --text-muted:    oklch(60% 0.006 250);
+    --accent:        oklch(18% 0.008 250);
+    --accent-dim:    oklch(0% 0 0 / 0.04);
+    --gold:          oklch(52% 0.13 70);
+    --red:           oklch(45% 0.17 22);
+    --red-dim:       oklch(45% 0.17 22 / 0.08);
+    --green:         oklch(38% 0.13 155);
+    --green-dim:     oklch(38% 0.13 155 / 0.08);
+    --amber:         oklch(55% 0.13 75);
+    --amber-dim:     oklch(55% 0.13 75 / 0.08);
   }
 
-  [data-theme="light"] body { background: #e8e8e8; }
+  [data-theme="light"] body { background: oklch(90% 0.006 250); }
   [data-theme="light"] body::before { display: none; }
 
   [data-theme="light"] header {
-    background: rgba(232,232,232,0.92);
-    border-bottom: 1px solid rgba(0,0,0,0.08);
+    background: oklch(90% 0.006 250 / 0.92);
+    border-bottom: 1px solid oklch(0% 0 0 / 0.08);
   }
 
-  [data-theme="light"] .page-title { color: #1a1a1a; font-size: 44px; }
-  [data-theme="light"] .page-sub { color: #666; font-size: 15px; }
+  [data-theme="light"] .page-title { color: oklch(18% 0.008 250); font-size: 44px; }
+  [data-theme="light"] .page-sub { color: oklch(45% 0.007 250); font-size: 15px; }
 
   /* White floating cards */
   [data-theme="light"] .upload-section,
@@ -740,7 +749,7 @@
     font-weight: 600;
     letter-spacing: 0.04em;
     text-transform: uppercase;
-    font-family: var(--mono);
+    font-family: var(--body);
     white-space: nowrap;
     margin-left: 6px;
   }
@@ -1138,6 +1147,46 @@
     color: var(--text-muted);
     letter-spacing: 0.1em;
     text-transform: uppercase;
+  }
+
+  /* ── MOTION UPGRADES — proper easing throughout ── */
+  .term-detail {
+    transition: grid-template-rows var(--dur-mid) var(--ease-out-quart);
+  }
+  .clickable-card .term-name-row::after {
+    transition: transform var(--dur-mid) var(--ease-out-quart);
+  }
+  .tab-btn, .view-btn, .proceed-btn, .analyze-btn, .theme-toggle {
+    transition: background var(--dur-fast) var(--ease-out-quart),
+                color var(--dur-fast) var(--ease-out-quart),
+                border-color var(--dur-fast) var(--ease-out-quart),
+                opacity var(--dur-fast) var(--ease-out-quart);
+  }
+  .term-card {
+    transition: border-color var(--dur-fast) var(--ease-out-quart),
+                background var(--dur-fast) var(--ease-out-quart);
+  }
+  .list-row {
+    transition: background var(--dur-fast) var(--ease-out-quart);
+  }
+
+  /* ── BODY TEXT — use Instrument Sans, not mono ── */
+  .term-summary, .proceed-sub, .page-sub, .notice-text,
+  .list-row-summary, .list-row-snapshot, .score-flag,
+  .deal-row-value, .custom-term-textarea, .dropzone-hint {
+    font-family: var(--body);
+  }
+
+  /* ── REDUCED MOTION ── */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+    .status-dot.processing {
+      animation: none !important;
+      opacity: 0.7;
+    }
   }
 </style>
 </head>
