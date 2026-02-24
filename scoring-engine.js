@@ -42,165 +42,92 @@ const STRIKE_THRESHOLDS = {
   ISONE:    { Solar: { bf_low:63, bf_high:70, mkt_low:75, mkt_high:85, sf_low:85, sf_high:95, rf_high:114 } },
   NYISO:  { Solar: { bf_low:58, bf_high:65, mkt_low:70, mkt_high:80, sf_low:80, sf_high:90,  rf_high:108 } },
 };
-// ─────────────────────────────────────────────────────────────────────────────
-// SCORING CONFIG — all configurable parameters in one place
-// Override by calling ScoringEngine.setConfig(overrides) before scoreAll()
-// ─────────────────────────────────────────────────────────────────────────────
 
+// ─── SCORING CONFIG ───────────────────────────────────────────────────────────
 const DEFAULT_CONFIG = {
-  // ── TERM WEIGHTS ──────────────────────────────────────────────
   weights: {
-    strike: 4, basis: 4, negprice: 4, eterm: 4, floating: 4,
-    delay: 2, curtailment: 2, availmech: 2, availguaranteed: 2,
-    ia: 2, cod: 2, fm: 2, changeinlaw: 2, cp: 2,
-    nonecocurtail: 2, basiscurtail: 2, permit: 2, marketdisrupt: 2,
-    sellerpa: 1, buyerpa: 1, assign: 1, eod: 1, recs: 1,
-    incentives: 1, interval: 1, invoice: 1, reputation: 1,
-    product: 1, govlaw: 1, conf: 1, excl: 1, expenses: 1,
-    acct: 1, publicity: 1, scheduling: 1,
+    strike:4, basis:4, negprice:4, eterm:4, floating:4,
+    delay:2, curtailment:2, availmech:2, availguaranteed:2, ia:2, cod:2, fm:2,
+    changeinlaw:2, cp:2, nonecocurtail:2, basiscurtail:2, permit:2, marketdisrupt:2,
+    sellerpa:1, buyerpa:1, assign:1, eod:1, recs:1, incentives:1, interval:1,
+    invoice:1, reputation:1, product:1, govlaw:1, conf:1, excl:1, expenses:1,
+    acct:1, publicity:1, scheduling:1,
   },
-
-  // ── STRIKE PRICE THRESHOLDS ($/MWh) ───────────────────────────
   strike: {
-    ERCOT:  {
-      Solar: { bf_low:40, bf_high:45, mkt_low:48, mkt_high:52, sf_low:55, sf_high:60, rf_high:72 },
-      Wind:  { bf_low:45, bf_high:50, mkt_low:52, mkt_high:60, sf_low:60, sf_high:70, rf_high:84 },
-    },
-    CAISO:  {
-      Solar: { bf_low:55, bf_high:62, mkt_low:70, mkt_high:80, sf_low:80, sf_high:90,  rf_high:108 },
-      Wind:  { bf_low:55, bf_high:65, mkt_low:65, mkt_high:75, sf_low:75, sf_high:85,  rf_high:102 },
-    },
-    PJM:    {
-      Solar: { bf_low:73, bf_high:81, mkt_low:85, mkt_high:95, sf_low:95, sf_high:110, rf_high:132 },
-      Wind:  { bf_low:70, bf_high:80, mkt_low:80, mkt_high:92, sf_low:92, sf_high:105, rf_high:126 },
-    },
-    MISO:   {
-      Solar: { bf_low:58, bf_high:65, mkt_low:65, mkt_high:75, sf_low:75, sf_high:85,  rf_high:102 },
-      Wind:  { bf_low:50, bf_high:58, mkt_low:58, mkt_high:68, sf_low:68, sf_high:78,  rf_high:94  },
-    },
-    SPP:    {
-      Solar: { bf_low:48, bf_high:55, mkt_low:55, mkt_high:65, sf_low:65, sf_high:75,  rf_high:90  },
-      Wind:  { bf_low:40, bf_high:48, mkt_low:48, mkt_high:55, sf_low:55, sf_high:65,  rf_high:78  },
-    },
-    'ISO-NE': { Solar: { bf_low:63, bf_high:70, mkt_low:75, mkt_high:85, sf_low:85, sf_high:95, rf_high:114 } },
-    NYISO:  { Solar: { bf_low:58, bf_high:65, mkt_low:70, mkt_high:80, sf_low:80, sf_high:90,  rf_high:108 } },
+    ERCOT:  { Solar:{bf_low:40,bf_high:45,mkt_low:48,mkt_high:52,sf_low:55,sf_high:60,rf_high:72},
+               Wind: {bf_low:45,bf_high:50,mkt_low:52,mkt_high:60,sf_low:60,sf_high:70,rf_high:84} },
+    CAISO:  { Solar:{bf_low:55,bf_high:62,mkt_low:70,mkt_high:80,sf_low:80,sf_high:90,rf_high:108},
+               Wind: {bf_low:55,bf_high:65,mkt_low:65,mkt_high:75,sf_low:75,sf_high:85,rf_high:102} },
+    PJM:    { Solar:{bf_low:73,bf_high:81,mkt_low:85,mkt_high:95,sf_low:95,sf_high:110,rf_high:132},
+               Wind: {bf_low:70,bf_high:80,mkt_low:80,mkt_high:92,sf_low:92,sf_high:105,rf_high:126} },
+    MISO:   { Solar:{bf_low:58,bf_high:65,mkt_low:65,mkt_high:75,sf_low:75,sf_high:85,rf_high:102},
+               Wind: {bf_low:50,bf_high:58,mkt_low:58,mkt_high:68,sf_low:68,sf_high:78,rf_high:94} },
+    SPP:    { Solar:{bf_low:48,bf_high:55,mkt_low:55,mkt_high:65,sf_low:65,sf_high:75,rf_high:90},
+               Wind: {bf_low:40,bf_high:48,mkt_low:48,mkt_high:55,sf_low:55,sf_high:65,rf_high:78} },
+    'ISO-NE':{ Solar:{bf_low:63,bf_high:70,mkt_low:75,mkt_high:85,sf_low:85,sf_high:95,rf_high:114} },
+    ISONE:  { Solar:{bf_low:63,bf_high:70,mkt_low:75,mkt_high:85,sf_low:85,sf_high:95,rf_high:114} },
+    NYISO:  { Solar:{bf_low:58,bf_high:65,mkt_low:70,mkt_high:80,sf_low:80,sf_high:90,rf_high:108} },
   },
-
-  // ── FLOATING / SETTLEMENT POINT ───────────────────────────────
   floating: {
-    hub:           { all_in: 5,  partial: 18, excluded: 35, not_specified: 40 },
-    zonal:         { all_in: 5,  partial: 18, excluded: 35, not_specified: 40 },
-    nodal:         { all_in: 55, partial: 62, excluded: 70, not_specified: 75 },
-    not_specified: { all_in: 80, partial: 80, excluded: 80, not_specified: 80 },
+    hub:          {all_in:5, partial:18, excluded:35, not_specified:40},
+    zonal:        {all_in:5, partial:18, excluded:35, not_specified:40},
+    nodal:        {all_in:55,partial:62, excluded:70, not_specified:75},
+    not_specified:{all_in:80,partial:80, excluded:80, not_specified:80},
   },
-
-  // ── NEGATIVE PRICE ─────────────────────────────────────────────
-  negprice: {
-    zero_floor: 5, seller_curtails: 30, full_passthrough: 70, not_specified: 85,
-  },
-
-  // ── BASIS ──────────────────────────────────────────────────────
-  basis: {
-    seller_bears: 10, shared_collar: 35, buyer_bears: 65, not_specified: 75,
-  },
-
-  // ── CURTAILMENT ────────────────────────────────────────────────
-  curtailment: {
-    seller_bears_deemed: 10, shared: 40, buyer_bears: 65, not_specified: 75,
-  },
-  nonecocurtail: {
-    seller_bears_deemed: 15, shared: 35, buyer_bears: 60, not_specified: 70,
-  },
-  basiscurtail: {
-    seller_bears_deemed: 10, shared: 40, buyer_bears: 70, not_specified: 78,
-  },
-
-  // ── SETTLEMENT INTERVAL ────────────────────────────────────────
-  interval: {
-    iso_native: 5, hourly: 30, monthly: 60, annual: 75, not_specified: 70,
-  },
-
-  // ── INVOICE / PAYMENT ──────────────────────────────────────────
-  invoice: {
-    monthly: 25, quarterly: 40, annual: 60, not_specified: 55,
-  },
-
-  // ── FORCE MAJEURE ──────────────────────────────────────────────
-  fm: {
-    narrow:        { yes: 10, no: 45, not_specified: 30 },
-    standard:      { yes: 25, no: 55, not_specified: 40 },
-    broad:         { yes: 45, no: 75, not_specified: 60 },
-    not_specified: { yes: 35, no: 65, not_specified: 55 },
-  },
-
-  // ── TERMINATION PAYMENT ────────────────────────────────────────
-  eterm: {
-    mark_to_market: { yes: 20, no: 60, not_specified: 45 },
-    fixed_formula:  { yes: 10, no: 50, not_specified: 35 },
-    negotiated:     { yes: 15, no: 55, not_specified: 40 },
-    not_specified:  { yes: 35, no: 75, not_specified: 60 },
-  },
-
-  // ── CHANGE IN LAW ──────────────────────────────────────────────
-  changeinlaw: {
-    buyer:         { automatic: 65, negotiated: 55, none: 75, not_specified: 65 },
-    seller:        { automatic: 10, negotiated: 20, none: 30, not_specified: 25 },
-    shared:        { automatic: 25, negotiated: 30, none: 40, not_specified: 35 },
-    not_specified: { automatic: 45, negotiated: 50, none: 60, not_specified: 55 },
-  },
-
-  // ── INTERCONNECTION ────────────────────────────────────────────
-  ia: {
-    fully_executed: 5, facilities_study_complete: 20,
-    system_impact_complete: 40, feasibility_stage: 55,
-    not_filed: 85, not_specified: 70,
-  },
-
-  // ── CONDITIONS PRECEDENT ───────────────────────────────────────
+  negprice: { zero_floor:5, seller_curtails:30, full_passthrough:70, not_specified:85 },
+  basis:    { seller_bears:10, shared_collar:35, buyer_bears:65, not_specified:75 },
+  curtailment:    { seller_bears_deemed:10, shared:40, buyer_bears:65, not_specified:75 },
+  nonecocurtail:  { seller_bears_deemed:15, shared:35, buyer_bears:60, not_specified:70 },
+  basiscurtail:   { seller_bears_deemed:10, shared:40, buyer_bears:70, not_specified:78 },
+  interval: { iso_native:5, hourly:30, monthly:60, annual:75, not_specified:70 },
+  invoice:  { monthly:25, quarterly:40, annual:60, not_specified:55 },
+  scheduling:{ iso_dispatch:15, seller_schedules:35, buyer_approval:10, not_specified:55 },
+  permit:   { all_obtained:5, major_obtained:18, in_progress:40, not_started:70, not_specified:65 },
+  cod:      { tight_objective:8, moderate:30, loose_substantial:58, not_specified:70 },
+  govlaw:   { NY:5, DE:8, TX:12, CA:15, other:20, not_specified:25 },
+  ia: { fully_executed:5, facilities_study_complete:20, system_impact_complete:35,
+        feasibility_stage:55, not_filed:85, not_specified:70 },
   cp: {
-    seller_base: { 0: 10, 1: 30, 2: 50, 3: 65, 4: 78, 5: 90 },
-    buyer_add:   { 0: 0,  1: 3,  2: 6,  3: 10, 4: 14, 5: 18 },
+    seller_base:{ 0:10, 1:30, 2:50, 3:65, 4:78, 5:90 },
+    buyer_add:  { 0:0,  1:3,  2:6,  3:10, 4:14, 5:18 },
   },
-
-  // ── SCHEDULING ─────────────────────────────────────────────────
-  scheduling: {
-    iso_dispatch: 15, seller_schedules: 35, buyer_approval: 10, not_specified: 55,
+  fm: {
+    narrow:       {yes:10,no:45,not_specified:30},
+    standard:     {yes:25,no:55,not_specified:40},
+    broad:        {yes:45,no:75,not_specified:60},
+    not_specified:{yes:35,no:65,not_specified:55},
   },
-
-  // ── AVAILABILITY MECHANISM ─────────────────────────────────────
-  availmech: {
-    deemed_generation: { yes: 5,  no: 35, not_specified: 20 },
-    liquidated_damages: { yes: 15, no: 55, not_specified: 35 },
-    none:               { yes: 55, no: 80, not_specified: 70 },
-    not_specified:      { yes: 40, no: 70, not_specified: 55 },
+  eterm: {
+    mark_to_market:{yes:20,no:60,not_specified:45},
+    fixed_formula: {yes:10,no:50,not_specified:35},
+    negotiated:    {yes:15,no:55,not_specified:40},
+    not_specified: {yes:35,no:75,not_specified:60},
   },
-
-  // ── PERMITS ────────────────────────────────────────────────────
-  permit: {
-    all_obtained: 5, major_obtained: 18, in_progress: 40,
-    not_started: 70, not_specified: 65,
-  },
-
-  // ── COD DEFINITION ─────────────────────────────────────────────
-  cod: {
-    tight_objective: 8, moderate: 30, loose_substantial: 58, not_specified: 70,
-  },
-
-  // ── GOVERNING LAW ──────────────────────────────────────────────
-  govlaw: {
-    NY: 5, DE: 8, TX: 12, CA: 15, other: 20, not_specified: 25,
-  },
-
-  // ── ASSIGNMENT ─────────────────────────────────────────────────
-  assign: {
-    buyer:  { free: 5,  cnrw: 15, consent_required: 30, no_assignment: 45, not_specified: 25 },
-    seller: { free: 55, cnrw: 20, consent_required: 8,  no_assignment: 5,  not_specified: 30 },
+  changeinlaw: {
+    buyer:        {automatic:65,negotiated:55,none:75,not_specified:65},
+    seller:       {automatic:10,negotiated:20,none:30,not_specified:25},
+    shared:       {automatic:25,negotiated:30,none:40,not_specified:35},
+    not_specified:{automatic:45,negotiated:50,none:60,not_specified:55},
   },
 };
 
-// Live config — starts as defaults, overridden by user
 let CONFIG = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
 
+function setConfig(overrides) {
+  function deepMerge(target, source) {
+    for (const key of Object.keys(source)) {
+      if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
+        if (!target[key]) target[key] = {};
+        deepMerge(target[key], source[key]);
+      } else { target[key] = source[key]; }
+    }
+  }
+  CONFIG = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+  deepMerge(CONFIG, overrides);
+}
+function getConfig()        { return JSON.parse(JSON.stringify(CONFIG)); }
+function getDefaultConfig() { return JSON.parse(JSON.stringify(DEFAULT_CONFIG)); }
+function resetConfig()      { CONFIG = JSON.parse(JSON.stringify(DEFAULT_CONFIG)); }
 
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -296,6 +223,7 @@ function scoreFloating(f) {
 function scoreInterval(f) {
   const BASE = CONFIG.interval;
   const PRICE_MOD = { real_time: 0, day_ahead: 5, not_specified: 10 };
+
   const si = f.settlementInterval || 'not_specified';
   const pr = f.priceReference     || 'not_specified';
   const base = BASE[si] !== undefined ? BASE[si] : 70;
@@ -1636,35 +1564,6 @@ function scoreAll(facts) {
 }
 
 // Export for Node (Netlify functions) and browser
-// Config management
-function setConfig(overrides) {
-  // Deep merge overrides into CONFIG
-  function deepMerge(target, source) {
-    for (const key of Object.keys(source)) {
-      if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
-        if (!target[key]) target[key] = {};
-        deepMerge(target[key], source[key]);
-      } else {
-        target[key] = source[key];
-      }
-    }
-  }
-  CONFIG = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
-  deepMerge(CONFIG, overrides);
-}
-
-function getConfig() {
-  return JSON.parse(JSON.stringify(CONFIG));
-}
-
-function getDefaultConfig() {
-  return JSON.parse(JSON.stringify(DEFAULT_CONFIG));
-}
-
-function resetConfig() {
-  CONFIG = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
-}
-
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = { scoreAll, scoreStrike, setConfig, getConfig, getDefaultConfig, resetConfig, DEFAULT_CONFIG };
 } else {

@@ -824,319 +824,6 @@
     color: var(--red);
   }
 
-  /* ── NAV ── */
-  .main-nav {
-    display: flex;
-    gap: 2px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 3px;
-  }
-  .nav-btn {
-    padding: 5px 14px;
-    border-radius: 6px;
-    border: none;
-    background: transparent;
-    font-family: var(--body);
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--text-muted);
-    cursor: pointer;
-    transition: all var(--dur-fast) var(--ease-out-quart);
-  }
-  .nav-btn:hover { color: var(--text); }
-  .nav-btn.active {
-    background: var(--text);
-    color: var(--bg);
-  }
-
-  /* ── SCORING MODEL PAGE ── */
-  .model-toolbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 20px;
-    padding: 12px 16px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-  }
-  .model-status {
-    font-family: var(--mono);
-    font-size: 10px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-  }
-  .model-status.modified { color: var(--gold); }
-  .model-btn-primary {
-    padding: 6px 14px;
-    background: var(--text);
-    color: var(--bg);
-    border: none;
-    border-radius: 6px;
-    font-family: var(--body);
-    font-size: 11px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: opacity var(--dur-fast) var(--ease-out-quart);
-  }
-  .model-btn-primary:hover { opacity: 0.8; }
-  .model-btn-secondary {
-    padding: 6px 14px;
-    background: transparent;
-    color: var(--text-dim);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    font-family: var(--body);
-    font-size: 11px;
-    cursor: pointer;
-    transition: all var(--dur-fast) var(--ease-out-quart);
-  }
-  .model-btn-secondary:hover { color: var(--text); border-color: var(--border-strong); }
-  .model-section {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    margin-bottom: 12px;
-    overflow: hidden;
-  }
-  .model-section-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 14px 20px;
-    cursor: pointer;
-    user-select: none;
-    transition: background var(--dur-fast) var(--ease-out-quart);
-  }
-  .model-section-header:hover { background: var(--surface2); }
-  .model-section-title {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-family: var(--body);
-    font-size: 13px;
-    color: var(--text-dim);
-  }
-  .model-section-toggle { color: var(--text-muted); font-size: 13px; }
-  .model-tier-badge {
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-family: var(--mono);
-    font-size: 9px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    font-weight: 600;
-  }
-  .model-tier-badge.tier-economics { background: oklch(75% 0.12 75 / 0.15); color: var(--gold); }
-  .model-tier-badge.tier-risk      { background: oklch(75% 0.14 55 / 0.15); color: var(--amber); }
-  .model-tier-badge.tier-admin     { background: var(--surface2); color: var(--text-dim); }
-  .model-section-body {
-    padding: 0 20px 20px;
-    border-top: 1px solid var(--border);
-  }
-  .model-term-block {
-    margin-top: 20px;
-    padding-top: 16px;
-    border-top: 1px solid var(--border);
-  }
-  .model-term-block:first-child { border-top: none; }
-  .model-term-header {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-    margin-bottom: 12px;
-  }
-  .model-term-name {
-    font-family: var(--body);
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--text);
-  }
-  .model-term-desc {
-    font-family: var(--body);
-    font-size: 11px;
-    color: var(--text-muted);
-  }
-  /* Score input rows */
-  .score-input-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 6px 0;
-    border-bottom: 1px solid var(--border);
-  }
-  .score-input-row:last-child { border-bottom: none; }
-  .score-input-label {
-    font-family: var(--body);
-    font-size: 11px;
-    color: var(--text-dim);
-    min-width: 200px;
-    flex: 1;
-  }
-  .score-input-label.modified { color: var(--gold); }
-  .score-input-num {
-    width: 56px;
-    padding: 4px 8px;
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--text);
-    text-align: right;
-    transition: border-color var(--dur-fast) var(--ease-out-quart);
-  }
-  .score-input-num:focus { outline: none; border-color: var(--text-muted); }
-  .score-input-num.modified { border-color: var(--gold); color: var(--gold); }
-  .score-input-bar {
-    flex: 1;
-    max-width: 180px;
-    height: 3px;
-    -webkit-appearance: none;
-    appearance: none;
-    background: var(--border);
-    border-radius: 2px;
-    cursor: pointer;
-  }
-  .score-input-bar::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 12px; height: 12px;
-    border-radius: 50%;
-    background: var(--text);
-    cursor: pointer;
-  }
-  .score-input-preview {
-    width: 80px;
-    text-align: right;
-  }
-  /* Strike threshold table */
-  .strike-iso-section { margin-bottom: 16px; }
-  .strike-iso-label {
-    font-family: var(--mono);
-    font-size: 9px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    margin-bottom: 8px;
-  }
-  .strike-threshold-row {
-    display: grid;
-    grid-template-columns: 80px repeat(7, 1fr);
-    gap: 4px;
-    align-items: center;
-    padding: 4px 0;
-    border-bottom: 1px solid var(--border);
-  }
-  .strike-threshold-row:last-child { border-bottom: none; }
-  .strike-threshold-row.header {
-    font-family: var(--mono);
-    font-size: 8px;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    padding-bottom: 6px;
-  }
-  .strike-tech-label {
-    font-family: var(--body);
-    font-size: 11px;
-    color: var(--text-dim);
-  }
-  .strike-input {
-    width: 100%;
-    padding: 3px 5px;
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: 3px;
-    font-family: var(--mono);
-    font-size: 10px;
-    color: var(--text);
-    text-align: center;
-  }
-  .strike-input:focus { outline: none; border-color: var(--text-muted); }
-  .strike-input.modified { border-color: var(--gold); color: var(--gold); }
-  /* Matrix editor */
-  .matrix-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 11px;
-  }
-  .matrix-table th {
-    font-family: var(--mono);
-    font-size: 8px;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    padding: 4px 8px;
-    text-align: center;
-    border-bottom: 1px solid var(--border);
-  }
-  .matrix-table th:first-child { text-align: left; }
-  .matrix-table td {
-    padding: 5px 8px;
-    border-bottom: 1px solid var(--border);
-    color: var(--text-dim);
-    font-family: var(--body);
-    font-size: 11px;
-  }
-  .matrix-table td:first-child { color: var(--text-dim); }
-  .matrix-table tr:last-child td { border-bottom: none; }
-  .matrix-input {
-    width: 52px;
-    padding: 3px 6px;
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: 3px;
-    font-family: var(--mono);
-    font-size: 10px;
-    color: var(--text);
-    text-align: center;
-    display: block;
-    margin: 0 auto;
-  }
-  .matrix-input:focus { outline: none; border-color: var(--text-muted); }
-  .matrix-input.modified { border-color: var(--gold); color: var(--gold); }
-  /* Weights editor */
-  .weights-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-  }
-  .weight-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 10px;
-    background: var(--bg2);
-    border-radius: 6px;
-    border: 1px solid var(--border);
-  }
-  .weight-term-label {
-    font-family: var(--body);
-    font-size: 11px;
-    color: var(--text-dim);
-    flex: 1;
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  .weight-input {
-    width: 44px;
-    padding: 3px 6px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--text);
-    text-align: center;
-  }
-  .weight-input:focus { outline: none; border-color: var(--text-muted); }
-  .weight-input.modified { border-color: var(--gold); color: var(--gold); }
-
   /* ── RISK SUMMARY PANEL ── */
   .risk-panel {
     background: var(--surface);
@@ -1789,6 +1476,67 @@
       opacity: 0.7;
     }
   }
+
+  /* ── NAV ── */
+  .main-nav { display:flex; gap:2px; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:3px; }
+  .nav-btn { padding:5px 14px; border-radius:6px; border:none; background:transparent; font-family:var(--body); font-size:12px; font-weight:500; color:var(--text-muted); cursor:pointer; transition:all var(--dur-fast) var(--ease-out-quart); }
+  .nav-btn:hover { color:var(--text); }
+  .nav-btn.active { background:var(--text); color:var(--bg); }
+
+  /* ── SCORING MODEL PAGE ── */
+  .model-toolbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; padding:12px 16px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); }
+  .model-status { font-family:var(--mono); font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--text-muted); }
+  .model-status.modified { color:var(--gold); }
+  .model-btn-primary { padding:6px 14px; background:var(--text); color:var(--bg); border:none; border-radius:6px; font-family:var(--body); font-size:11px; font-weight:600; cursor:pointer; }
+  .model-btn-primary:hover { opacity:.8; }
+  .model-btn-secondary { padding:6px 14px; background:transparent; color:var(--text-dim); border:1px solid var(--border); border-radius:6px; font-family:var(--body); font-size:11px; cursor:pointer; }
+  .model-btn-secondary:hover { color:var(--text); border-color:var(--border-strong); }
+  .model-section { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); margin-bottom:12px; overflow:hidden; }
+  .model-section-header { display:flex; align-items:center; justify-content:space-between; padding:14px 20px; cursor:pointer; user-select:none; }
+  .model-section-header:hover { background:var(--surface2); }
+  .model-section-title { display:flex; align-items:center; gap:10px; font-family:var(--body); font-size:13px; color:var(--text-dim); }
+  .model-section-toggle { color:var(--text-muted); font-size:13px; }
+  .model-tier-badge { padding:2px 8px; border-radius:4px; font-family:var(--mono); font-size:9px; letter-spacing:.08em; text-transform:uppercase; font-weight:600; }
+  .model-tier-badge.tier-economics { background:oklch(75% 0.12 75 / 0.15); color:var(--gold); }
+  .model-tier-badge.tier-risk      { background:oklch(75% 0.14 55 / 0.15); color:var(--amber); }
+  .model-tier-badge.tier-admin     { background:var(--surface2); color:var(--text-dim); }
+  .model-section-body { padding:0 20px 20px; border-top:1px solid var(--border); }
+  .model-term-block { margin-top:20px; padding-top:16px; border-top:1px solid var(--border); }
+  .model-term-block:first-child { border-top:none; }
+  .model-term-name { font-family:var(--body); font-size:12px; font-weight:600; color:var(--text); margin-bottom:3px; }
+  .model-term-desc { font-family:var(--body); font-size:11px; color:var(--text-muted); margin-bottom:10px; }
+  .score-row { display:flex; align-items:center; gap:10px; padding:6px 0; border-bottom:1px solid var(--border); }
+  .score-row:last-child { border-bottom:none; }
+  .score-row-label { font-family:var(--body); font-size:11px; color:var(--text-dim); flex:1; min-width:200px; }
+  .score-row-label.mod { color:var(--gold); }
+  .score-range { flex:1; max-width:160px; height:3px; accent-color:var(--text); cursor:pointer; }
+  .score-num { width:52px; padding:3px 6px; background:var(--bg2); border:1px solid var(--border); border-radius:4px; font-family:var(--mono); font-size:11px; color:var(--text); text-align:right; }
+  .score-num:focus { outline:none; border-color:var(--text-muted); }
+  .score-num.mod { border-color:var(--gold); color:var(--gold); }
+  .score-preview { width:90px; text-align:right; }
+  .matrix-wrap { overflow-x:auto; }
+  .mtx { width:100%; border-collapse:collapse; font-size:11px; }
+  .mtx th { font-family:var(--mono); font-size:8px; letter-spacing:.06em; text-transform:uppercase; color:var(--text-muted); padding:4px 8px; border-bottom:1px solid var(--border); text-align:center; }
+  .mtx th:first-child { text-align:left; }
+  .mtx td { padding:5px 8px; border-bottom:1px solid var(--border); color:var(--text-dim); font-size:11px; }
+  .mtx tr:last-child td { border-bottom:none; }
+  .mtx-input { width:52px; padding:3px 5px; background:var(--bg2); border:1px solid var(--border); border-radius:3px; font-family:var(--mono); font-size:10px; color:var(--text); text-align:center; display:block; margin:0 auto; }
+  .mtx-input:focus { outline:none; border-color:var(--text-muted); }
+  .mtx-input.mod { border-color:var(--gold); color:var(--gold); }
+  .strike-iso { margin-bottom:16px; }
+  .strike-iso-label { font-family:var(--mono); font-size:9px; letter-spacing:.1em; text-transform:uppercase; color:var(--text-muted); margin-bottom:6px; }
+  .strike-row { display:grid; grid-template-columns:70px repeat(7,1fr); gap:4px; align-items:center; padding:4px 0; border-bottom:1px solid var(--border); }
+  .strike-row:last-child { border-bottom:none; }
+  .strike-row.hdr { font-family:var(--mono); font-size:8px; letter-spacing:.05em; text-transform:uppercase; color:var(--text-muted); }
+  .strike-input { width:100%; padding:3px 4px; background:var(--bg2); border:1px solid var(--border); border-radius:3px; font-family:var(--mono); font-size:10px; color:var(--text); text-align:center; }
+  .strike-input:focus { outline:none; border-color:var(--text-muted); }
+  .strike-input.mod { border-color:var(--gold); color:var(--gold); }
+  .weights-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; }
+  .weight-row { display:flex; align-items:center; gap:6px; padding:5px 8px; background:var(--bg2); border:1px solid var(--border); border-radius:6px; }
+  .weight-label { font-family:var(--body); font-size:11px; color:var(--text-dim); flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .weight-input { width:42px; padding:3px 5px; background:var(--surface); border:1px solid var(--border); border-radius:4px; font-family:var(--mono); font-size:11px; color:var(--text); text-align:center; }
+  .weight-input:focus { outline:none; border-color:var(--text-muted); }
+  .weight-input.mod { border-color:var(--gold); color:var(--gold); }
 </style>
 </head>
 <body>
@@ -1947,213 +1695,6 @@
       </div>
     </div>
 
-  </div>
-
-</div>
-
-<!-- SCORING MODEL PAGE -->
-<div class="main" id="pageModel" style="display:none;">
-  <h1 class="page-title">Scoring Model</h1>
-  <p class="page-sub">Calibrate the scoring engine to reflect your current market view. Changes apply to all future deal analyses.</p>
-
-  <div class="model-toolbar">
-    <div class="model-status" id="modelStatus">Default settings</div>
-    <div style="display:flex;gap:8px;">
-      <button class="model-btn-secondary" onclick="resetScoringModel()">Reset to defaults</button>
-      <button class="model-btn-primary" onclick="saveScoringModel()">Save model</button>
-    </div>
-  </div>
-
-  <!-- Tier 1: Deal Economics -->
-  <div class="model-section">
-    <div class="model-section-header" onclick="toggleModelSection(this)">
-      <div class="model-section-title">
-        <span class="model-tier-badge tier-economics">Deal Economics</span>
-        <span>Strike Price, Basis, Negative Price, Termination, Settlement</span>
-      </div>
-      <span class="model-section-toggle">▾</span>
-    </div>
-    <div class="model-section-body">
-
-      <!-- Strike price thresholds -->
-      <div class="model-term-block">
-        <div class="model-term-header">
-          <span class="model-term-name">Price & Escalator — Strike Thresholds ($/MWh)</span>
-          <span class="model-term-desc">Market bands by ISO and technology. Drag or type to adjust.</span>
-        </div>
-        <div id="strikeThresholdEditor"></div>
-      </div>
-
-      <!-- Floating / settlement point -->
-      <div class="model-term-block">
-        <div class="model-term-header">
-          <span class="model-term-name">Floating Settlement — Score Matrix</span>
-          <span class="model-term-desc">Scores by settlement point type × adders included.</span>
-        </div>
-        <div id="floatingEditor"></div>
-      </div>
-
-      <!-- Negative price -->
-      <div class="model-term-block">
-        <div class="model-term-header">
-          <span class="model-term-name">Negative Price — Mechanism Scores</span>
-          <span class="model-term-desc">Base score for each negative price mechanism.</span>
-        </div>
-        <div id="negpriceEditor"></div>
-      </div>
-
-      <!-- Termination payment -->
-      <div class="model-term-block">
-        <div class="model-term-header">
-          <span class="model-term-name">Termination Payment — Score Matrix</span>
-          <span class="model-term-desc">Scores by payment basis × defaulter-pays provision.</span>
-        </div>
-        <div id="etermEditor"></div>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- Tier 2: Project Risk -->
-  <div class="model-section">
-    <div class="model-section-header" onclick="toggleModelSection(this)">
-      <div class="model-section-title">
-        <span class="model-tier-badge tier-risk">Project Risk</span>
-        <span>Curtailment, Availability, Delay, IA, FM, Change in Law, CPs</span>
-      </div>
-      <span class="model-section-toggle">▾</span>
-    </div>
-    <div class="model-section-body">
-
-      <div class="model-term-block">
-        <div class="model-term-header">
-          <span class="model-term-name">Basis Risk — Allocation Scores</span>
-        </div>
-        <div id="basisEditor"></div>
-      </div>
-
-      <div class="model-term-block">
-        <div class="model-term-header">
-          <span class="model-term-name">Economic Curtailment — Allocation Scores</span>
-        </div>
-        <div id="curtailmentEditor"></div>
-      </div>
-
-      <div class="model-term-block">
-        <div class="model-term-header">
-          <span class="model-term-name">Non-Economic Curtailment — Allocation Scores</span>
-        </div>
-        <div id="nonecocurtailEditor"></div>
-      </div>
-
-      <div class="model-term-block">
-        <div class="model-term-header">
-          <span class="model-term-name">Basis Curtailment — Allocation Scores</span>
-        </div>
-        <div id="basiscurtailEditor"></div>
-      </div>
-
-      <div class="model-term-block">
-        <div class="model-term-header">
-          <span class="model-term-name">Force Majeure — Score Matrix</span>
-          <span class="model-term-desc">Scores by FM breadth × excuses payment.</span>
-        </div>
-        <div id="fmEditor"></div>
-      </div>
-
-      <div class="model-term-block">
-        <div class="model-term-header">
-          <span class="model-term-name">Change in Law — Score Matrix</span>
-        </div>
-        <div id="changeinlawEditor"></div>
-      </div>
-
-      <div class="model-term-block">
-        <div class="model-term-header">
-          <span class="model-term-name">Interconnection — Status Scores</span>
-        </div>
-        <div id="iaEditor"></div>
-      </div>
-
-      <div class="model-term-block">
-        <div class="model-term-header">
-          <span class="model-term-name">Conditions Precedent — Seller CP Count Scores</span>
-          <span class="model-term-desc">Each seller CP is a potential exit. Score by number of seller CPs.</span>
-        </div>
-        <div id="cpEditor"></div>
-      </div>
-
-      <div class="model-term-block">
-        <div class="model-term-header">
-          <span class="model-term-name">Permits — Status Scores</span>
-        </div>
-        <div id="permitEditor"></div>
-      </div>
-
-      <div class="model-term-block">
-        <div class="model-term-header">
-          <span class="model-term-name">COD Definition — Scores</span>
-        </div>
-        <div id="codEditor"></div>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- Tier 3: Legal & Admin -->
-  <div class="model-section">
-    <div class="model-section-header" onclick="toggleModelSection(this)">
-      <div class="model-section-title">
-        <span class="model-tier-badge tier-admin">Legal & Admin</span>
-        <span>Settlement Interval, Invoice, Scheduling, Assignment, Governing Law</span>
-      </div>
-      <span class="model-section-toggle">▾</span>
-    </div>
-    <div class="model-section-body">
-
-      <div class="model-term-block">
-        <div class="model-term-header">
-          <span class="model-term-name">Settlement Interval — Scores</span>
-        </div>
-        <div id="intervalEditor"></div>
-      </div>
-
-      <div class="model-term-block">
-        <div class="model-term-header">
-          <span class="model-term-name">Invoice Frequency — Scores</span>
-        </div>
-        <div id="invoiceEditor"></div>
-      </div>
-
-      <div class="model-term-block">
-        <div class="model-term-header">
-          <span class="model-term-name">Scheduling Control — Scores</span>
-        </div>
-        <div id="schedulingEditor"></div>
-      </div>
-
-      <div class="model-term-block">
-        <div class="model-term-header">
-          <span class="model-term-name">Governing Law — State Scores</span>
-        </div>
-        <div id="govlawEditor"></div>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- Term Weights -->
-  <div class="model-section">
-    <div class="model-section-header" onclick="toggleModelSection(this)">
-      <div class="model-section-title">
-        <span class="model-tier-badge" style="background:var(--surface2);color:var(--text-dim);">Weights</span>
-        <span>How much each term counts toward the overall weighted score</span>
-      </div>
-      <span class="model-section-toggle">▾</span>
-    </div>
-    <div class="model-section-body">
-      <div id="weightsEditor"></div>
-    </div>
   </div>
 
 </div>
@@ -3072,11 +2613,10 @@ function renderScores(scores, termFlags, interactions) {
   } // end grid view
 
   // ── WEIGHTED OVERALL SCORE ──────────────────────────────────
-  const liveWeights = window.ScoringEngine ? window.ScoringEngine.getConfig().weights : TERM_WEIGHTS;
   let weightedSum = 0, weightedTotal = 0;
   for (const [e2key, score] of Object.entries(scores)) {
     if (score == null) continue;
-    const w = liveWeights[e2key] ?? TERM_WEIGHTS[e2key] ?? 1;
+    const w = TERM_WEIGHTS[e2key] || 1;
     weightedSum   += score * w;
     weightedTotal += w;
   }
@@ -3321,274 +2861,290 @@ function applyFilters() {
     section.classList.toggle('filter-empty', visible === 0 && (hasScore || hasTier));
   });
 }
-</script>
 
-// ─── PAGE SWITCHING ─────────────────────────────────────────
+<!-- SCORING MODEL PAGE -->
+<div class="main" id="pageModel" style="display:none;">
+  <h1 class="page-title">Scoring Model</h1>
+  <p class="page-sub">Calibrate the scoring engine to your current market view. Changes apply to all future deal analyses.</p>
+  <div class="model-toolbar">
+    <div class="model-status" id="modelStatus">Default settings</div>
+    <div style="display:flex;gap:8px;">
+      <button class="model-btn-secondary" onclick="resetScoringModel()">Reset to defaults</button>
+      <button class="model-btn-primary" onclick="saveScoringModel()">Save model</button>
+    </div>
+  </div>
+
+  <div class="model-section">
+    <div class="model-section-header" onclick="toggleModelSection(this)">
+      <div class="model-section-title"><span class="model-tier-badge tier-economics">Deal Economics</span><span>Strike Price, Settlement, Negative Price, Termination, Basis</span></div>
+      <span class="model-section-toggle">▾</span>
+    </div>
+    <div class="model-section-body">
+      <div class="model-term-block"><div class="model-term-name">Strike Price Thresholds ($/MWh)</div><div class="model-term-desc">Market bands by ISO and technology. BF=Buyer Favorable, Mkt=Market, SF=Slightly Unfavorable, RF=Reject.</div><div id="strikeEd"></div></div>
+      <div class="model-term-block"><div class="model-term-name">Settlement Point — Score Matrix</div><div id="floatingEd"></div></div>
+      <div class="model-term-block"><div class="model-term-name">Negative Price Mechanisms</div><div id="negpriceEd"></div></div>
+      <div class="model-term-block"><div class="model-term-name">Termination Payment — Score Matrix</div><div id="etermEd"></div></div>
+      <div class="model-term-block"><div class="model-term-name">Basis Risk Allocation</div><div id="basisEd"></div></div>
+    </div>
+  </div>
+
+  <div class="model-section">
+    <div class="model-section-header" onclick="toggleModelSection(this)">
+      <div class="model-section-title"><span class="model-tier-badge tier-risk">Project Risk</span><span>Curtailment, FM, Change in Law, IA, CPs, Permits, COD</span></div>
+      <span class="model-section-toggle">▾</span>
+    </div>
+    <div class="model-section-body">
+      <div class="model-term-block"><div class="model-term-name">Economic Curtailment</div><div id="curtailmentEd"></div></div>
+      <div class="model-term-block"><div class="model-term-name">Non-Economic Curtailment</div><div id="nonecocurtailEd"></div></div>
+      <div class="model-term-block"><div class="model-term-name">Basis Curtailment</div><div id="basiscurtailEd"></div></div>
+      <div class="model-term-block"><div class="model-term-name">Force Majeure — Score Matrix</div><div id="fmEd"></div></div>
+      <div class="model-term-block"><div class="model-term-name">Change in Law — Score Matrix</div><div id="changeinlawEd"></div></div>
+      <div class="model-term-block"><div class="model-term-name">Interconnection Status</div><div id="iaEd"></div></div>
+      <div class="model-term-block"><div class="model-term-name">Conditions Precedent — Seller CP Count</div><div class="model-term-desc">Each seller CP is a potential exit for the seller.</div><div id="cpEd"></div></div>
+      <div class="model-term-block"><div class="model-term-name">Permits Status</div><div id="permitEd"></div></div>
+      <div class="model-term-block"><div class="model-term-name">COD Definition</div><div id="codEd"></div></div>
+    </div>
+  </div>
+
+  <div class="model-section">
+    <div class="model-section-header" onclick="toggleModelSection(this)">
+      <div class="model-section-title"><span class="model-tier-badge tier-admin">Legal &amp; Admin</span><span>Settlement Interval, Invoice, Scheduling, Governing Law</span></div>
+      <span class="model-section-toggle">▾</span>
+    </div>
+    <div class="model-section-body">
+      <div class="model-term-block"><div class="model-term-name">Settlement Interval</div><div id="intervalEd"></div></div>
+      <div class="model-term-block"><div class="model-term-name">Invoice Frequency</div><div id="invoiceEd"></div></div>
+      <div class="model-term-block"><div class="model-term-name">Scheduling Control</div><div id="schedulingEd"></div></div>
+      <div class="model-term-block"><div class="model-term-name">Governing Law</div><div id="govlawEd"></div></div>
+    </div>
+  </div>
+
+  <div class="model-section">
+    <div class="model-section-header" onclick="toggleModelSection(this)">
+      <div class="model-section-title"><span class="model-tier-badge" style="background:var(--surface2);color:var(--text-dim);">Weights</span><span>How much each term counts toward the overall weighted score (1–10)</span></div>
+      <span class="model-section-toggle">▾</span>
+    </div>
+    <div class="model-section-body">
+      <div class="model-term-block"><div id="weightsEd"></div></div>
+    </div>
+  </div>
+</div>
+
+
+
+// ── PAGE SWITCHING ────────────────────────────────────────────
 function switchPage(page) {
-  document.getElementById('pageAnalyzer').style.display = page === 'analyzer' ? 'block' : 'none';
-  document.getElementById('pageModel').style.display    = page === 'model'    ? 'block' : 'none';
-  document.getElementById('navAnalyzer').classList.toggle('active', page === 'analyzer');
-  document.getElementById('navModel').classList.toggle('active', page === 'model');
-  if (page === 'model') renderModelPage();
+  document.getElementById('pageAnalyzer').style.display = page==='analyzer' ? 'block' : 'none';
+  document.getElementById('pageModel').style.display    = page==='model'    ? 'block' : 'none';
+  document.getElementById('navAnalyzer').classList.toggle('active', page==='analyzer');
+  document.getElementById('navModel').classList.toggle('active', page==='model');
+  if (page==='model') renderModelPage();
 }
 
-// ─── SCORING MODEL ───────────────────────────────────────────
-const MODEL_STORAGE_KEY = 'clearpath_scoring_model_v1';
-
+// ── PERSISTENCE ───────────────────────────────────────────────
+const MODEL_KEY = 'clearpath_model_v1';
 function loadSavedModel() {
-  try {
-    const saved = localStorage.getItem(MODEL_STORAGE_KEY);
-    if (saved) { window.ScoringEngine.setConfig(JSON.parse(saved)); return true; }
-  } catch(e) {}
-  return false;
+  try { const s=localStorage.getItem(MODEL_KEY); if(s) window.ScoringEngine.setConfig(JSON.parse(s)); } catch(e){}
 }
-
 function saveScoringModel() {
-  localStorage.setItem(MODEL_STORAGE_KEY, JSON.stringify(window.ScoringEngine.getConfig()));
+  localStorage.setItem(MODEL_KEY, JSON.stringify(window.ScoringEngine.getConfig()));
   updateModelStatus();
-  const btn = document.querySelector('.model-btn-primary');
-  btn.textContent = 'Saved ✓';
-  setTimeout(() => btn.textContent = 'Save model', 1500);
+  const b=document.querySelector('.model-btn-primary');
+  b.textContent='Saved ✓'; setTimeout(()=>b.textContent='Save model',1500);
 }
-
 function resetScoringModel() {
-  if (!confirm('Reset all scoring parameters to defaults?')) return;
-  localStorage.removeItem(MODEL_STORAGE_KEY);
+  if(!confirm('Reset all scoring parameters to defaults?')) return;
+  localStorage.removeItem(MODEL_KEY);
   window.ScoringEngine.resetConfig();
   renderModelPage();
   updateModelStatus();
 }
-
 function updateModelStatus() {
-  const saved = localStorage.getItem(MODEL_STORAGE_KEY);
-  const el = document.getElementById('modelStatus');
-  if (!el) return;
-  if (saved) { el.textContent = 'Custom model active — saved to browser'; el.classList.add('modified'); }
-  else { el.textContent = 'Default settings'; el.classList.remove('modified'); }
+  const el=document.getElementById('modelStatus'); if(!el) return;
+  const saved=localStorage.getItem(MODEL_KEY);
+  if(saved){el.textContent='Custom model active — saved to browser';el.classList.add('modified');}
+  else{el.textContent='Default settings';el.classList.remove('modified');}
 }
-
-function getDefaultVal(path) {
-  const def = window.ScoringEngine.getDefaultConfig();
-  const parts = path.split('.');
-  let cur = def;
-  for (const p of parts) { if (cur == null) return null; cur = cur[p]; }
-  return cur;
+function defVal(path) {
+  const d=window.ScoringEngine.getDefaultConfig();
+  return path.split('.').reduce((o,k)=>o?.[k], d);
 }
-
-function updateConfig(path, val) {
-  const cfg = window.ScoringEngine.getConfig();
-  const parts = path.split('.');
-  let obj = cfg;
-  for (let i = 0; i < parts.length - 1; i++) { if (!obj[parts[i]]) obj[parts[i]] = {}; obj = obj[parts[i]]; }
-  obj[parts[parts.length - 1]] = val;
+function updCfg(path, val) {
+  const cfg=window.ScoringEngine.getConfig();
+  const parts=path.split('.');
+  let o=cfg;
+  for(let i=0;i<parts.length-1;i++){if(!o[parts[i]])o[parts[i]]={};o=o[parts[i]];}
+  o[parts[parts.length-1]]=val;
   window.ScoringEngine.setConfig(cfg);
-  const el = document.getElementById('modelStatus');
-  if (el) { el.textContent = 'Unsaved changes'; el.classList.add('modified'); }
+  const el=document.getElementById('modelStatus');
+  if(el){el.textContent='Unsaved changes';el.classList.add('modified');}
 }
-
-function renderMiniScoreBadge(val) {
-  const { label, cls } = scoreLabel(Math.round(val));
+function miniBadge(v) {
+  const {label,cls}=scoreLabel(Math.round(v));
   return `<span class="score-badge ${cls}" style="font-size:9px;">${label}</span>`;
 }
-function syncNumInput(rangeEl) {
-  const num = rangeEl.parentElement.querySelector('.score-input-num');
-  if (num) { num.value = rangeEl.value; num.classList.add('modified'); }
-  const preview = rangeEl.parentElement.querySelector('.score-input-preview');
-  if (preview) preview.innerHTML = renderMiniScoreBadge(+rangeEl.value);
-  rangeEl.parentElement.querySelector('.score-input-label')?.classList.add('modified');
+function syncR(rangeEl) {
+  const p=rangeEl.parentElement;
+  const n=p.querySelector('.score-num'); if(n){n.value=rangeEl.value;n.classList.add('mod');}
+  const pv=p.querySelector('.score-preview'); if(pv) pv.innerHTML=miniBadge(+rangeEl.value);
+  p.querySelector('.score-row-label')?.classList.add('mod');
 }
-function syncRangeInput(numEl) {
-  const range = numEl.parentElement.querySelector('.score-input-bar');
-  if (range) range.value = numEl.value;
-  const preview = numEl.parentElement.querySelector('.score-input-preview');
-  if (preview) preview.innerHTML = renderMiniScoreBadge(+numEl.value);
-  numEl.parentElement.querySelector('.score-input-label')?.classList.add('modified');
-  numEl.classList.add('modified');
+function syncN(numEl) {
+  const p=numEl.parentElement;
+  const r=p.querySelector('.score-range'); if(r) r.value=numEl.value;
+  const pv=p.querySelector('.score-preview'); if(pv) pv.innerHTML=miniBadge(+numEl.value);
+  p.querySelector('.score-row-label')?.classList.add('mod');
+  numEl.classList.add('mod');
 }
 
-function renderSimpleEditor(containerId, configPath, labels) {
-  const container = document.getElementById(containerId);
-  if (!container) return;
-  const cfg = window.ScoringEngine.getConfig();
-  const parts = configPath.split('.');
-  let obj = cfg;
-  for (const p of parts) obj = obj?.[p];
-  if (!obj) return;
-  const entries = Object.entries(obj);
-  const nonNS = entries.filter(([k]) => k !== 'not_specified');
-  const ns    = entries.filter(([k]) => k === 'not_specified');
-  container.innerHTML = [...nonNS, ...ns].map(([key, val]) => {
-    const label = labels?.[key] || key.replace(/_/g, ' ');
-    const defVal = getDefaultVal(configPath + '.' + key);
-    const mod = val !== defVal;
-    return `<div class="score-input-row">
-      <span class="score-input-label ${mod ? 'modified' : ''}">${label}</span>
-      <input type="range" class="score-input-bar" min="0" max="100" value="${val}"
-        oninput="updateConfig('${configPath}.${key}', +this.value); syncNumInput(this)">
-      <input type="number" class="score-input-num ${mod ? 'modified' : ''}" min="0" max="100" value="${val}"
-        oninput="updateConfig('${configPath}.${key}', +this.value); syncRangeInput(this)">
-      <div class="score-input-preview">${renderMiniScoreBadge(val)}</div>
+// Simple flat-object editor (label→score rows)
+function simpleEd(id, cfgPath, labels) {
+  const el=document.getElementById(id); if(!el) return;
+  const cfg=window.ScoringEngine.getConfig();
+  let obj=cfg; cfgPath.split('.').forEach(k=>obj=obj?.[k]);
+  if(!obj) return;
+  const entries=Object.entries(obj);
+  const ns=entries.filter(([k])=>k==='not_specified');
+  const rest=entries.filter(([k])=>k!=='not_specified');
+  el.innerHTML=[...rest,...ns].map(([k,v])=>{
+    const lbl=labels?.[k]||k.replace(/_/g,' ');
+    const mod=v!==defVal(cfgPath+'.'+k);
+    return `<div class="score-row">
+      <span class="score-row-label${mod?' mod':''}">${lbl}</span>
+      <input type="range" class="score-range" min="0" max="100" value="${v}" oninput="updCfg('${cfgPath}.${k}',+this.value);syncR(this)">
+      <input type="number" class="score-num${mod?' mod':''}" min="0" max="100" value="${v}" oninput="updCfg('${cfgPath}.${k}',+this.value);syncN(this)">
+      <div class="score-preview">${miniBadge(v)}</div>
     </div>`;
   }).join('');
 }
 
-function renderMatrixEditor(containerId, configPath, rowLabels, colLabels) {
-  const container = document.getElementById(containerId);
-  if (!container) return;
-  const cfg = window.ScoringEngine.getConfig();
-  const parts = configPath.split('.');
-  let matrix = cfg;
-  for (const p of parts) matrix = matrix?.[p];
-  if (!matrix) return;
-  const rows = Object.keys(rowLabels);
-  const cols = Object.keys(colLabels);
-  const headerRow = `<tr><th></th>${cols.map(c => `<th>${colLabels[c]}</th>`).join('')}</tr>`;
-  const dataRows = rows.map(row => {
-    const cells = cols.map(col => {
-      const val = matrix[row]?.[col] ?? '';
-      const defVal = getDefaultVal(`${configPath}.${row}.${col}`);
-      const mod = val !== defVal;
-      return `<td><input type="number" class="matrix-input ${mod ? 'modified' : ''}"
-        min="0" max="100" value="${val}"
-        oninput="updateConfig('${configPath}.${row}.${col}', +this.value); this.classList.add('modified')"></td>`;
+// Matrix editor (row×col → score inputs)
+function matrixEd(id, cfgPath, rowLabels, colLabels) {
+  const el=document.getElementById(id); if(!el) return;
+  const cfg=window.ScoringEngine.getConfig();
+  let mx=cfg; cfgPath.split('.').forEach(k=>mx=mx?.[k]);
+  if(!mx) return;
+  const rows=Object.keys(rowLabels), cols=Object.keys(colLabels);
+  const hdr=`<tr><th></th>${cols.map(c=>`<th>${colLabels[c]}</th>`).join('')}</tr>`;
+  const body=rows.map(r=>{
+    const cells=cols.map(c=>{
+      const v=mx[r]?.[c]??'';
+      const mod=v!==defVal(`${cfgPath}.${r}.${c}`);
+      return `<td><input type="number" class="mtx-input${mod?' mod':''}" min="0" max="100" value="${v}" oninput="updCfg('${cfgPath}.${r}.${c}',+this.value);this.classList.add('mod')"></td>`;
     }).join('');
-    return `<tr><td>${rowLabels[row]}</td>${cells}</tr>`;
+    return `<tr><td>${rowLabels[r]}</td>${cells}</tr>`;
   }).join('');
-  container.innerHTML = `<table class="matrix-table"><thead>${headerRow}</thead><tbody>${dataRows}</tbody></table>`;
+  el.innerHTML=`<div class="matrix-wrap"><table class="mtx"><thead>${hdr}</thead><tbody>${body}</tbody></table></div>`;
 }
 
-function renderStrikeEditor() {
-  const container = document.getElementById('strikeThresholdEditor');
-  if (!container) return;
-  const cfg = window.ScoringEngine.getConfig();
-  const isos = ['ERCOT','CAISO','PJM','MISO','SPP','ISO-NE','NYISO'];
-  const techs = ['Solar','Wind'];
-  const fields = ['bf_low','bf_high','mkt_low','mkt_high','sf_low','sf_high','rf_high'];
-  const fieldLabels = ['BF Low','BF High','Mkt Low','Mkt High','SF Low','SF High','RF High'];
-  container.innerHTML = isos.map(iso => {
-    const isoData = cfg.strike[iso] || cfg.strike[iso.replace('-','')];
-    if (!isoData) return '';
-    const techRows = techs.map(tech => {
-      const techData = isoData[tech];
-      if (!techData) return '';
-      const inputs = fields.map((f, i) => {
-        const val = techData[f] ?? '';
-        const defVal = getDefaultVal(`strike.${iso}.${tech}.${f}`);
-        const mod = val !== defVal;
-        return `<input type="number" class="strike-input ${mod ? 'modified' : ''}" value="${val}" step="0.5"
-          oninput="updateConfig('strike.${iso}.${tech}.${f}', +this.value); this.classList.add('modified')">`;
+// Strike price threshold editor
+function strikeEd() {
+  const el=document.getElementById('strikeEd'); if(!el) return;
+  const cfg=window.ScoringEngine.getConfig();
+  const isos=['ERCOT','CAISO','PJM','MISO','SPP','ISO-NE','NYISO'];
+  const techs=['Solar','Wind'];
+  const flds=['bf_low','bf_high','mkt_low','mkt_high','sf_low','sf_high','rf_high'];
+  const hdrs=['BF Low','BF High','Mkt Low','Mkt High','SF Low','SF High','RF High'];
+  el.innerHTML=isos.map(iso=>{
+    const isoD=cfg.strike[iso]||cfg.strike[iso.replace('-','')];
+    if(!isoD) return '';
+    const rows=techs.map(tech=>{
+      const td=isoD[tech]; if(!td) return '';
+      const ins=flds.map((f,i)=>{
+        const v=td[f]??'';
+        const mod=v!==defVal(`strike.${iso}.${tech}.${f}`);
+        return `<input type="number" class="strike-input${mod?' mod':''}" value="${v}" step="0.5" oninput="updCfg('strike.${iso}.${tech}.${f}',+this.value);this.classList.add('mod')">`;
       }).join('');
-      return `<div class="strike-threshold-row"><span class="strike-tech-label">${tech}</span>${inputs}</div>`;
+      return `<div class="strike-row"><span style="font-size:11px;color:var(--text-dim)">${tech}</span>${ins}</div>`;
     }).join('');
-    return `<div class="strike-iso-section">
-      <div class="strike-iso-label">${iso}</div>
-      <div class="strike-threshold-row header"><span></span>${fieldLabels.map(l => `<span>${l}</span>`).join('')}</div>
-      ${techRows}
-    </div>`;
+    return `<div class="strike-iso"><div class="strike-iso-label">${iso}</div>
+      <div class="strike-row hdr"><span></span>${hdrs.map(h=>`<span>${h}</span>`).join('')}</div>${rows}</div>`;
   }).join('');
 }
 
-function renderWeightsEditor() {
-  const container = document.getElementById('weightsEditor');
-  if (!container) return;
-  const cfg = window.ScoringEngine.getConfig();
-  const weights = cfg.weights;
-  container.innerHTML = `<div class="weights-grid">${
-    Object.keys(TERM_NAMES).map(key => {
-      const e2 = TERM_KEY_MAP[key];
-      const wKey = e2 || key;
-      const val = weights[wKey] ?? 1;
-      const defVal = getDefaultVal(`weights.${wKey}`);
-      const mod = val !== defVal;
-      const tier = E2_TIER[e2] || 'admin';
-      const badge = tier === 'economics' ? 'T1' : tier === 'risk' ? 'T2' : 'T3';
-      return `<div class="weight-row">
-        <span class="model-tier-badge tier-${tier}" style="font-size:8px;padding:1px 5px;">${badge}</span>
-        <span class="weight-term-label" title="${TERM_NAMES[key]}">${TERM_NAMES[key]}</span>
-        <input type="number" class="weight-input ${mod ? 'modified' : ''}" min="1" max="10" value="${val}"
-          oninput="updateConfig('weights.${wKey}', +this.value); this.classList.add('modified')">
-      </div>`;
-    }).join('')
-  }</div>`;
+// Weights editor
+function weightsEd() {
+  const el=document.getElementById('weightsEd'); if(!el) return;
+  const cfg=window.ScoringEngine.getConfig();
+  const w=cfg.weights;
+  el.innerHTML=`<div class="weights-grid">${Object.keys(TERM_NAMES).map(key=>{
+    const e2=TERM_KEY_MAP[key], wk=e2||key;
+    const v=w[wk]??1, mod=v!==defVal(`weights.${wk}`);
+    const tier=E2_TIER[e2]||'admin';
+    const badge=tier==='economics'?'T1':tier==='risk'?'T2':'T3';
+    return `<div class="weight-row">
+      <span class="model-tier-badge tier-${tier}" style="font-size:8px;padding:1px 5px;">${badge}</span>
+      <span class="weight-label" title="${TERM_NAMES[key]}">${TERM_NAMES[key]}</span>
+      <input type="number" class="weight-input${mod?' mod':''}" min="1" max="10" value="${v}" oninput="updCfg('weights.${wk}',+this.value);this.classList.add('mod')">
+    </div>`;
+  }).join('')}</div>`;
+}
+
+function toggleModelSection(h) {
+  const b=h.nextElementSibling, t=h.querySelector('.model-section-toggle');
+  const open=b.style.display!=='none';
+  b.style.display=open?'none':'block';
+  t.textContent=open?'▸':'▾';
 }
 
 function renderModelPage() {
   updateModelStatus();
-  renderStrikeEditor();
-  renderMatrixEditor('floatingEditor', 'floating',
-    { hub:'Hub', zonal:'Zonal', nodal:'Nodal', not_specified:'Not specified' },
-    { all_in:'All-in', partial:'Partial', excluded:'Excluded', not_specified:'Not specified' });
-  renderSimpleEditor('negpriceEditor', 'negprice', {
-    zero_floor:'Zero floor (buyer protected)', seller_curtails:'Seller curtails',
-    full_passthrough:'Full passthrough to buyer', not_specified:'Not specified' });
-  renderMatrixEditor('etermEditor', 'eterm',
-    { mark_to_market:'Mark-to-market', fixed_formula:'Fixed formula', negotiated:'Negotiated', not_specified:'Not specified' },
-    { yes:'Defaulter pays', no:'No defaulter-pays', not_specified:'Not specified' });
-  renderSimpleEditor('basisEditor', 'basis', {
-    seller_bears:'Seller bears full basis risk', shared_collar:'Shared with collar',
-    buyer_bears:'Buyer bears full basis risk', not_specified:'Not specified' });
-  renderSimpleEditor('curtailmentEditor', 'curtailment', {
-    seller_bears_deemed:'Seller bears (deemed gen)', shared:'Shared',
-    buyer_bears:'Buyer bears', not_specified:'Not specified' });
-  renderSimpleEditor('nonecocurtailEditor', 'nonecocurtail', {
-    seller_bears_deemed:'Seller bears (deemed gen)', shared:'Shared',
-    buyer_bears:'Buyer bears', not_specified:'Not specified' });
-  renderSimpleEditor('basiscurtailEditor', 'basiscurtail', {
-    seller_bears_deemed:'Seller bears (deemed gen)', shared:'Shared',
-    buyer_bears:'Buyer bears', not_specified:'Not specified' });
-  renderMatrixEditor('fmEditor', 'fm',
-    { narrow:'Narrow', standard:'Standard', broad:'Broad', not_specified:'Not specified' },
-    { yes:'Excuses payment', no:'Does not excuse', not_specified:'Not specified' });
-  renderMatrixEditor('changeinlawEditor', 'changeinlaw',
-    { buyer:'Buyer bears', seller:'Seller bears', shared:'Shared', not_specified:'Not specified' },
-    { automatic:'Automatic adj.', negotiated:'Negotiated', none:'No adjustment', not_specified:'Not specified' });
-  renderSimpleEditor('iaEditor', 'ia', {
-    fully_executed:'Fully executed', facilities_study_complete:'Facilities study complete',
-    system_impact_complete:'System impact complete', feasibility_stage:'Feasibility stage',
-    not_filed:'Not filed', not_specified:'Not specified' });
-  const cpContainer = document.getElementById('cpEditor');
-  if (cpContainer) {
-    const cfg = window.ScoringEngine.getConfig();
-    cpContainer.innerHTML = Object.entries(cfg.cp.seller_base).map(([k, v]) => {
-      const defVal = getDefaultVal(`cp.seller_base.${k}`);
-      const mod = v !== defVal;
-      return `<div class="score-input-row">
-        <span class="score-input-label ${mod ? 'modified' : ''}">${k} seller CP${k!=='1'?'s':''}</span>
-        <input type="range" class="score-input-bar" min="0" max="100" value="${v}"
-          oninput="updateConfig('cp.seller_base.${k}', +this.value); syncNumInput(this)">
-        <input type="number" class="score-input-num ${mod ? 'modified' : ''}" min="0" max="100" value="${v}"
-          oninput="updateConfig('cp.seller_base.${k}', +this.value); syncRangeInput(this)">
-        <div class="score-input-preview">${renderMiniScoreBadge(v)}</div>
+  strikeEd();
+  matrixEd('floatingEd','floating',
+    {hub:'Hub',zonal:'Zonal',nodal:'Nodal',not_specified:'Not specified'},
+    {all_in:'All-in',partial:'Partial',excluded:'Excluded',not_specified:'Not specified'});
+  simpleEd('negpriceEd','negprice',
+    {zero_floor:'Zero floor (protected)',seller_curtails:'Seller curtails',full_passthrough:'Full passthrough',not_specified:'Not specified'});
+  matrixEd('etermEd','eterm',
+    {mark_to_market:'Mark-to-market',fixed_formula:'Fixed formula',negotiated:'Negotiated',not_specified:'Not specified'},
+    {yes:'Defaulter pays',no:'No defaulter-pays',not_specified:'Not specified'});
+  simpleEd('basisEd','basis',
+    {seller_bears:'Seller bears',shared_collar:'Shared / collar',buyer_bears:'Buyer bears',not_specified:'Not specified'});
+  simpleEd('curtailmentEd','curtailment',
+    {seller_bears_deemed:'Seller bears (deemed)',shared:'Shared',buyer_bears:'Buyer bears',not_specified:'Not specified'});
+  simpleEd('nonecocurtailEd','nonecocurtail',
+    {seller_bears_deemed:'Seller bears (deemed)',shared:'Shared',buyer_bears:'Buyer bears',not_specified:'Not specified'});
+  simpleEd('basiscurtailEd','basiscurtail',
+    {seller_bears_deemed:'Seller bears (deemed)',shared:'Shared',buyer_bears:'Buyer bears',not_specified:'Not specified'});
+  matrixEd('fmEd','fm',
+    {narrow:'Narrow',standard:'Standard',broad:'Broad',not_specified:'Not specified'},
+    {yes:'Excuses payment',no:'Does not excuse',not_specified:'Not specified'});
+  matrixEd('changeinlawEd','changeinlaw',
+    {buyer:'Buyer bears',seller:'Seller bears',shared:'Shared',not_specified:'Not specified'},
+    {automatic:'Automatic adj.',negotiated:'Negotiated',none:'No adjustment',not_specified:'Not specified'});
+  simpleEd('iaEd','ia',
+    {fully_executed:'Fully executed',facilities_study_complete:'Facilities study complete',
+     system_impact_complete:'System impact complete',feasibility_stage:'Feasibility stage',
+     not_filed:'Not filed',not_specified:'Not specified'});
+  // CP seller base scores
+  const cpEl=document.getElementById('cpEd');
+  if(cpEl){
+    const cfg=window.ScoringEngine.getConfig();
+    cpEl.innerHTML=Object.entries(cfg.cp.seller_base).map(([k,v])=>{
+      const mod=v!==defVal(`cp.seller_base.${k}`);
+      return `<div class="score-row">
+        <span class="score-row-label${mod?' mod':''}">${k} seller CP${k!=='1'?'s':''}</span>
+        <input type="range" class="score-range" min="0" max="100" value="${v}" oninput="updCfg('cp.seller_base.${k}',+this.value);syncR(this)">
+        <input type="number" class="score-num${mod?' mod':''}" min="0" max="100" value="${v}" oninput="updCfg('cp.seller_base.${k}',+this.value);syncN(this)">
+        <div class="score-preview">${miniBadge(v)}</div>
       </div>`;
     }).join('');
   }
-  renderSimpleEditor('permitEditor', 'permit', {
-    all_obtained:'All permits obtained', major_obtained:'Major permits obtained',
-    in_progress:'In progress', not_started:'Not started', not_specified:'Not specified' });
-  renderSimpleEditor('codEditor', 'cod', {
-    tight_objective:'Tight / objective', moderate:'Moderate',
-    loose_substantial:'Loose / substantial completion', not_specified:'Not specified' });
-  renderSimpleEditor('intervalEditor', 'interval', {
-    iso_native:'ISO native', hourly:'Hourly', monthly:'Monthly',
-    annual:'Annual', not_specified:'Not specified' });
-  renderSimpleEditor('invoiceEditor', 'invoice', {
-    monthly:'Monthly', quarterly:'Quarterly', annual:'Annual', not_specified:'Not specified' });
-  renderSimpleEditor('schedulingEditor', 'scheduling', {
-    iso_dispatch:'ISO dispatch (best)', buyer_approval:'Buyer approval required',
-    seller_schedules:'Seller schedules', not_specified:'Not specified' });
-  renderSimpleEditor('govlawEditor', 'govlaw', {
-    NY:'New York', DE:'Delaware', TX:'Texas', CA:'California',
-    other:'Other state', not_specified:'Not specified' });
-  renderWeightsEditor();
+  simpleEd('permitEd','permit',
+    {all_obtained:'All obtained',major_obtained:'Major obtained',in_progress:'In progress',not_started:'Not started',not_specified:'Not specified'});
+  simpleEd('codEd','cod',
+    {tight_objective:'Tight / objective',moderate:'Moderate',loose_substantial:'Loose / substantial',not_specified:'Not specified'});
+  simpleEd('intervalEd','interval',
+    {iso_native:'ISO native',hourly:'Hourly',monthly:'Monthly',annual:'Annual',not_specified:'Not specified'});
+  simpleEd('invoiceEd','invoice',
+    {monthly:'Monthly',quarterly:'Quarterly',annual:'Annual',not_specified:'Not specified'});
+  simpleEd('schedulingEd','scheduling',
+    {iso_dispatch:'ISO dispatch',buyer_approval:'Buyer approval',seller_schedules:'Seller schedules',not_specified:'Not specified'});
+  simpleEd('govlawEd','govlaw',
+    {NY:'New York',DE:'Delaware',TX:'Texas',CA:'California',other:'Other',not_specified:'Not specified'});
+  weightsEd();
 }
 
-function toggleModelSection(headerEl) {
-  const body = headerEl.nextElementSibling;
-  const toggle = headerEl.querySelector('.model-section-toggle');
-  const open = body.style.display !== 'none';
-  body.style.display = open ? 'none' : 'block';
-  toggle.textContent = open ? '▸' : '▾';
-}
+window.addEventListener('load', ()=>{ loadSavedModel(); updateModelStatus(); });
 
-// Load saved model on startup
-window.addEventListener('load', () => { loadSavedModel(); updateModelStatus(); });
+</script>
