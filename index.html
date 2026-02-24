@@ -1132,6 +1132,22 @@
     letter-spacing: -0.01em;
   }
   .proceed-sub { font-size: 12px; color: var(--text-muted); font-weight: 300; }
+  .score-legend {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+  }
+  .legend-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-right: 2px;
+  }
+  .score-legend .score-badge { margin-left: 0; }
   .proceed-btn {
     padding: 8px 18px;
     background: transparent;
@@ -1280,6 +1296,14 @@
       <div>
         <div class="proceed-text">Extraction complete</div>
         <div class="proceed-sub" id="proceedSub">Engine 2 will score each term against VPPA market standards</div>
+        <div class="score-legend">
+          <span class="legend-label">Buyer score — lower is better:</span>
+          <span class="score-badge score-favorable">0–25 Favorable</span>
+          <span class="score-badge score-mostly-favorable">26–45 Mostly Favorable</span>
+          <span class="score-badge score-market">46–55 Market</span>
+          <span class="score-badge score-unfavorable">56–75 Unfavorable</span>
+          <span class="score-badge score-bad">76–100 Highly Unfavorable</span>
+        </div>
       </div>
       <div style="display:flex;align-items:center;gap:14px;">
         <button class="proceed-btn" id="scoreBtn" onclick="runEngine2()">Score Terms →</button>
