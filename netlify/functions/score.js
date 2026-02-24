@@ -299,7 +299,7 @@ Return ONLY valid JSON. Use null for truly unknown values. Use the exact enum st
     "logoTrademarkRestriction": "prior_written_consent|permitted|not_addressed|not_specified",
     "approvalProcess": "mutual|seller_approves|buyer_approves|none|not_specified"
   }
-}`;\
+}`;
 
 
 async function callHaiku(userContent, retryCount = 0) {
