@@ -1,8 +1,7 @@
-// Engine 1: Term Sheet Extraction — Single-pass optimized
-// One API call per chunk, fully parallel chunks, confidence flags, auto-retry
+// Engine 1: Term Sheet Extraction — Two-pass parallel, optimized
+// 2 parallel API calls per chunk, 20k chunk size, fully parallel chunks
 
 const Anthropic = require('@anthropic-ai/sdk');
-
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 const HEADERS = {
@@ -12,13 +11,15 @@ const HEADERS = {
   'Content-Type': 'application/json'
 };
 
-const PROMPT = `You are an expert energy procurement analyst extracting facts from a VPPA/PPA term sheet.
-
+const SYSTEM_PREFIX = `You are an expert energy procurement analyst extracting facts from a VPPA/PPA term sheet.
 Return ONLY valid JSON — no prose, no markdown. Use null for absent fields.
 For each term include:
-- "snapshot": 2-4 words capturing the key fact (e.g. "2% fixed, Y2", "Seller bears", "Monthly, net-30"). Use "Not addressed" if absent.
+- "snapshot": 2-4 words capturing the key fact (e.g. "2% fixed, Y2", "Seller bears"). Use "Not addressed" if absent.
 - "summary": plain-English explanation of the full term
-- "confidence": "high" (explicitly stated), "medium" (implied/inferred), or "low" (guessed/unclear)
+- "confidence": "high" (explicitly stated), "medium" (implied/inferred), or "low" (guessed/unclear)`;
+
+// Pass A: Deal header + Pricing & Settlement terms (~2500 output tokens)
+const PROMPT_A = SYSTEM_PREFIX + `
 
 {
   "deal": {
@@ -40,38 +41,46 @@ For each term include:
     "buyerShareMW": "buyer contracted share in MWac — derive from capacity x pct if not explicit — or null"
   },
   "terms": {
-    "escalation": { "snapshot": "e.g. '2% fixed, Y2+' or 'None'", "summary": "How does the strike price escalate — rate or index, when first applies, any cap or collar.", "confidence": "high|medium|low" },
-    "interval": { "snapshot": "e.g. 'Hourly, real-time'", "summary": "Settlement interval (5-min/hourly/monthly), day-ahead or real-time, pricing node.", "confidence": "high|medium|low" },
+    "escalation": { "snapshot": "e.g. '2% fixed, Y2+' or 'None'", "summary": "How strike price escalates — rate or index, when first applies, any cap or collar.", "confidence": "high|medium|low" },
+    "interval": { "snapshot": "e.g. 'Hourly, real-time'", "summary": "Settlement interval, day-ahead or real-time, pricing node.", "confidence": "high|medium|low" },
     "negprice": { "snapshot": "e.g. '$-5/MWh floor' or 'Buyer pays'", "summary": "What happens when prices go negative — floor, curtailment trigger, or buyer still pays fixed.", "confidence": "high|medium|low" },
-    "basis": { "snapshot": "e.g. 'Seller bears' or 'Buyer bears'", "summary": "Who bears node-to-hub basis risk. Any collar or cap on exposure.", "confidence": "high|medium|low" },
-    "scheduling": { "snapshot": "e.g. 'ISO dispatch' or 'Seller controls'", "summary": "Who controls project dispatch — seller, ISO, or buyer approval rights.", "confidence": "high|medium|low" },
+    "basis": { "snapshot": "e.g. 'Seller bears' or 'Buyer bears'", "summary": "Who bears node-to-hub basis risk. Any collar or cap.", "confidence": "high|medium|low" },
+    "scheduling": { "snapshot": "e.g. 'ISO dispatch' or 'Seller controls'", "summary": "Who controls project dispatch.", "confidence": "high|medium|low" },
     "curtailment": { "snapshot": "e.g. 'Seller bears' or 'Deemed gen'", "summary": "Economic curtailment — who bears lost revenue, any deemed generation.", "confidence": "high|medium|low" },
-    "nonecocurtail": { "snapshot": "e.g. 'Seller bears' or 'Force majeure'", "summary": "Grid operator reliability curtailment — who bears the loss.", "confidence": "high|medium|low" },
-    "interconnection": { "snapshot": "e.g. 'Signed, CP met' or 'Pending'", "summary": "Interconnection status, who pays network upgrades, whether it's a condition precedent.", "confidence": "high|medium|low" },
-    "conditions": { "snapshot": "e.g. '3 CPs listed' or 'None'", "summary": "Conditions precedent that must be met before contract becomes binding.", "confidence": "high|medium|low" },
-    "delay": { "snapshot": "e.g. '$10k/day, capped' or 'Not addressed'", "summary": "COD delay damages — rate per day and cap.", "confidence": "high|medium|low" },
-    "permits": { "snapshot": "e.g. 'All obtained' or 'Pending, CP'", "summary": "Permitting status — obtained vs pending, whether it is a condition precedent.", "confidence": "high|medium|low" },
-    "cod": { "snapshot": "e.g. 'IE certified' or 'Self-certified'", "summary": "How COD is defined and certified — who verifies, any independent engineer.", "confidence": "high|medium|low" },
-    "availability": { "snapshot": "e.g. '95%, liquidated' or 'Not addressed'", "summary": "Mechanical availability guarantee — percentage and remedy if missed.", "confidence": "high|medium|low" },
-    "production": { "snapshot": "e.g. 'Annual MWh, LD' or 'Not addressed'", "summary": "Annual energy production guarantee and consequence if missed.", "confidence": "high|medium|low" },
-    "recs": { "snapshot": "e.g. 'Buyer gets all' or 'Seller retains'", "summary": "Who gets RECs, delivery mechanics, consequence of delivery failure.", "confidence": "high|medium|low" },
-    "buyercredit": { "snapshot": "e.g. 'LOC, $5M' or 'Parent guaranty'", "summary": "Buyer credit support — type and amount.", "confidence": "high|medium|low" },
-    "sellercredit": { "snapshot": "e.g. 'Sponsor guaranty' or 'SPV only'", "summary": "Seller credit support pre- and post-COD.", "confidence": "high|medium|low" },
-    "forcemajeure": { "snapshot": "e.g. 'Broad, excl. payment' or 'Narrow'", "summary": "Force majeure definition breadth and whether it excuses payment.", "confidence": "high|medium|low" },
-    "marketdisrupt": { "snapshot": "e.g. 'Substitute price' or 'Not addressed'", "summary": "Major market disruption treatment — scarcity pricing, deemed generation, substitute price.", "confidence": "high|medium|low" },
-    "changeinlaw": { "snapshot": "e.g. 'Buyer bears' or 'Strike adjusts'", "summary": "Who bears impact of law or tax credit changes, whether strike price adjusts.", "confidence": "high|medium|low" },
-    "reputation": { "snapshot": "e.g. 'Termination right' or 'Not addressed'", "summary": "Reputational harm exit rights — definition and which party.", "confidence": "high|medium|low" },
+    "nonecocurtail": { "snapshot": "e.g. 'Seller bears' or 'Force majeure'", "summary": "Reliability curtailment — who bears the loss.", "confidence": "high|medium|low" },
     "invoice": { "snapshot": "e.g. 'Monthly, net-30'", "summary": "Invoice frequency, payment due days, late payment fees.", "confidence": "high|medium|low" },
+    "buyercredit": { "snapshot": "e.g. 'LOC, $5M' or 'Parent guaranty'", "summary": "Buyer credit support — type and amount.", "confidence": "high|medium|low" },
+    "sellercredit": { "snapshot": "e.g. 'Sponsor guaranty' or 'SPV only'", "summary": "Seller credit support pre- and post-COD.", "confidence": "high|medium|low" }
+  }
+}`;
+
+// Pass B: All remaining terms (~2500 output tokens)
+const PROMPT_B = SYSTEM_PREFIX + `
+
+{
+  "terms": {
+    "interconnection": { "snapshot": "e.g. 'Signed, CP met' or 'Pending'", "summary": "Interconnection status, network upgrade costs, whether it's a condition precedent.", "confidence": "high|medium|low" },
+    "conditions": { "snapshot": "e.g. '3 CPs listed' or 'None'", "summary": "Conditions precedent before contract becomes binding.", "confidence": "high|medium|low" },
+    "delay": { "snapshot": "e.g. '$10k/day, capped' or 'Not addressed'", "summary": "COD delay damages — rate per day and cap.", "confidence": "high|medium|low" },
+    "permits": { "snapshot": "e.g. 'All obtained' or 'Pending, CP'", "summary": "Permitting status — obtained vs pending, condition precedent.", "confidence": "high|medium|low" },
+    "cod": { "snapshot": "e.g. 'IE certified' or 'Self-certified'", "summary": "How COD is defined and certified.", "confidence": "high|medium|low" },
+    "availability": { "snapshot": "e.g. '95%, liquidated' or 'Not addressed'", "summary": "Mechanical availability guarantee — percentage and remedy.", "confidence": "high|medium|low" },
+    "production": { "snapshot": "e.g. 'Annual MWh, LD' or 'Not addressed'", "summary": "Annual energy production guarantee and consequence if missed.", "confidence": "high|medium|low" },
+    "recs": { "snapshot": "e.g. 'Buyer gets all' or 'Seller retains'", "summary": "Who gets RECs, delivery mechanics, failure consequence.", "confidence": "high|medium|low" },
+    "forcemajeure": { "snapshot": "e.g. 'Broad, excl. payment' or 'Narrow'", "summary": "Force majeure definition breadth and whether it excuses payment.", "confidence": "high|medium|low" },
+    "marketdisrupt": { "snapshot": "e.g. 'Substitute price' or 'Not addressed'", "summary": "Major market disruption treatment — scarcity pricing, substitute price.", "confidence": "high|medium|low" },
+    "changeinlaw": { "snapshot": "e.g. 'Buyer bears' or 'Strike adjusts'", "summary": "Who bears impact of law or tax credit changes.", "confidence": "high|medium|low" },
+    "reputation": { "snapshot": "e.g. 'Termination right' or 'Not addressed'", "summary": "Reputational harm exit rights — definition and which party.", "confidence": "high|medium|low" },
     "assignment": { "snapshot": "e.g. 'Consent required' or 'Lender carve-out'", "summary": "Assignment rights, consent required, lender security interest.", "confidence": "high|medium|low" },
     "default": { "snapshot": "e.g. '30-day cure' or 'No cross-default'", "summary": "Events of default, cure period, cross-default provisions.", "confidence": "high|medium|low" },
     "termination": { "snapshot": "e.g. 'Mark-to-market' or 'Fixed payment'", "summary": "Early termination payment calculation.", "confidence": "high|medium|low" },
-    "govlaw": { "snapshot": "e.g. 'NY law, courts'", "summary": "Governing state law and dispute resolution venue.", "confidence": "high|medium|low" },
-    "confidentiality": { "snapshot": "e.g. 'ESG ok, no press'", "summary": "Confidentiality scope — ESG reporting and press release rights.", "confidence": "high|medium|low" },
-    "exclusivity": { "snapshot": "e.g. '60-day exclusivity' or 'None'", "summary": "Seller output exclusivity or negotiation exclusivity period.", "confidence": "high|medium|low" },
-    "expenses": { "snapshot": "e.g. 'Each party pays' or 'Shared'", "summary": "Who pays legal fees, registry fees, independent engineer costs.", "confidence": "high|medium|low" },
-    "incentives": { "snapshot": "e.g. 'Seller keeps ITC' or 'Shared'", "summary": "ITC/PTC ownership and transferability value, state incentive sharing.", "confidence": "high|medium|low" },
-    "accounting": { "snapshot": "e.g. 'Hedge accounting' or 'Not addressed'", "summary": "Hedge accounting treatment or tax indemnity provisions.", "confidence": "high|medium|low" },
-    "publicity": { "snapshot": "e.g. 'Mutual approval' or 'Buyer approval'", "summary": "Press release and logo use rights, approval process.", "confidence": "high|medium|low" }
+    "govlaw": { "snapshot": "e.g. 'NY law, courts'", "summary": "Governing law and dispute resolution.", "confidence": "high|medium|low" },
+    "confidentiality": { "snapshot": "e.g. 'ESG ok, no press'", "summary": "Confidentiality scope — ESG and press release rights.", "confidence": "high|medium|low" },
+    "exclusivity": { "snapshot": "e.g. '60-day exclusivity' or 'None'", "summary": "Exclusivity period.", "confidence": "high|medium|low" },
+    "expenses": { "snapshot": "e.g. 'Each party pays' or 'Shared'", "summary": "Who pays legal, registry, and IE costs.", "confidence": "high|medium|low" },
+    "incentives": { "snapshot": "e.g. 'Seller keeps ITC' or 'Shared'", "summary": "ITC/PTC ownership and transferability.", "confidence": "high|medium|low" },
+    "accounting": { "snapshot": "e.g. 'Hedge accounting' or 'Not addressed'", "summary": "Hedge accounting or tax indemnity provisions.", "confidence": "high|medium|low" },
+    "publicity": { "snapshot": "e.g. 'Mutual approval' or 'Buyer approval'", "summary": "Press release and logo use approval process.", "confidence": "high|medium|low" }
   }
 }`;
 
@@ -90,11 +99,11 @@ function chunkDocument(text, maxChars = 20000, overlap = 1500) {
 }
 
 // ─── CALL HAIKU WITH RETRY ───────────────────────────────────
-async function callHaiku(userContent, retryCount = 0) {
+async function callHaiku(systemPrompt, userContent, retryCount = 0) {
   const response = await client.messages.create({
     model: 'claude-haiku-4-5',
-    max_tokens: 6000,
-    system: PROMPT,
+    max_tokens: 3500,
+    system: systemPrompt,
     messages: [{ role: 'user', content: userContent }]
   });
 
@@ -103,8 +112,7 @@ async function callHaiku(userContent, retryCount = 0) {
 
   if (!jsonMatch) {
     if (retryCount < 1) {
-      console.warn('No JSON found, retrying...');
-      return callHaiku(userContent + '\n\nCRITICAL: Return ONLY the JSON object. No other text.', retryCount + 1);
+      return callHaiku(systemPrompt + '\n\nCRITICAL: Return ONLY the JSON object. No other text.', userContent, retryCount + 1);
     }
     throw new Error('Model did not return valid JSON after retry');
   }
@@ -113,8 +121,7 @@ async function callHaiku(userContent, retryCount = 0) {
     return JSON.parse(jsonMatch[0]);
   } catch (e) {
     if (retryCount < 1) {
-      console.warn('JSON parse failed, retrying...');
-      return callHaiku(userContent + '\n\nCRITICAL: Previous response had malformed JSON. Return ONLY valid parseable JSON.', retryCount + 1);
+      return callHaiku(systemPrompt + '\n\nCRITICAL: Previous response had malformed JSON. Return ONLY valid parseable JSON.', userContent, retryCount + 1);
     }
     throw new Error('JSON parse failed after retry: ' + e.message);
   }
@@ -170,16 +177,24 @@ exports.handler = async (event) => {
 
   try {
     const chunks = chunkDocument(text);
-    console.log(`Document: ${text.length} chars → ${chunks.length} chunk(s), 1 call each (was 2)`);
+    console.log(`Document: ${text.length} chars → ${chunks.length} chunk(s), 2 parallel calls each`);
 
+    // All chunks fire in parallel; within each chunk, Pass A and Pass B fire in parallel
     const chunkResults = await Promise.all(
-      chunks.map((chunk, i) =>
-        callHaiku(`Extract all facts from this VPPA/PPA term sheet${chunks.length > 1 ? ` (section ${i + 1} of ${chunks.length})` : ''}:\n\n${chunk}`)
-      )
+      chunks.map(async (chunk, i) => {
+        const msg = `Extract all facts from this VPPA/PPA term sheet${chunks.length > 1 ? ` (section ${i + 1} of ${chunks.length})` : ''}:\n\n${chunk}`;
+        const [passA, passB] = await Promise.all([
+          callHaiku(PROMPT_A, msg),
+          callHaiku(PROMPT_B, msg)
+        ]);
+        return {
+          deal: passA.deal || {},
+          terms: { ...(passA.terms || {}), ...(passB.terms || {}) }
+        };
+      })
     );
 
     const merged = mergeResults(chunkResults);
-
     if (!merged.deal || !merged.terms) throw new Error('Extraction produced no usable results');
 
     if (merged.deal.strikePrice != null) {
