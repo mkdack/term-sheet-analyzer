@@ -1756,7 +1756,7 @@ const CATEGORIES = [
 ];
 
 const TERM_NAMES = {
-  escalation: 'Price',
+  escalation: 'Price & Escalator',
   interval: 'Settlement Interval',
   negprice: 'Negative Prices',
   invoice: 'Invoicing & Payment',
@@ -1804,10 +1804,22 @@ function renderTermCategories(terms, missing, lowConfidence = []) {
     const cards = cat.keys.map(key => {
       const termData   = terms[key];
       const summary    = termData && typeof termData === 'object' ? termData.summary    : termData;
-      const snapshot   = termData && typeof termData === 'object' ? termData.snapshot   : null;
+      let   snapshot   = termData && typeof termData === 'object' ? termData.snapshot   : null;
       const confidence = termData && typeof termData === 'object' ? termData.confidence : null;
       const isMissing  = !summary || missing.includes(key);
       const isLowConf  = lowConfidence.includes(key);
+
+      // Override snapshot for escalation to show combined price + escalator
+      if (key === 'escalation' && !isMissing && extractedData?.deal) {
+        const price = extractedData.deal.strikePrice;
+        const esc   = extractedData.deal.escalator;
+        if (price != null || esc) {
+          snapshot = [
+            price != null ? `$${price}/MWh` : null,
+            esc && esc !== '0%' && esc !== '0' ? esc : '0% escalator'
+          ].filter(Boolean).join(' · ');
+        }
+      }
 
       let badge = '';
       if (!isMissing && confidence === 'low') {
