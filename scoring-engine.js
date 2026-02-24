@@ -493,29 +493,45 @@ function scoreIA(f) {
  * 13. cp — Conditions Precedent
  */
 function scoreCP(f) {
-  const COUNT_BASE = { 5: 5, 4: 12, 3: 22, 2: 35, 1: 50, 0: 80 };
-  const count = Array.isArray(f.buyerCPs) ? f.buyerCPs.length : (f.buyerCPCount || 0);
-  let score = COUNT_BASE[Math.min(count, 5)] !== undefined ? COUNT_BASE[Math.min(count, 5)] : 80;
-
-  const TERM = { yes: -5, no: 10, not_specified: 5 };
-  score += TERM[f.buyerTerminationRight || 'not_specified'] || 5;
-
-  const months = f.cpDeadlineMonths;
-  if      (months != null && months <= 6)  score -= 5;
-  else if (months != null && months <= 12) score += 0;
-  else if (months != null && months <= 18) score += 3;
-  else if (months != null && months <= 24) score += 5;
-  else if (months != null)                 score += 10;
-  else                                     score += 8;
+  // From buyer perspective: CPs are seller protections — get-out-of-jail cards.
+  // Fewer seller CPs = better. Buyer CPs are less dangerous but still add friction.
+  // Ideal deal: 0 seller CPs, seller fully committed from execution.
 
   const sellerCPs = Array.isArray(f.sellerCPs) ? f.sellerCPs.length : (f.sellerCPCount || 0);
-  score += Math.min(sellerCPs, 3) * 2;
+  const buyerCPs  = Array.isArray(f.buyerCPs)  ? f.buyerCPs.length  : (f.buyerCPCount  || 0);
 
-  const NOTICE = { required: -3, not_required: 3, not_specified: 2 };
-  score += NOTICE[f.cpSatisfactionNotice || 'not_specified'] || 2;
+  // Seller CP count is the primary risk driver
+  const SELLER_BASE = { 0: 10, 1: 30, 2: 50, 3: 65, 4: 78, 5: 90 };
+  let score = SELLER_BASE[Math.min(sellerCPs, 5)] !== undefined
+    ? SELLER_BASE[Math.min(sellerCPs, 5)]
+    : 90;
 
+  // Buyer CPs add modest friction but are less dangerous
+  const BUYER_ADD = { 0: 0, 1: 3, 2: 6, 3: 10, 4: 14, 5: 18 };
+  score += BUYER_ADD[Math.min(buyerCPs, 5)] || 0;
+
+  // Buyer termination right if CPs not met = good (buyer has an exit)
+  const TERM = { yes: -8, no: 8, not_specified: 4 };
+  score += TERM[f.buyerTerminationRight || 'not_specified'] || 4;
+
+  // CP deadline: tight deadline = seller must satisfy quickly = better for buyer
+  const months = f.cpDeadlineMonths;
+  if      (months != null && months <= 6)  score -= 8;
+  else if (months != null && months <= 12) score -= 4;
+  else if (months != null && months <= 18) score += 0;
+  else if (months != null && months <= 24) score += 4;
+  else if (months != null)                 score += 10;
+  else                                     score += 6;
+
+  // Flags
   let flag = null;
-  if (count === 0) flag = 'No conditions precedent — buyer is contractually committed from execution regardless of project status.';
+  if (sellerCPs >= 3) {
+    flag = sellerCPs + ' seller CPs — significant seller optionality. Each is a potential exit before the project is committed.';
+  } else if (sellerCPs === 0) {
+    flag = 'No seller CPs — seller is fully committed from execution. Favorable for buyer.';
+  } else if (sellerCPs >= 1 && f.buyerTerminationRight === 'no') {
+    flag = 'Seller has CP optionality but buyer has no termination right if CPs are not met — asymmetric risk.';
+  }
 
   return { score: clamp(score), flag };
 }
