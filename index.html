@@ -1523,9 +1523,23 @@
   .mtx-input { width:52px; padding:3px 5px; background:var(--bg2); border:1px solid var(--border); border-radius:3px; font-family:var(--mono); font-size:10px; color:var(--text); text-align:center; display:block; margin:0 auto; }
   .mtx-input:focus { outline:none; border-color:var(--text-muted); }
   .mtx-input.mod { border-color:var(--gold); color:var(--gold); }
-  .strike-iso { margin-bottom:16px; }
+  .strike-iso { margin-bottom:20px; }
+  .strike-iso-header { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+  .strike-custom-badge { font-family:var(--mono); font-size:8px; letter-spacing:.06em; text-transform:uppercase; color:var(--gold); background:oklch(75% 0.12 75 / 0.15); padding:1px 5px; border-radius:3px; vertical-align:middle; }
+  .strike-add-tech-btn { font-family:var(--body); font-size:10px; color:var(--text-muted); background:none; border:none; cursor:pointer; padding:0; margin-left:auto; }
+  .strike-add-tech-btn:hover { color:var(--text); }
+  .strike-remove-iso-btn { font-family:var(--body); font-size:10px; color:var(--red); background:none; border:none; cursor:pointer; padding:0; opacity:.6; }
+  .strike-remove-iso-btn:hover { opacity:1; }
+  .strike-remove-btn { font-family:var(--body); font-size:13px; color:var(--text-muted); background:none; border:none; cursor:pointer; padding:0 4px; line-height:1; opacity:.5; width:20px; flex-shrink:0; }
+  .strike-remove-btn:hover { color:var(--red); opacity:1; }
+  .strike-add-market-row { margin-top:16px; padding-top:16px; border-top:1px dashed var(--border); }
+  .strike-add-market-btn { font-family:var(--body); font-size:11px; color:var(--text-muted); background:none; border:1px dashed var(--border); border-radius:6px; padding:6px 14px; cursor:pointer; width:100%; transition:all var(--dur-fast) var(--ease-out-quart); }
+  .strike-add-market-btn:hover { color:var(--text); border-color:var(--border-strong); }
+  .strike-add-market-form { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .strike-add-input { padding:5px 10px; background:var(--bg2); border:1px solid var(--border); border-radius:6px; font-family:var(--body); font-size:11px; color:var(--text); width:160px; }
+  .strike-add-input:focus { outline:none; border-color:var(--text-muted); }
   .strike-iso-label { font-family:var(--mono); font-size:9px; letter-spacing:.1em; text-transform:uppercase; color:var(--text-muted); margin-bottom:6px; }
-  .strike-row { display:grid; grid-template-columns:70px repeat(7,1fr); gap:4px; align-items:center; padding:4px 0; border-bottom:1px solid var(--border); }
+  .strike-row { display:grid; grid-template-columns:70px repeat(7,1fr) 24px; gap:4px; align-items:center; padding:4px 0; border-bottom:1px solid var(--border); }
   .strike-row:last-child { border-bottom:none; }
   .strike-row.hdr { font-family:var(--mono); font-size:8px; letter-spacing:.05em; text-transform:uppercase; color:var(--text-muted); }
   .strike-input { width:100%; padding:3px 4px; background:var(--bg2); border:1px solid var(--border); border-radius:3px; font-family:var(--mono); font-size:10px; color:var(--text); text-align:center; }
@@ -3041,28 +3055,119 @@ function matrixEd(id, cfgPath, rowLabels, colLabels) {
 }
 
 // Strike price threshold editor
+const STRIKE_FLDS = ['bf_low','bf_high','mkt_low','mkt_high','sf_low','sf_high','rf_high'];
+const STRIKE_HDRS = ['BF Low','BF High','Mkt Low','Mkt High','SF Low','SF High','RF High'];
+const DEFAULT_ISOS = ['ERCOT','CAISO','PJM','MISO','SPP','ISO-NE','NYISO'];
+
+function strikeIsoBlock(iso, isoD) {
+  const rows = Object.keys(isoD).map(tech => {
+    const td = isoD[tech]; if(!td || typeof td !== 'object') return '';
+    const isCustom = !DEFAULT_ISOS.includes(iso);
+    const ins = STRIKE_FLDS.map(f => {
+      const v = td[f] ?? '';
+      const mod = isCustom || v !== defVal(`strike.${iso}.${tech}.${f}`);
+      return `<input type="number" class="strike-input${mod?' mod':''}" value="${v}" step="0.5"
+        oninput="updCfg('strike.${iso}.${tech}.${f}',+this.value);this.classList.add('mod')">`;
+    }).join('');
+    return `<div class="strike-row">
+      <span style="font-size:11px;color:var(--text-dim)">${escHtml(tech)}</span>${ins}
+      <button class="strike-remove-btn" title="Remove ${tech}" onclick="removeStrikeTech('${iso}','${tech}')">×</button>
+    </div>`;
+  }).join('');
+
+  const isCustom = !DEFAULT_ISOS.includes(iso);
+  return `<div class="strike-iso" id="strike-iso-${iso.replace(/[^a-z0-9]/gi,'_')}">
+    <div class="strike-iso-header">
+      <div class="strike-iso-label">${escHtml(iso)}${isCustom ? ' <span class="strike-custom-badge">custom</span>' : ''}</div>
+      <button class="strike-add-tech-btn" onclick="addStrikeTech('${iso}')">+ Add technology</button>
+      ${isCustom ? `<button class="strike-remove-iso-btn" onclick="removeStrikeIso('${iso}')">Remove market</button>` : ''}
+    </div>
+    <div class="strike-row hdr"><span></span>${STRIKE_HDRS.map(h=>`<span>${h}</span>`).join('')}<span></span></div>
+    ${rows}
+  </div>`;
+}
+
 function strikeEd() {
   const el=document.getElementById('strikeEd'); if(!el) return;
   const cfg=window.ScoringEngine.getConfig();
-  const isos=['ERCOT','CAISO','PJM','MISO','SPP','ISO-NE','NYISO'];
-  const techs=['Solar','Wind'];
-  const flds=['bf_low','bf_high','mkt_low','mkt_high','sf_low','sf_high','rf_high'];
-  const hdrs=['BF Low','BF High','Mkt Low','Mkt High','SF Low','SF High','RF High'];
-  el.innerHTML=isos.map(iso=>{
-    const isoD=cfg.strike[iso]||cfg.strike[iso.replace('-','')];
-    if(!isoD) return '';
-    const rows=techs.map(tech=>{
-      const td=isoD[tech]; if(!td) return '';
-      const ins=flds.map((f,i)=>{
-        const v=td[f]??'';
-        const mod=v!==defVal(`strike.${iso}.${tech}.${f}`);
-        return `<input type="number" class="strike-input${mod?' mod':''}" value="${v}" step="0.5" oninput="updCfg('strike.${iso}.${tech}.${f}',+this.value);this.classList.add('mod')">`;
-      }).join('');
-      return `<div class="strike-row"><span style="font-size:11px;color:var(--text-dim)">${tech}</span>${ins}</div>`;
-    }).join('');
-    return `<div class="strike-iso"><div class="strike-iso-label">${iso}</div>
-      <div class="strike-row hdr"><span></span>${hdrs.map(h=>`<span>${h}</span>`).join('')}</div>${rows}</div>`;
-  }).join('');
+  const allIsos = Object.keys(cfg.strike);
+
+  el.innerHTML = allIsos.map(iso => {
+    const isoD = cfg.strike[iso];
+    if(!isoD || typeof isoD !== 'object') return '';
+    return strikeIsoBlock(iso, isoD);
+  }).join('') + `
+  <div class="strike-add-market-row">
+    <div class="strike-add-market-form" id="strikeAddForm" style="display:none;">
+      <input type="text" class="strike-add-input" id="strikeNewIso" placeholder="ISO name (e.g. AESO)" maxlength="20">
+      <input type="text" class="strike-add-input" id="strikeNewTech" placeholder="Technology (e.g. Solar)" maxlength="20">
+      <button class="model-btn-primary" onclick="confirmAddStrike()" style="font-size:11px;padding:5px 12px;">Add</button>
+      <button class="model-btn-secondary" onclick="cancelAddStrike()" style="font-size:11px;padding:5px 12px;">Cancel</button>
+    </div>
+    <button class="strike-add-market-btn" id="strikeAddBtn" onclick="showAddStrikeForm()">+ Add market / technology</button>
+  </div>`;
+}
+
+function showAddStrikeForm() {
+  document.getElementById('strikeAddForm').style.display='flex';
+  document.getElementById('strikeAddBtn').style.display='none';
+  document.getElementById('strikeNewIso').focus();
+}
+function cancelAddStrike() {
+  document.getElementById('strikeAddForm').style.display='none';
+  document.getElementById('strikeAddBtn').style.display='inline-flex';
+  document.getElementById('strikeNewIso').value='';
+  document.getElementById('strikeNewTech').value='';
+}
+function confirmAddStrike() {
+  const iso = document.getElementById('strikeNewIso').value.trim().toUpperCase();
+  const tech = document.getElementById('strikeNewTech').value.trim();
+  if(!iso || !tech) { alert('Please enter both an ISO/market name and a technology.'); return; }
+  const cfg = window.ScoringEngine.getConfig();
+  if(!cfg.strike[iso]) cfg.strike[iso] = {};
+  if(cfg.strike[iso][tech]) { alert(`${iso} / ${tech} already exists.`); return; }
+  // Default values — start at market-ish midpoints, user fills in
+  cfg.strike[iso][tech] = { bf_low:0, bf_high:0, mkt_low:0, mkt_high:0, sf_low:0, sf_high:0, rf_high:0 };
+  window.ScoringEngine.setConfig(cfg);
+  markUnsaved();
+  strikeEd();
+  // Scroll to new ISO
+  setTimeout(() => {
+    const el = document.getElementById('strike-iso-' + iso.replace(/[^a-z0-9]/gi,'_'));
+    if(el) el.scrollIntoView({ behavior:'smooth', block:'nearest' });
+  }, 50);
+}
+function addStrikeTech(iso) {
+  const tech = prompt(`Add technology to ${iso}:`);
+  if(!tech || !tech.trim()) return;
+  const cfg = window.ScoringEngine.getConfig();
+  if(!cfg.strike[iso]) cfg.strike[iso] = {};
+  const techKey = tech.trim();
+  if(cfg.strike[iso][techKey]) { alert(`${techKey} already exists for ${iso}.`); return; }
+  cfg.strike[iso][techKey] = { bf_low:0, bf_high:0, mkt_low:0, mkt_high:0, sf_low:0, sf_high:0, rf_high:0 };
+  window.ScoringEngine.setConfig(cfg);
+  markUnsaved();
+  strikeEd();
+}
+function removeStrikeTech(iso, tech) {
+  if(!confirm(`Remove ${tech} from ${iso}?`)) return;
+  const cfg = window.ScoringEngine.getConfig();
+  if(cfg.strike[iso]) delete cfg.strike[iso][tech];
+  window.ScoringEngine.setConfig(cfg);
+  markUnsaved();
+  strikeEd();
+}
+function removeStrikeIso(iso) {
+  if(!confirm(`Remove ${iso} and all its thresholds?`)) return;
+  const cfg = window.ScoringEngine.getConfig();
+  delete cfg.strike[iso];
+  window.ScoringEngine.setConfig(cfg);
+  markUnsaved();
+  strikeEd();
+}
+function markUnsaved() {
+  const el = document.getElementById('modelStatus');
+  if(el) { el.textContent='Unsaved changes'; el.classList.add('modified'); }
 }
 
 // Weights editor
