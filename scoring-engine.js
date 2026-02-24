@@ -1250,27 +1250,51 @@ function scoreProduct(f) {
  * 28. recs — REC Delivery & Mechanics
  */
 function scoreRECs(f) {
+  // f fields from mapper: recOwnership, recQuality, deliveryMechanism, recDefaultRemedy, vintageRequirement, registryAccount
   const MATRIX = CONFIG.recs;
 
-  const ro = f.replacementObligation || 'not_specified';
-  const rq = f.replacementQuality    || 'not_specified';
+  // Map mapper's recOwnership → matrix row key
+  const ownershipMap = {
+    buyer: 'yes',
+    seller: 'none',
+    split: 'yes',          // partial conveyance — treat as yes but lower quality row
+    cash_only: 'cash_only',
+    not_specified: 'not_specified',
+  };
+
+  // Map mapper's recQuality → matrix col key
+  const qualityMap = {
+    same_tech_same_region:       'same_tech_same_region',
+    same_region_any_renewable:   'same_region_any_renewable',
+    any_national_rec:            'any_national_rec',
+    not_specified:               'not_specified',
+  };
+
+  const ro  = ownershipMap[f.recOwnership || 'not_specified'] || 'not_specified';
+  const rq  = qualityMap[f.recQuality     || 'not_specified'] || 'not_specified';
   const row = MATRIX[ro] || MATRIX['not_specified'];
-  let score = row[rq] !== undefined ? row[rq] : (row['_'] || row['not_specified'] || 65);
+  let score = row[rq] !== undefined ? row[rq] : (row['_'] ?? row['not_specified'] ?? 65);
 
-  const DEL  = { monthly: -5, quarterly: -3, annual: 0, long_lag: 5, not_specified: 3 };
-  const VIN  = { strict_match: -3, loose_banking: 5, not_specified: 3 };
-  const REG  = { yes_seller_transfers: -5, yes_buyer_responsible: 3, not_specified: 5 };
-  const DAM  = { full_replacement_cost: -5, market_value_cash: -3, fixed_ld: 3, capped_below_market: 7, none: 10, not_specified: 5 };
-  const FEES = { seller_pays: -2, buyer_pays: 2, not_specified: 1 };
+  // Delivery mechanism modifier
+  const DEL = { transfer: -5, certificate: -2, not_specified: 3 };
+  score += DEL[f.deliveryMechanism || 'not_specified'] ?? 3;
 
-  score += DEL[f.deliveryTiming || 'not_specified'] || 3;
-  score += VIN[f.vintageMatching || 'not_specified'] || 3;
-  score += REG[f.registryExplicit || 'not_specified'] || 5;
-  score += DAM[f.shortfallDamages || 'not_specified'] || 5;
-  score += FEES[f.transferFees || 'not_specified'] || 1;
+  // Shortfall remedy modifier — map from mapper's recDefaultRemedy
+  const DAM = { replacement: -5, liquidated_damages: -3, termination: -2, none: 10, not_specified: 5 };
+  score += DAM[f.recDefaultRemedy || 'not_specified'] ?? 5;
+
+  // Vintage requirement modifier
+  const VIN = { strict_match: -3, loose_banking: 5, not_specified: 3 };
+  score += VIN[f.vintageRequirement || 'not_specified'] ?? 3;
+
+  // Registry account modifier
+  const REG = { buyer_account: -5, seller_transfers: -3, not_addressed: 5, not_specified: 5 };
+  score += REG[f.registryAccount || 'not_specified'] ?? 5;
 
   let flag = null;
-  if (!f.replacementObligation) flag = 'REC mechanics not defined — buyer cannot guarantee annual decarbonization claims.';
+  if (!f.recOwnership || f.recOwnership === 'seller' || f.recOwnership === 'not_specified') {
+    flag = 'REC ownership not confirmed for buyer — renewable energy claim may not be valid.';
+  }
 
   return { score: clamp(score), flag };
 }
