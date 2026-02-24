@@ -1982,10 +1982,9 @@ async function runEngine2() {
 
     const { scores, termFlags, interactions } = window.ScoringEngine.scoreAll(facts);
 
-    // Render scores onto cards
+    // Render scores onto cards + overall score into proceedSub
     renderScores(scores, termFlags, interactions);
 
-    sub.textContent = 'Scoring complete';
     btn.textContent = 'Re-score';
     btn.disabled = false;
 
