@@ -2900,6 +2900,7 @@ function applyFilters() {
       <div class="model-term-block"><div class="model-term-name">Settlement Point — Score Matrix</div><div id="floatingEd"></div></div>
       <div class="model-term-block"><div class="model-term-name">Negative Price Mechanisms</div><div id="negpriceEd"></div></div>
       <div class="model-term-block"><div class="model-term-name">Termination Payment — Score Matrix</div><div id="etermEd"></div></div>
+      <div class="model-term-block"><div class="model-term-name">Market Disruption — Score Matrix</div><div class="model-term-desc">Scores by price publication available × fallback mechanism.</div><div id="marketdisruptEd"></div></div>
       <div class="model-term-block"><div class="model-term-name">Basis Risk Allocation</div><div id="basisEd"></div></div>
     </div>
   </div>
@@ -2919,12 +2920,16 @@ function applyFilters() {
       <div class="model-term-block"><div class="model-term-name">Conditions Precedent — Seller CP Count</div><div class="model-term-desc">Each seller CP is a potential exit for the seller.</div><div id="cpEd"></div></div>
       <div class="model-term-block"><div class="model-term-name">Permits Status</div><div id="permitEd"></div></div>
       <div class="model-term-block"><div class="model-term-name">COD Definition</div><div id="codEd"></div></div>
+      <div class="model-term-block"><div class="model-term-name">Delay / COD Extension — Score Matrix</div><div class="model-term-desc">Scores by long-stop date present × delay termination right.</div><div id="delayEd"></div></div>
+      <div class="model-term-block"><div class="model-term-name">Availability Mechanism — Score Matrix</div><div class="model-term-desc">Scores by availability remedy × availability guaranty present.</div><div id="availmechEd"></div></div>
+      <div class="model-term-block"><div class="model-term-name">Availability Guarantee — Production Basis × P-Value</div><div class="model-term-desc">Scores by guaranty present × P-value basis.</div><div id="availguaranteedEd"></div></div>
+      <div class="model-term-block"><div class="model-term-name">Seller Performance Assurance — Score Matrix</div><div class="model-term-desc">Scores by credit support type × pre-COD guarantee.</div><div id="sellerpaEd"></div></div>
     </div>
   </div>
 
   <div class="model-section">
     <div class="model-section-header" onclick="toggleModelSection(this)">
-      <div class="model-section-title"><span class="model-tier-badge tier-admin">Legal &amp; Admin</span><span>Settlement Interval, Invoice, Scheduling, Governing Law</span></div>
+      <div class="model-section-title"><span class="model-tier-badge tier-admin">Legal &amp; Admin</span><span>Settlement Interval, Invoice, Scheduling, Governing Law, Performance Assurance, Assignment, EOD, Product, RECs, Incentives, Confidentiality, Exclusivity, Expenses, Accounting, Publicity, Reputation</span></div>
       <span class="model-section-toggle">▾</span>
     </div>
     <div class="model-section-body">
@@ -2932,6 +2937,18 @@ function applyFilters() {
       <div class="model-term-block"><div class="model-term-name">Invoice Frequency</div><div id="invoiceEd"></div></div>
       <div class="model-term-block"><div class="model-term-name">Scheduling Control</div><div id="schedulingEd"></div></div>
       <div class="model-term-block"><div class="model-term-name">Governing Law</div><div id="govlawEd"></div></div>
+      <div class="model-term-block"><div class="model-term-name">Buyer Performance Assurance — Score Matrix</div><div class="model-term-desc">Scores by buyer credit rating × credit support type.</div><div id="buyerpaEd"></div></div>
+      <div class="model-term-block"><div class="model-term-name">Assignment Rights — Score Matrix</div><div class="model-term-desc">Scores by FM scope × buyer obligation treatment.</div><div id="assignEd"></div></div>
+      <div class="model-term-block"><div class="model-term-name">Events of Default — Score Matrix</div><div class="model-term-desc">Scores by cross-default present × cure period type.</div><div id="eodEd"></div></div>
+      <div class="model-term-block"><div class="model-term-name">Product Definition — Score Matrix</div><div class="model-term-desc">Scores by output conveyed × bundled vs unbundled.</div><div id="productEd"></div></div>
+      <div class="model-term-block"><div class="model-term-name">RECs — Score Matrix</div><div class="model-term-desc">Scores by REC conveyance × REC eligibility scope.</div><div id="recsEd"></div></div>
+      <div class="model-term-block"><div class="model-term-name">Incentives / ITC Treatment</div><div id="incentivesEd"></div></div>
+      <div class="model-term-block"><div class="model-term-name">Confidentiality Scope</div><div id="confEd"></div></div>
+      <div class="model-term-block"><div class="model-term-name">Seller Output Exclusivity</div><div id="exclEd"></div></div>
+      <div class="model-term-block"><div class="model-term-name">Legal Fees / Expenses</div><div id="expensesEd"></div></div>
+      <div class="model-term-block"><div class="model-term-name">Accounting Representations</div><div id="acctEd"></div></div>
+      <div class="model-term-block"><div class="model-term-name">Publicity / Joint Announcement</div><div id="publicityEd"></div></div>
+      <div class="model-term-block"><div class="model-term-name">Reputation / Termination Right</div><div id="reputationEd"></div></div>
     </div>
   </div>
 
@@ -3250,6 +3267,68 @@ function renderModelPage() {
     {iso_dispatch:'ISO dispatch',buyer_approval:'Buyer approval',seller_schedules:'Seller schedules',not_specified:'Not specified'});
   simpleEd('govlawEd','govlaw',
     {NY:'New York',DE:'Delaware',TX:'Texas',CA:'California',other:'Other',not_specified:'Not specified'});
+
+  matrixEd('marketdisruptEd','marketdisrupt',
+    {yes:'Price published',no:'Price unavailable',not_specified:'Not specified'},
+    {suspend:'Suspend',fallback_average:'Fallback avg',fallback_last:'Fallback last',settle_normal:'Settle normally',not_specified:'Not specified',_:'N/A'});
+
+  matrixEd('delayEd','delay',
+    {yes:'Long-stop date present',no:'No long-stop date',not_specified:'Not specified'},
+    {yes:'Termination right',no:'No termination right',not_specified:'Not specified'});
+
+  matrixEd('availmechEd','availmech',
+    {deemed_generation:'Deemed generation',liquidated_damages:'Liquidated damages',none:'No remedy',not_specified:'Not specified'},
+    {yes:'Guaranty present',no:'No guaranty',not_specified:'Not specified'});
+
+  matrixEd('availguaranteedEd','availguaranteed',
+    {yes:'Guaranty present',no:'No guaranty',not_specified:'Not specified'},
+    {P50:'P50',P75:'P75',P90:'P90',other:'Other',not_specified:'Not specified',_:'N/A'});
+
+  matrixEd('sellerpaEd','sellerpa',
+    {ig_sponsor_guaranty:'IG sponsor guaranty',sponsor_guaranty:'Sponsor guaranty',lc:'Letter of credit',cash:'Cash',spv_only:'SPV only',not_specified:'Not specified'},
+    {yes:'Pre-COD guarantee',no:'No pre-COD',not_specified:'Not specified'});
+
+  matrixEd('buyerpaEd','buyerpa',
+    {ig:'IG rated',non_ig:'Non-IG',not_specified:'Not specified'},
+    {unsecured:'Unsecured',parent_guaranty:'Parent guaranty',lc:'LC',cash:'Cash',lc_plus_mtm:'LC+MTM',cash_plus_mtm:'Cash+MTM',not_specified:'Not specified'});
+
+  matrixEd('assignEd','assign_matrix',
+    {narrow_objective:'Narrow / objective',moderate:'Moderate',broad_subjective:'Broad / subjective',not_specified:'Not specified'},
+    {continue:'Obligations continue',excused:'Obligations excused',not_specified:'Not specified'});
+
+  matrixEd('eodEd','eod',
+    {yes:'Cross-default present',no:'No cross-default',not_specified:'Not specified'},
+    {objective_test:'Objective cure',subjective:'Subjective cure',none:'No cure right',not_specified:'Not specified'});
+
+  matrixEd('productEd','product',
+    {all_conveyed:'All output',partial_carveouts:'Partial carveouts',not_defined:'Not defined',not_specified:'Not specified'},
+    {bundled:'Bundled',unbundled:'Unbundled',not_specified:'Not specified'});
+
+  matrixEd('recsEd','recs',
+    {yes:'RECs conveyed',cash_only:'Cash only',none:'No RECs',not_specified:'Not specified'},
+    {same_tech_same_region:'Same tech & region',same_region_any_renewable:'Same region any renewable',any_national_rec:'Any national REC',not_specified:'Not specified',_:'N/A'});
+
+  simpleEd('incentivesEd','incentives',
+    {buyer_shares_upside:'Buyer shares ITC upside',seller_retains_strike_reflects:'Seller retains — strike reflects',seller_retains_no_transparency:'Seller retains — no transparency',not_specified:'Not specified'});
+
+  simpleEd('confEd','conf',
+    {narrow_pricing_only:'Narrow (pricing only)',standard_all_terms:'Standard (all terms)',broad_existence_included:'Broad (existence included)',not_specified:'Not specified'});
+
+  simpleEd('exclEd','excl',
+    {full_project_committed:'Full project committed',partial_project:'Partial project',not_specified:'Not specified'});
+
+  simpleEd('expensesEd','expenses',
+    {each_own:'Each party bears own',shared:'Shared',buyer_bears:'Buyer bears all',not_specified:'Not specified'});
+
+  simpleEd('acctEd','acct',
+    {both_parties:'Both parties make reps',buyer_only:'Buyer only',none:'None',not_specified:'Not specified'});
+
+  simpleEd('publicityEd','publicity',
+    {yes_mutual_approval:'Mutual approval required',notification_only:'Notification only',no_restriction:'No restriction',not_specified:'Not specified'});
+
+  simpleEd('reputationEd','reputation',
+    {buyer_right:'Buyer termination right',mutual:'Mutual right',none:'No right',not_specified:'Not specified'});
+
   weightsEd();
 }
 

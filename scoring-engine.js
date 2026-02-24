@@ -109,6 +109,69 @@ const DEFAULT_CONFIG = {
     shared:       {automatic:25,negotiated:30,none:40,not_specified:35},
     not_specified:{automatic:45,negotiated:50,none:60,not_specified:55},
   },
+
+  delay: {
+    yes:          {yes:10,no:45,not_specified:30},
+    no:           {yes:35,no:75,not_specified:60},
+    not_specified:{not_specified:80},
+  },
+  availguaranteed: {
+    yes:{P50:10,P75:45,P90:65,other:50,not_specified:40},
+    no: {_:82},
+    not_specified:{_:80},
+  },
+  availmech: {
+    solar:{pct99:0,pct98:10,pct97:25,pct96:40,pct95:55,below95:80,null_pct:78},
+    wind: {pct97:5,pct96:15,pct95:30,pct94:42,pct93:55,pct92:65,below92:82,null_pct:78},
+  },
+  buyerpa: {
+    ig:    {unsecured:5,parent_guaranty:15,lc:30,cash:45,lc_plus_mtm:55,cash_plus_mtm:70,not_specified:40},
+    non_ig:{unsecured:55,parent_guaranty:30,lc:15,cash:10,lc_plus_mtm:8,cash_plus_mtm:5,not_specified:65},
+    not_specified:{not_specified:60},
+  },
+  sellerpa: {
+    ig_sponsor_guaranty:{yes:5, no:15},
+    sponsor_guaranty:   {yes:12,no:28},
+    lc:                 {yes:18,no:35},
+    cash:               {yes:15,no:32},
+    spv_only:           {yes:55,no:78},
+    not_specified:      {not_specified:65},
+  },
+  eod: {
+    yes:          {objective_test:5, subjective:18,none:30,not_specified:25},
+    no:           {objective_test:30,subjective:42,none:65,not_specified:55},
+    not_specified:{not_specified:60},
+  },
+  marketdisrupt: {
+    yes:          {suspend:5,fallback_average:15,fallback_last:30,settle_normal:65,not_specified:50},
+    no:           {_:80},
+    not_specified:{_:80},
+  },
+  reputation: {buyer_right:10,mutual:25,none:55,not_specified:50},
+  product: {
+    all_conveyed:      {bundled:5, unbundled:20,not_specified:15},
+    partial_carveouts: {bundled:35,unbundled:50,not_specified:45},
+    not_defined:       {bundled:55,unbundled:70,not_specified:65},
+    not_specified:     {not_specified:60},
+  },
+  recs: {
+    yes:          {same_tech_same_region:5,same_region_any_renewable:15,any_national_rec:35,not_specified:25},
+    cash_only:    {_:40},
+    none:         {_:72},
+    not_specified:{_:65},
+  },
+  incentives:  {buyer_shares_upside:5,seller_retains_strike_reflects:20,seller_retains_no_transparency:50,not_specified:55},
+  conf:        {narrow_pricing_only:15,standard_all_terms:30,broad_existence_included:55,not_specified:45},
+  excl:        {full_project_committed:10,partial_project:40,not_specified:55},
+  expenses:    {each_own:20,shared:30,buyer_bears:60,not_specified:35},
+  acct:        {both_parties:15,buyer_only:30,none:50,not_specified:45},
+  publicity:   {yes_mutual_approval:15,notification_only:35,no_restriction:55,not_specified:45},
+  assign_matrix: {
+    narrow_objective: {continue:5, excused:25,not_specified:15},
+    moderate:         {continue:20,excused:40,not_specified:32},
+    broad_subjective: {continue:40,excused:65,not_specified:55},
+    not_specified:    {not_specified:60},
+  },
 };
 
 let CONFIG = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
@@ -375,11 +438,7 @@ function scoreMarketDisrupt(f) {
   const defined = f.disruptionDefined || 'not_specified';
   const treatment = f.settlementTreatment || 'not_specified';
 
-  const MATRIX = {
-    yes: { suspend: 5, fallback_average: 15, fallback_last: 30, settle_normal: 65, not_specified: 50 },
-    no:  { _: 80 },
-    not_specified: { _: 80 },
-  };
+  const MATRIX = CONFIG.marketdisrupt;
 
   let score;
   if (defined === 'yes') {
@@ -606,11 +665,7 @@ function scoreCP(f) {
  * 14. delay — Project Delay Provisions
  */
 function scoreDelay(f) {
-  const MATRIX = {
-    yes:  { yes: 10, no: 45, not_specified: 30 },
-    no:   { yes: 35, no: 75, not_specified: 60 },
-    not_specified: { not_specified: 80 },
-  };
+  const MATRIX = CONFIG.delay;
 
   const gCOD = f.guaranteedCOD || 'not_specified';
   const dDP  = f.delayDamagesPresent || 'not_specified';
@@ -684,24 +739,25 @@ function scoreAvailMech(f) {
   const tech = (f.technology || 'solar').toLowerCase();
   const pct  = f.availGuaranteePct;
 
+  const AM = CONFIG.availmech[tech] || CONFIG.availmech.solar;
   let base;
   if (pct == null) {
-    base = 78;
+    base = AM.null_pct ?? 78;
   } else if (tech === 'wind') {
-    if      (pct >= 97) base = 5;
-    else if (pct >= 96) base = 15;
-    else if (pct >= 95) base = 30;
-    else if (pct >= 94) base = 42;
-    else if (pct >= 93) base = 55;
-    else if (pct >= 92) base = 65;
-    else                base = 82;
-  } else { // solar
-    if      (pct >= 99) base = 0;
-    else if (pct >= 98) base = 10;
-    else if (pct >= 97) base = 25;
-    else if (pct >= 96) base = 40;
-    else if (pct >= 95) base = 55;
-    else                base = 80;
+    if      (pct >= 97) base = AM.pct97 ?? 5;
+    else if (pct >= 96) base = AM.pct96 ?? 15;
+    else if (pct >= 95) base = AM.pct95 ?? 30;
+    else if (pct >= 94) base = AM.pct94 ?? 42;
+    else if (pct >= 93) base = AM.pct93 ?? 55;
+    else if (pct >= 92) base = AM.pct92 ?? 65;
+    else                base = AM.below92 ?? 82;
+  } else {
+    if      (pct >= 99) base = AM.pct99 ?? 0;
+    else if (pct >= 98) base = AM.pct98 ?? 10;
+    else if (pct >= 97) base = AM.pct97 ?? 25;
+    else if (pct >= 96) base = AM.pct96 ?? 40;
+    else if (pct >= 95) base = AM.pct95 ?? 55;
+    else                base = AM.below95 ?? 80;
   }
 
   const MEAS = { time_based: 0, energy_weighted: tech === 'wind' ? -5 : -3, not_specified: 3 };
@@ -735,11 +791,7 @@ function scoreAvailGuaranteed(f) {
   const pg   = f.productionGuarantee || 'not_specified';
   const pval = f.pValue || 'not_specified';
 
-  const MATRIX = {
-    yes: { P50: 10, P75: 45, P90: 65, other: 50, not_specified: 40 },
-    no:  { _: 82 },
-    not_specified: { _: 80 },
-  };
+  const MATRIX = CONFIG.availguaranteed;
 
   let score;
   if (pg === 'yes') score = (MATRIX.yes[pval] !== undefined ? MATRIX.yes[pval] : 40);
@@ -830,18 +882,7 @@ function scoreCOD(f) {
  * 19. buyerpa — Buyer Performance Assurance
  */
 function scoreBuyerPA(f) {
-  const MATRIX = {
-    ig: {
-      unsecured: 5, parent_guaranty: 15, lc: 30, cash: 45,
-      lc_plus_mtm: 55, cash_plus_mtm: 70, not_specified: 40,
-    },
-    non_ig: {
-      unsecured: 20, parent_guaranty: 25, lc: 35, cash: 50,
-      lc_plus_mtm: 55, cash_plus_mtm: 70, not_specified: 50,
-    },
-    not_specified: { not_specified: 60 },
-  };
-
+  const MATRIX = CONFIG.buyerpa;
   const credit = f.buyerCreditRating || 'not_specified';
   const collat = f.collateralType    || 'not_specified';
   const row    = MATRIX[credit] || MATRIX['not_specified'];
@@ -894,15 +935,7 @@ function scoreBuyerPA(f) {
  * 20. sellerpa — Seller Performance Assurance
  */
 function scoreSellerPA(f) {
-  const MATRIX = {
-    ig_sponsor_guaranty: { yes: 5,  no: 15 },
-    sponsor_guaranty:    { yes: 12, no: 28 },
-    lc:                  { yes: 18, no: 35 },
-    cash:                { yes: 15, no: 32 },
-    spv_only:            { yes: 55, no: 78 },
-    not_specified:       { not_specified: 72 },
-  };
-
+  const MATRIX = CONFIG.sellerpa;
   const preCOD = f.preCODCreditType || 'not_specified';
   const compG  = f.completionGuaranty || 'not_specified';
   const row    = MATRIX[preCOD] || MATRIX['not_specified'];
@@ -984,12 +1017,7 @@ function scoreAssign(f) {
  * 22. fm — Force Majeure
  */
 function scoreFM(f) {
-  const MATRIX = {
-    narrow_objective: { continue: 5, excused: 25, not_specified: 15 },
-    moderate:         { continue: 20, excused: 40, not_specified: 32 },
-    broad_subjective: { continue: 40, excused: 65, not_specified: 55 },
-    not_specified:    { not_specified: 60 },
-  };
+  const MATRIX = CONFIG.assign_matrix;
 
   const scope   = f.fmDefinitionScope  || 'not_specified';
   const payment = f.paymentObligations || 'not_specified';
@@ -1036,11 +1064,7 @@ function scoreFM(f) {
  * 23. eod — Events of Default
  */
 function scoreEOD(f) {
-  const MATRIX = {
-    yes: { objective_test: 5, subjective: 18, none: 30, not_specified: 25 },
-    no:  { objective_test: 30, subjective: 42, none: 65, not_specified: 55 },
-    not_specified: { not_specified: 60 },
-  };
+  const MATRIX = CONFIG.eod;
 
   const longstop = f.longstopCODDefault || 'not_specified';
   const abandon  = f.abandonmentTrigger || 'not_specified';
@@ -1168,7 +1192,7 @@ function scoreChangeInLaw(f) {
  * 26. reputation — Reputational Provisions
  */
 function scoreReputation(f) {
-  const BASE = { buyer_right: 10, mutual: 25, none: 55, not_specified: 50 };
+  const BASE = CONFIG.reputation;
   let score = BASE[f.reputationTerminationRight || 'not_specified'] || 50;
 
   const SCR = { comprehensive: -5, standard: 0, minimal: 3, none: 8, not_specified: 5 };
@@ -1195,12 +1219,7 @@ function scoreReputation(f) {
  * 27. product — Contracted Product Definition
  */
 function scoreProduct(f) {
-  const MATRIX = {
-    all_conveyed:   { bundled: 5,  unbundled: 20, not_specified: 15 },
-    partial_carveouts: { bundled: 35, unbundled: 50, not_specified: 45 },
-    not_defined:    { bundled: 55, unbundled: 70, not_specified: 65 },
-    not_specified:  { not_specified: 60 },
-  };
+  const MATRIX = CONFIG.product;
 
   const ea = f.environmentalAttributes || 'not_specified';
   const bs = f.bundledStructure || 'not_specified';
@@ -1231,12 +1250,7 @@ function scoreProduct(f) {
  * 28. recs — REC Delivery & Mechanics
  */
 function scoreRECs(f) {
-  const MATRIX = {
-    yes: { same_tech_same_region: 5, same_region_any_renewable: 15, any_national_rec: 35, not_specified: 25 },
-    cash_only: { _: 40 },
-    none: { _: 72 },
-    not_specified: { _: 65 },
-  };
+  const MATRIX = CONFIG.recs;
 
   const ro = f.replacementObligation || 'not_specified';
   const rq = f.replacementQuality    || 'not_specified';
@@ -1265,12 +1279,7 @@ function scoreRECs(f) {
  * 29. incentives — Tax Credits, Grants & Incentive Allocation
  */
 function scoreIncentives(f) {
-  const BASE = {
-    buyer_shares_upside: 5,
-    seller_retains_strike_reflects: 20,
-    seller_retains_no_transparency: 50,
-    not_specified: 55,
-  };
+  const BASE = CONFIG.incentives;
   let score = BASE[f.taxCreditAllocation || 'not_specified'] || 55;
 
   const BONUS  = { reflected_in_strike: -5, shared: -3, seller_retains: 3, not_addressed: 5, not_specified: 4 };
@@ -1322,7 +1331,7 @@ function scoreGovLaw(f) {
  * 31. conf — Confidentiality Provisions
  */
 function scoreConf(f) {
-  const BASE = { narrow_pricing_only: 15, standard_all_terms: 30, broad_existence_included: 55, not_specified: 45 };
+  const BASE = CONFIG.conf;
   let score = BASE[f.confScope || 'not_specified'] || 45;
 
   const ESG  = { explicit: -5, implied: -2, none: 8, not_specified: 5 };
@@ -1347,7 +1356,7 @@ function scoreConf(f) {
  * 32. excl — Exclusivity Provisions
  */
 function scoreExcl(f) {
-  const BASE = { full_project_committed: 10, partial_project: 40, not_specified: 55 };
+  const BASE = CONFIG.excl;
   let score = BASE[f.sellerOutputExclusivity || 'not_specified'] || 55;
 
   const BEXCL = { none: -5, limited_same_iso: 3, broad: 10, not_specified: 3 };
@@ -1368,7 +1377,7 @@ function scoreExcl(f) {
  * 33. expenses — Transaction Expenses & Cost Allocation
  */
 function scoreExpenses(f) {
-  const BASE = { each_own: 20, shared: 30, buyer_bears: 60, not_specified: 35 };
+  const BASE = CONFIG.expenses;
   let score = BASE[f.legalFees || 'not_specified'] || 35;
 
   const ADMIN = { seller_bears: -5, shared: 0, buyer_bears: 5, not_specified: 3 };
@@ -1389,7 +1398,7 @@ function scoreExpenses(f) {
  * 34. acct — Accounting & Tax Treatment
  */
 function scoreAcct(f) {
-  const BASE = { both_parties: 15, buyer_only: 30, none: 50, not_specified: 45 };
+  const BASE = CONFIG.acct;
   let score = BASE[f.accountingRepresentations || 'not_specified'] || 45;
 
   const HEDGE = { supportive_structure: -5, neutral: 0, problematic_features: 10, not_specified: 3 };
@@ -1410,7 +1419,7 @@ function scoreAcct(f) {
  * 35. publicity — Public Announcements & Marketing
  */
 function scorePublicity(f) {
-  const BASE = { yes_mutual_approval: 15, notification_only: 35, no_restriction: 55, not_specified: 45 };
+  const BASE = CONFIG.publicity;
   let score = BASE[f.jointAnnouncementRequired || 'not_specified'] || 45;
 
   const BPR  = { broad_esg_marketing: -5, limited_with_approval: 0, restricted: 8, not_specified: 3 };
