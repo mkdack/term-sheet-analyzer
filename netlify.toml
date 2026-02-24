@@ -12,6 +12,12 @@
 [functions."extract"]
   timeout = 30
 
+[functions."extract-a"]
+  timeout = 30
+
+[functions."extract-b"]
+  timeout = 30
+
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/:splat"

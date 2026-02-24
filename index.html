@@ -630,6 +630,34 @@
   [data-theme="light"] .term-detail-divider { background: rgba(0,0,0,0.07); }
   [data-theme="light"] .clickable-card .term-name-row::after { color: var(--gold); }
 
+  /* ── CARD ENTRANCE ANIMATION ── */
+  @keyframes cardEntrance {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .term-card {
+    animation: cardEntrance 0.35s ease both;
+  }
+  .term-card:nth-child(1)  { animation-delay: 0.00s; }
+  .term-card:nth-child(2)  { animation-delay: 0.06s; }
+  .term-card:nth-child(3)  { animation-delay: 0.12s; }
+  .term-card:nth-child(4)  { animation-delay: 0.18s; }
+  .term-card:nth-child(5)  { animation-delay: 0.24s; }
+  .term-card:nth-child(6)  { animation-delay: 0.30s; }
+  .term-card:nth-child(7)  { animation-delay: 0.36s; }
+  .term-card:nth-child(8)  { animation-delay: 0.42s; }
+  .category {
+    animation: cardEntrance 0.4s ease both;
+  }
+
+  /* ── SCAN PULSE ── */
+  @keyframes scanPulse {
+    0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(212,168,75,0.7); }
+    50%       { opacity: 0.5; box-shadow: 0 0 0 7px rgba(212,168,75,0); }
+  }
+  .status-dot.processing {
+    animation: scanPulse 1.2s ease-in-out infinite !important;
+  }
 
   .add-term-btn {
     margin-top: 10px;
@@ -1265,7 +1293,6 @@ function loadScript(src) {
 // ─── MAIN ENGINE 1 FUNCTION ──────────────────────────────────
 async function runEngine1() {
   clearError();
-
   let text = '';
 
   if (currentTab === 'paste') {
@@ -1275,57 +1302,85 @@ async function runEngine1() {
   } else {
     if (!selectedFile) { showError('Please select a file to upload.'); return; }
     setStatus('Reading file...', true);
-    try {
-      text = await fileToText(selectedFile);
-    } catch (err) {
-      showError('Could not read file: ' + err.message);
-      clearStatus();
-      return;
-    }
+    try { text = await fileToText(selectedFile); }
+    catch (err) { showError('Could not read file: ' + err.message); clearStatus(); return; }
     if (!text || text.trim().length < 100) {
       showError('Could not extract text from file. Try copying and pasting the text directly.');
-      clearStatus();
-      return;
+      clearStatus(); return;
     }
   }
 
-  // Show loading state
   const btn = document.getElementById('analyzeBtn');
   btn.disabled = true;
   btn.classList.add('loading');
   btn.querySelector('.btn-text').textContent = 'Extracting...';
-  setStatus('Reading term sheet — this takes about 5 seconds...', true);
 
-  // Hide old results
   document.getElementById('results').classList.remove('visible');
   document.getElementById('results').style.display = 'none';
+  document.getElementById('termCategories').innerHTML = '';
+
+  setStatus('Scanning term sheet...', true);
+  startScanAnimation();
+
+  const payload = { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text }) };
 
   try {
-    const response = await fetch('/api/extract', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text })
-    });
+    // Fire both passes simultaneously
+    const [resA, resB] = await Promise.all([
+      fetch('/api/extract-a', payload),
+      fetch('/api/extract-b', payload)
+    ]);
 
-    const data = await response.json();
+    const [dataA, dataB] = await Promise.all([resA.json(), resB.json()]);
 
-    if (!response.ok || !data.ok) {
-      throw new Error(data.message || data.error || `Server error ${response.status}`);
-    }
+    if (!resA.ok || !dataA.ok) throw new Error(dataA.message || dataA.error || 'Pass A failed');
+    if (!resB.ok || !dataB.ok) throw new Error(dataB.message || dataB.error || 'Pass B failed');
 
-    extractedData = data.extraction;
-    renderResults(data.extraction);
+    const combined = {
+      deal: dataA.deal || {},
+      terms: { ...(dataA.terms || {}), ...(dataB.terms || {}) },
+      missing: [],
+      lowConfidence: [],
+      meta: { chunks: 1, docLength: text.length }
+    };
 
+    combined.missing = Object.entries(combined.terms).filter(([,v]) => !v || !v.summary).map(([k]) => k);
+    combined.lowConfidence = Object.entries(combined.terms).filter(([,v]) => v && v.confidence === 'low').map(([k]) => k);
+
+    extractedData = combined;
+    renderResults(combined);
     setStatus('Extraction complete', false);
+    stopScanAnimation();
 
   } catch (err) {
     showError('Extraction failed: ' + err.message);
     clearStatus();
+    stopScanAnimation();
   } finally {
     btn.disabled = false;
     btn.classList.remove('loading');
     btn.querySelector('.btn-text').textContent = 'Extract Terms';
   }
+}
+
+// ─── SCAN ANIMATION ──────────────────────────────────────────
+let scanInterval = null;
+const scanMessages = [
+  'Scanning term sheet...', 'Reading pricing terms...', 'Analyzing settlement structure...',
+  'Checking curtailment provisions...', 'Reviewing credit terms...', 'Examining risk allocation...',
+  'Extracting contract terms...', 'Parsing legal provisions...'
+];
+let scanIdx = 0;
+function startScanAnimation() {
+  scanIdx = 0;
+  setStatus(scanMessages[0], true);
+  scanInterval = setInterval(() => {
+    scanIdx = (scanIdx + 1) % scanMessages.length;
+    setStatus(scanMessages[scanIdx], true);
+  }, 1800);
+}
+function stopScanAnimation() {
+  if (scanInterval) { clearInterval(scanInterval); scanInterval = null; }
 }
 
 // ─── RENDER RESULTS ──────────────────────────────────────────
