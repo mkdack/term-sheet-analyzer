@@ -3315,13 +3315,6 @@ function availmechEd() {
   const el = document.getElementById('availmechEd'); if (!el) return;
   const cfg = window.ScoringEngine.getConfig().availmech;
 
-  function threshRow(label, cfgKey, scoreSolarKey, scoreWindKey) {
-    const sT = cfg[cfgKey+'_solar'] !== undefined ? cfg[cfgKey] : cfg[cfgKey];
-    const threshSolar = cfg['solar_'+cfgKey+'_threshold'] ?? cfg[cfgKey+'_solar_threshold'];
-    const threshWind  = cfg['wind_'+cfgKey+'_threshold']  ?? cfg[cfgKey+'_wind_threshold'];
-    return '';
-  }
-
   const pctInputs = (tech, tKey, sKey) => {
     const threshold = cfg[`${tech}_${tKey}_threshold`];
     const score     = cfg[`${tech}_${sKey}`];
