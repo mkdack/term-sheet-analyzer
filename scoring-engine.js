@@ -741,9 +741,10 @@ function scoreDelay(f) {
 /**
  * 15. availmech — Availability Guarantee
  *
- * Market standard LD structure: $/MW-year per % shortfall
+ * Market standard LD structure: $/MW-year per 0.1% shortfall increment
  *   Solar: Weak $800–1,500 | Market $1,500–3,000 | Strong $3,000–5,000+
  *   Wind:  Weak $1,000–2,000 | Market $2,000–3,500 | Strong $3,500–6,000+
+ *   Example: $2,000/MW-yr per 0.1% × 2% shortfall (20 increments) × 100 MW = $4M/yr
  *
  * Annual LD cap (% of annual VPPA revenue):
  *   <10% Weak | 10–15% Low market | 15–25% Market | 25–35% Strong | 35%+ Very strong
