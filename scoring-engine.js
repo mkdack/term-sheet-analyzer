@@ -88,8 +88,17 @@ const DEFAULT_CONFIG = {
   ia: { fully_executed:5, facilities_study_complete:20, system_impact_complete:35,
         feasibility_stage:55, not_filed:85, not_specified:70 },
   cp: {
-    seller_base:{ 0:10, 1:30, 2:50, 3:65, 4:78, 5:90 },
-    buyer_add:  { 0:0,  1:3,  2:6,  3:10, 4:14, 5:18 },
+    // Base scores by active seller CP count
+    cp0:10, cp1:30, cp2:50, cp3:65, cp4:78, cp5:90,
+    // Buyer CP friction (added on top)
+    buyer0:0, buyer1:3, buyer2:6, buyer3:10, buyer4:14, buyer5:18,
+    // CP type penalties
+    interconnection_penalty:20,
+    financing_penalty:8,
+    // Buyer termination right
+    term_yes:-8, term_no:8, term_not_specified:4,
+    // CP deadline adjustments
+    deadline_6mo:-8, deadline_12mo:-4, deadline_18mo:0, deadline_24mo:4, deadline_none:6,
   },
   fm: {
     narrow:       {yes:10,no:45,not_specified:30},
@@ -659,37 +668,36 @@ function scoreCP(f) {
   const activeCPs = Math.max(0, sellerCPCount - satisfiedCount);
 
   // Base score from active (unsatisfied) seller CP count
-  const SELLER_BASE = CONFIG.cp.seller_base;
-  let score = SELLER_BASE[Math.min(activeCPs, 5)] !== undefined
-    ? SELLER_BASE[Math.min(activeCPs, 5)]
-    : 90;
+  const C = CONFIG.cp;
+  const cpKey = 'cp' + Math.min(activeCPs, 5);
+  let score = C[cpKey] ?? 90;
 
-  // Interconnection CP: highest risk — queue delays are 4–7 years in ERCOT/PJM right now
+  // Interconnection CP: highest risk
   const hasInterconnectionCP = f.interconnectionCPPresent === 'yes' ||
     (sellerCPs.includes('interconnection') && !satisfiedCPs.includes('interconnection'));
-  if (hasInterconnectionCP) score += 20;
+  if (hasInterconnectionCP) score += C.interconnection_penalty ?? 20;
 
-  // Financing CP: meaningful but lower risk for established developers
+  // Financing CP: meaningful but lower risk
   const hasFinancingCP = sellerCPs.includes('financing') && !satisfiedCPs.includes('financing');
-  if (hasFinancingCP) score += 8;
+  if (hasFinancingCP) score += C.financing_penalty ?? 8;
 
   // Buyer CPs add modest friction
-  const buyerCPs  = Array.isArray(f.buyerCPs) ? f.buyerCPs.length : (f.buyerCPCount || 0);
-  const BUYER_ADD = CONFIG.cp.buyer_add;
-  score += BUYER_ADD[Math.min(buyerCPs, 5)] || 0;
+  const buyerCPs = Array.isArray(f.buyerCPs) ? f.buyerCPs.length : (f.buyerCPCount || 0);
+  const buyerKey = 'buyer' + Math.min(buyerCPs, 5);
+  score += C[buyerKey] ?? 0;
 
-  // Buyer termination right if CPs not met
-  const TERM = { yes: -8, no: 8, not_specified: 4 };
+  // Buyer termination right
+  const TERM = { yes: C.term_yes ?? -8, no: C.term_no ?? 8, not_specified: C.term_not_specified ?? 4 };
   score += TERM[f.buyerTerminationRight || 'not_specified'] || 4;
 
-  // CP deadline: tight = better for buyer
+  // CP deadline
   const months = f.cpDeadlineMonths;
-  if      (months != null && months <= 6)  score -= 8;
-  else if (months != null && months <= 12) score -= 4;
-  else if (months != null && months <= 18) score += 0;
-  else if (months != null && months <= 24) score += 4;
+  if      (months != null && months <= 6)  score += C.deadline_6mo  ?? -8;
+  else if (months != null && months <= 12) score += C.deadline_12mo ?? -4;
+  else if (months != null && months <= 18) score += C.deadline_18mo ?? 0;
+  else if (months != null && months <= 24) score += C.deadline_24mo ?? 4;
   else if (months != null)                 score += 10;
-  else                                     score += 6;
+  else                                     score += C.deadline_none ?? 6;
 
   // Flags — most severe first
   let flag = null;

@@ -3035,7 +3035,7 @@ function applyFilters() {
       <div class="model-term-block"><div class="model-term-name">Force Majeure — Score Matrix</div><div id="fmEd"></div></div>
       <div class="model-term-block"><div class="model-term-name">Change in Law — Score Matrix</div><div id="changeinlawEd"></div></div>
       <div class="model-term-block"><div class="model-term-name">Interconnection Status</div><div id="iaEd"></div></div>
-      <div class="model-term-block"><div class="model-term-name">Conditions Precedent — Seller CP Count</div><div class="model-term-desc">Each seller CP is a potential exit for the seller.</div><div id="cpEd"></div></div>
+      <div class="model-term-block"><div class="model-term-name">Conditions Precedent</div><div class="model-term-desc">Base scores by seller CP count, plus penalties by CP type, deadline tightness, and buyer termination right.</div><div id="cpEd"></div></div>
       <div class="model-term-block"><div class="model-term-name">Permits Status</div><div id="permitEd"></div></div>
       <div class="model-term-block"><div class="model-term-name">COD Definition</div><div id="codEd"></div></div>
       <div class="model-term-block"><div class="model-term-name">Delay / COD Extension — Score Matrix</div><div class="model-term-desc">Scores by long-stop date present × delay termination right.</div><div id="delayEd"></div></div>
@@ -3435,19 +3435,23 @@ function renderModelPage() {
      system_impact_complete:'System impact complete',feasibility_stage:'Feasibility stage',
      not_filed:'Not filed',not_specified:'Not specified'});
   // CP seller base scores
-  const cpEl=document.getElementById('cpEd');
-  if(cpEl){
-    const cfg=window.ScoringEngine.getConfig();
-    cpEl.innerHTML=Object.entries(cfg.cp.seller_base).map(([k,v])=>{
-      const mod=v!==defVal(`cp.seller_base.${k}`);
-      return `<div class="score-row">
-        <span class="score-row-label${mod?' mod':''}">${k} seller CP${k!=='1'?'s':''}</span>
-        <input type="range" class="score-range" min="0" max="100" value="${v}" oninput="updCfg('cp.seller_base.${k}',+this.value);syncR(this)">
-        <input type="number" class="score-num${mod?' mod':''}" min="0" max="100" value="${v}" oninput="updCfg('cp.seller_base.${k}',+this.value);syncN(this)">
-        <div class="score-preview">${miniBadge(v)}</div>
-      </div>`;
-    }).join('');
-  }
+  simpleEd('cpEd','cp',{
+    cp0:'0 seller CPs (fully committed)',
+    cp1:'1 seller CP',
+    cp2:'2 seller CPs',
+    cp3:'3 seller CPs',
+    cp4:'4 seller CPs',
+    cp5:'5+ seller CPs',
+    interconnection_penalty:'Penalty: Interconnection CP',
+    financing_penalty:'Penalty: Financing CP',
+    term_yes:'Buyer termination right: Yes',
+    term_no:'Buyer termination right: No',
+    deadline_6mo:'Deadline: ≤6 months',
+    deadline_12mo:'Deadline: 7–12 months',
+    deadline_18mo:'Deadline: 13–18 months',
+    deadline_24mo:'Deadline: 19–24 months',
+    deadline_none:'Deadline: Not specified',
+  });
   simpleEd('permitEd','permit',
     {all_obtained:'All obtained',major_obtained:'Major obtained',in_progress:'In progress',not_started:'Not started',not_specified:'Not specified'});
   simpleEd('codEd','cod',
