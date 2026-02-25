@@ -121,7 +121,7 @@ const DEFAULT_CONFIG = {
     // Guarantee % — Wind
     wind_pct95:5, wind_pct91:50, wind_below90:78, wind_null:80,
     // LD rate (solar and wind share strong/market/weak labels)
-    solar_ld_strong:-10, solar_ld_market:0, solar_ld_weak:20, ld_none:40,
+    solar_ld_strong:-10, solar_ld_market:0, solar_ld_weak:20, ld_none:60,
     // Annual LD cap
     cap_strong:0, cap_market:5, cap_weak:18,
     // Measurement period
@@ -131,7 +131,7 @@ const DEFAULT_CONFIG = {
     wind_pct94:15, wind_pct93:25, wind_pct92:35, wind_pct90:62, wind_below90:78,
     wind_ld_strong:-10, wind_ld_market:0, wind_ld_weak:20, wind_ld_below_floor:30,
     cap_very_strong:-3, cap_low_market:10, cap_not_stated:8,
-    ld_present_no_rate:8, ld_not_specified:20,
+    ld_present_no_rate:8, ld_not_specified:20, ld_none:60,
     period_not_specified:8,
     excl_narrow:-3, excl_standard:0, excl_broad:8, excl_not_specified:5,
     term_yes:-5, term_no:5, term_not_specified:3,
