@@ -791,8 +791,8 @@ function scoreAvailMech(f) {
   };
   score += PERIOD[f.measurementPeriod || 'not_specified'] ?? 8;
 
-  // LD rate in $/MW-year per % shortfall (most common VPPA structure)
-  const ldRate = f.ldRatePerMWYear;
+  // LD rate: $ per each 0.1% of availability shortfall (most common VPPA structure)
+  const ldRate = f.ldRatePerTenth;
   if (ldRate != null) {
     if (tech === 'wind') {
       if      (ldRate >= 3500) score -= 5;  // Strong: $3,500+
@@ -849,9 +849,9 @@ function scoreAvailMech(f) {
   } else if (f.ldPresent === 'no') {
     flag = 'Availability guarantee has no LD remedy — guarantee is unenforceable without damages.';
   } else if (ldRate != null && tech === 'solar' && ldRate < 800) {
-    flag = `Availability LD rate ($${ldRate}/MW-year per %) is below the market floor for solar — insufficient compensation for shortfall.`;
+    flag = `Availability LD rate ($${ldRate} per 0.1%) is below the market floor for solar — insufficient compensation for shortfall.`;
   } else if (ldRate != null && tech === 'wind' && ldRate < 1000) {
-    flag = `Availability LD rate ($${ldRate}/MW-year per %) is below the market floor for wind — insufficient compensation for shortfall.`;
+    flag = `Availability LD rate ($${ldRate} per 0.1%) is below the market floor for wind — insufficient compensation for shortfall.`;
   }
 
   return { score: clamp(score), flag };
