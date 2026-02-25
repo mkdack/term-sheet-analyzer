@@ -694,19 +694,29 @@ function scoreDelay(f) {
   else if (grace != null)                score += 7;
   else                                   score += 5;
 
-  const CAP = {
-    both: 0, none: -5, not_specified: 3,
-    project_cost_pct: (v) => v <= 8 ? -2 : v <= 12 ? 0 : -3,
-    months_capped:    (v) => v <= 12 ? 3 : v <= 18 ? 0 : -2,
-  };
+  // Aggregate cap as % of EPC/contract value
   const capStruct = f.damagesCapStructure || 'not_specified';
-  if (capStruct === 'both') score += 0;
-  else if (capStruct === 'none') score -= 5;
-  else if (capStruct === 'project_cost_pct' && f.damagesCapValue != null)
-    score += typeof CAP.project_cost_pct === 'function' ? CAP.project_cost_pct(f.damagesCapValue) : 0;
-  else if (capStruct === 'months_capped' && f.damagesCapValue != null)
-    score += typeof CAP.months_capped === 'function' ? CAP.months_capped(f.damagesCapValue) : 0;
-  else score += 3;
+  const capPct    = f.damagesCapValue;    // percentage, e.g. 15 = 15%
+
+  if (capStruct === 'none') {
+    score -= 5;  // no cap = uncapped LDs, best for buyer
+  } else if (capStruct === 'project_cost_pct' && capPct != null) {
+    if      (capPct >= 30) score -= 3;   // Very strong: 30%+
+    else if (capPct >= 20) score += 0;   // Strong: 20–30%
+    else if (capPct >= 15) score += 5;   // Market: 15–20%
+    else if (capPct >= 10) score += 10;  // Low market: 10–15%
+    else                   score += 18;  // Weak: <10%
+  } else if (capStruct === 'months_capped' && capPct != null) {
+    // Months cap (e.g. 12 months of LDs) — less precise but common
+    if      (capPct >= 24) score += 0;
+    else if (capPct >= 18) score += 5;
+    else if (capPct >= 12) score += 10;
+    else                   score += 18;
+  } else if (capStruct === 'both') {
+    score += 5;  // Both % and months capped — double-capped, less favorable
+  } else {
+    score += 8;  // not_specified
+  }
 
   const ls = f.longstopMonths;
   if      (ls != null && ls <= 12) score -= 5;
