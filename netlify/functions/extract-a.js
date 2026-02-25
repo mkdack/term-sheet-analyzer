@@ -48,7 +48,7 @@ For each term include "snapshot" (2-4 words), "summary" (plain English), "confid
 
 async function callHaiku(prompt, userContent, retryCount = 0) {
   const response = await client.messages.create({
-    model: 'claude-haiku-4-5',
+    model: 'claude-haiku-4-5-20251001',
     max_tokens: 3500,
     system: prompt,
     messages: [{ role: 'user', content: userContent }]

@@ -300,7 +300,7 @@ Return ONLY valid JSON. Use null for truly unknown values. Use the exact enum st
 
 async function callHaiku(userContent, retryCount = 0) {
   const response = await client.messages.create({
-    model: 'claude-haiku-4-5',
+    model: 'claude-haiku-4-5-20251001',
     max_tokens: 4000,
     system: MAPPER_PROMPT,
     messages: [{ role: 'user', content: userContent }]

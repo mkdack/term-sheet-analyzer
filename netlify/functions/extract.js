@@ -102,7 +102,7 @@ function chunkDocument(text, maxChars = 20000, overlap = 1500) {
 // ─── CALL HAIKU WITH RETRY ───────────────────────────────────
 async function callHaiku(systemPrompt, userContent, retryCount = 0) {
   const response = await client.messages.create({
-    model: 'claude-haiku-4-5',
+    model: 'claude-haiku-4-5-20251001',
     max_tokens: 3500,
     system: systemPrompt,
     messages: [{ role: 'user', content: userContent }]
