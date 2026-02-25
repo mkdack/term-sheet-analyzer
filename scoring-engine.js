@@ -667,22 +667,23 @@ function scoreDelay(f) {
   const row  = MATRIX[gCOD] || MATRIX['not_specified'];
   let score  = (row[dDP] !== undefined ? row[dDP] : row['not_specified']) || 80;
 
-  // Damages rate
+  // Damages rate in $/MW/day
   if (dDP === 'yes') {
     const tech = (f.technology || 'solar').toLowerCase();
     const rate = f.delayDamagesRate;
     if (tech === 'wind') {
-      if      (rate != null && rate >= 3200) score -= 5;
-      else if (rate != null && rate >= 2000) score += 0;
-      else if (rate != null && rate >= 1500) score += 5;
-      else if (rate != null)                 score += 10;
-      else                                   score += 5;
+      if      (rate != null && rate >= 275) score -= 5;  // Strong: $275+/MW/day
+      else if (rate != null && rate >= 140) score += 0;  // Market: $140–$275/MW/day
+      else if (rate != null && rate >= 60)  score += 8;  // Weak: $60–$140/MW/day
+      else if (rate != null)                score += 15; // Below market floor
+      else                                  score += 5;  // Present but rate not stated
     } else {
-      if      (rate != null && rate >= 2200) score -= 5;
-      else if (rate != null && rate >= 1400) score += 0;
-      else if (rate != null && rate >= 1000) score += 5;
-      else if (rate != null)                 score += 10;
-      else                                   score += 5;
+      // Solar
+      if      (rate != null && rate >= 300) score -= 5;  // Strong: $300+/MW/day
+      else if (rate != null && rate >= 150) score += 0;  // Market: $150–$300/MW/day
+      else if (rate != null && rate >= 75)  score += 8;  // Weak: $75–$150/MW/day
+      else if (rate != null)                score += 15; // Below market floor
+      else                                  score += 5;  // Present but rate not stated
     }
   }
 

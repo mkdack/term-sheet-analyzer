@@ -91,7 +91,7 @@ Return ONLY valid JSON. Use null for truly unknown values. Use the exact enum st
   "delay": {
     "guaranteedCOD": "yes|no|not_specified",
     "delayDamagesPresent": "yes|no|not_specified",
-    "delayDamagesRate": number ($/day) or null,
+    "delayDamagesRate": number in $/MW/day (normalize if stated as flat $/day by dividing by project MW capacity) or null,
     "gracePeriodDays": number or null,
     "damagesCapStructure": "both|none|months_capped|project_cost_pct|not_specified",
     "damagesCapValue": number or null,
