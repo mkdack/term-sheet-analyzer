@@ -2799,7 +2799,6 @@ function renderScores(scores, termFlags, interactions) {
 }
 
 function renderRiskPanel(scores, termFlags, overall, overallLabel, overallCls, interactions) {
-  // Build scored term list with names, weights, flags
   const e1ByE2 = {};
   for (const [e1, e2] of Object.entries(TERM_KEY_MAP)) e1ByE2[e2] = e1;
 
@@ -2815,18 +2814,75 @@ function renderRiskPanel(scores, termFlags, overall, overallLabel, overallCls, i
     }))
     .sort((a, b) => (b.score * b.weight) - (a.score * a.weight));
 
-  const risks     = scoredTerms.filter(t => t.score > 55).slice(0, 3);
-  const strengths = [...scoredTerms].sort((a,b) => a.score - b.score).filter(t => t.score <= 45).slice(0, 3);
+  // Tighter thresholds: only surface genuinely bad/good terms
+  const risks     = scoredTerms.filter(t => t.score >= 65).slice(0, 3);
+  const strengths = [...scoredTerms].sort((a,b) => a.score - b.score)
+                      .filter(t => t.score <= 30).slice(0, 3);
 
-  // Verdict sentence based on overall score and top risks
-  const verdictMap = {
-    'Favorable':          'This deal is well-structured for the buyer — proceed with confidence.',
-    'Mostly Favorable':   'This deal leans buyer-favorable with a few terms worth tightening before signing.',
-    'Market':             'This is a market-standard deal — no major red flags, but some terms have room for improvement.',
-    'Unfavorable':        'This deal has meaningful buyer risk. Several terms need negotiation before signing.',
-    'Highly Unfavorable': 'Significant buyer exposure across multiple high-stakes terms. Do not sign without substantial changes.',
-  };
-  const verdict = verdictMap[overallLabel] || '';
+  // ── Dynamic verdict ──────────────────────────────────────────
+  // Build verdict from actual top risk terms rather than static bucket strings
+  function buildVerdict(overall, overallLabel, risks, interactions) {
+    if (risks.length === 0 && overall <= 35) {
+      return 'This deal is well-structured across the board — no material red flags identified. Proceed with standard diligence.';
+    }
+
+    // Name the top 1-2 risk drivers specifically
+    const topRiskNames = risks.slice(0, 2).map(t => t.name);
+    const hasHighStakes = risks.some(t => t.weight >= 4); // Deal Economics tier
+    const hasInteractions = interactions.length > 0;
+
+    let opener = '';
+    if (overallLabel === 'Favorable' || overallLabel === 'Mostly Favorable') {
+      opener = 'This deal leans buyer-favorable';
+    } else if (overallLabel === 'Market') {
+      opener = 'This is a market-standard deal';
+    } else if (overallLabel === 'Unfavorable') {
+      opener = 'This deal has meaningful buyer risk';
+    } else {
+      opener = 'This deal has significant buyer exposure';
+    }
+
+    let riskLine = '';
+    if (risks.length === 0) {
+      riskLine = ' with no standout risk terms.';
+    } else if (risks.length === 1) {
+      riskLine = ` — ${topRiskNames[0]} is the primary concern.`;
+    } else {
+      riskLine = ` — ${topRiskNames[0]} and ${topRiskNames[1]} are the primary concerns.`;
+    }
+
+    let actionLine = '';
+    if (overallLabel === 'Favorable' || overallLabel === 'Mostly Favorable') {
+      if (risks.length > 0) {
+        actionLine = ` Focus negotiation on ${topRiskNames[0]} before signing.`;
+      }
+    } else if (overallLabel === 'Market') {
+      if (hasHighStakes) {
+        actionLine = ` The flagged Deal Economics terms warrant close attention — small improvements here have outsized financial impact.`;
+      } else {
+        actionLine = ` Standard negotiation on flagged terms should bring this to favorable territory.`;
+      }
+    } else if (overallLabel === 'Unfavorable') {
+      if (hasInteractions) {
+        actionLine = ` Multiple terms are compounding each other — see cross-term issues below. Do not sign without targeted negotiation on all flagged items.`;
+      } else {
+        actionLine = ` Push back on all flagged terms before proceeding — these represent real financial exposure over the contract life.`;
+      }
+    } else {
+      // Highly Unfavorable
+      if (hasHighStakes && hasInteractions) {
+        actionLine = ` Deal Economics terms are structurally weak and several risks compound each other. This deal needs substantial revision — consider whether the project fundamentals justify the effort.`;
+      } else if (hasHighStakes) {
+        actionLine = ` Core Deal Economics terms are the primary driver. These are difficult to fix post-signing — address them now or walk away.`;
+      } else {
+        actionLine = ` Do not sign without substantial changes across the flagged terms.`;
+      }
+    }
+
+    return opener + riskLine + actionLine;
+  }
+
+  const verdict = buildVerdict(overall, overallLabel, risks, interactions);
 
   const tierLabel = w => w >= 4 ? 'Deal Economics' : w >= 2 ? 'Project Risk' : 'Legal & Admin';
 
@@ -2854,13 +2910,11 @@ function renderRiskPanel(scores, termFlags, overall, overallLabel, overallCls, i
       </div>
     </div>`).join('') : '<div class="risk-none">No standout strengths identified.</div>';
 
-  // Show/hide existing panel
   let panel = document.getElementById('riskPanel');
   if (!panel) {
     panel = document.createElement('div');
     panel.id = 'riskPanel';
     panel.className = 'risk-panel';
-    // Insert after proceed bar
     const proceedBar = document.getElementById('proceedBar');
     proceedBar.insertAdjacentElement('afterend', panel);
   }
