@@ -644,30 +644,45 @@ function scoreIA(f) {
 
 /**
  * 13. cp — Conditions Precedent
+ *
+ * Seller CPs are get-out-of-jail cards. Fewer = better for buyer.
+ * Interconnection CP is highest risk in current market (ERCOT/PJM queues 4–7 yrs).
+ * Already-satisfied CPs should not count against the buyer.
  */
 function scoreCP(f) {
-  // From buyer perspective: CPs are seller protections — get-out-of-jail cards.
-  // Fewer seller CPs = better. Buyer CPs are less dangerous but still add friction.
-  // Ideal deal: 0 seller CPs, seller fully committed from execution.
+  const sellerCPs   = Array.isArray(f.sellerCPs) ? f.sellerCPs : [];
+  const satisfiedCPs = Array.isArray(f.satisfiedCPs) ? f.satisfiedCPs : [];
+  const sellerCPCount = f.sellerCPCount || sellerCPs.length || 0;
 
-  const sellerCPs = Array.isArray(f.sellerCPs) ? f.sellerCPs.length : (f.sellerCPCount || 0);
-  const buyerCPs  = Array.isArray(f.buyerCPs)  ? f.buyerCPs.length  : (f.buyerCPCount  || 0);
+  // Subtract already-satisfied CPs — they're listed but not live risk
+  const satisfiedCount = satisfiedCPs.length;
+  const activeCPs = Math.max(0, sellerCPCount - satisfiedCount);
 
-  // Seller CP count is the primary risk driver
+  // Base score from active (unsatisfied) seller CP count
   const SELLER_BASE = CONFIG.cp.seller_base;
-  let score = SELLER_BASE[Math.min(sellerCPs, 5)] !== undefined
-    ? SELLER_BASE[Math.min(sellerCPs, 5)]
+  let score = SELLER_BASE[Math.min(activeCPs, 5)] !== undefined
+    ? SELLER_BASE[Math.min(activeCPs, 5)]
     : 90;
 
-  // Buyer CPs add modest friction but are less dangerous
+  // Interconnection CP: highest risk — queue delays are 4–7 years in ERCOT/PJM right now
+  const hasInterconnectionCP = f.interconnectionCPPresent === 'yes' ||
+    (sellerCPs.includes('interconnection') && !satisfiedCPs.includes('interconnection'));
+  if (hasInterconnectionCP) score += 20;
+
+  // Financing CP: meaningful but lower risk for established developers
+  const hasFinancingCP = sellerCPs.includes('financing') && !satisfiedCPs.includes('financing');
+  if (hasFinancingCP) score += 8;
+
+  // Buyer CPs add modest friction
+  const buyerCPs  = Array.isArray(f.buyerCPs) ? f.buyerCPs.length : (f.buyerCPCount || 0);
   const BUYER_ADD = CONFIG.cp.buyer_add;
   score += BUYER_ADD[Math.min(buyerCPs, 5)] || 0;
 
-  // Buyer termination right if CPs not met = good (buyer has an exit)
+  // Buyer termination right if CPs not met
   const TERM = { yes: -8, no: 8, not_specified: 4 };
   score += TERM[f.buyerTerminationRight || 'not_specified'] || 4;
 
-  // CP deadline: tight deadline = seller must satisfy quickly = better for buyer
+  // CP deadline: tight = better for buyer
   const months = f.cpDeadlineMonths;
   if      (months != null && months <= 6)  score -= 8;
   else if (months != null && months <= 12) score -= 4;
@@ -676,14 +691,18 @@ function scoreCP(f) {
   else if (months != null)                 score += 10;
   else                                     score += 6;
 
-  // Flags
+  // Flags — most severe first
   let flag = null;
-  if (sellerCPs >= 3) {
-    flag = sellerCPs + ' seller CPs — significant seller optionality. Each is a potential exit before the project is committed.';
-  } else if (sellerCPs === 0) {
-    flag = 'No seller CPs — seller is fully committed from execution. Favorable for buyer.';
-  } else if (sellerCPs >= 1 && f.buyerTerminationRight === 'no') {
-    flag = 'Seller has CP optionality but buyer has no termination right if CPs are not met — asymmetric risk.';
+  if (hasInterconnectionCP && f.cpDeadlineMonths > 18) {
+    flag = `Unsatisfied interconnection CP with ${f.cpDeadlineMonths}-month deadline — interconnection queues in major ISOs are 4–7 years. High risk this project never reaches COD.`;
+  } else if (hasInterconnectionCP) {
+    flag = 'Unsatisfied interconnection CP — highest-risk seller CP in current market. Interconnection queue delays are endemic across ERCOT, PJM, and MISO.';
+  } else if (activeCPs >= 3) {
+    flag = `${activeCPs} active seller CPs — significant seller optionality. Contract is closer to a pre-agreement than a firm commitment.`;
+  } else if (activeCPs === 0 && sellerCPCount === 0) {
+    flag = 'No seller CPs — seller is fully committed from execution. Most favorable for buyer.';
+  } else if (activeCPs >= 1 && f.buyerTerminationRight === 'no') {
+    flag = 'Seller has active CP optionality but buyer has no termination right if CPs are not met — asymmetric risk.';
   }
 
   return { score: clamp(score), flag };

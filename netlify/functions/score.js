@@ -88,7 +88,9 @@ Return ONLY valid JSON. Use null for truly unknown values. Use the exact enum st
     "buyerTerminationRight": "yes|no|not_specified",
     "cpDeadlineMonths": number or null,
     "sellerCPs": ["financing","permitting","interconnection","board_approval","other"] (list any that apply, or []),
-    "buyerCPs": ["board_approval","financing","regulatory","other"] (list any that apply, or [])
+    "buyerCPs": ["board_approval","financing","regulatory","other"] (list any that apply, or []),
+    "interconnectionCPPresent": "yes|no|not_specified",  // true if interconnection is an unsatisfied seller CP
+    "satisfiedCPs": ["financing","permitting","interconnection","board_approval"] (list any CPs already satisfied at signing, or [])
   },
   "delay": {
     "guaranteedCOD": "yes|no|not_specified",
