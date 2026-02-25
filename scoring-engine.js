@@ -116,8 +116,26 @@ const DEFAULT_CONFIG = {
     not_specified:{not_specified:80},
   },
   availmech: {
-    solar:{pct99:5,pct98:15,pct97:25,pct96:35,pct95:45,pct94:60,below94:78,null_pct:80},
-    wind: {pct95:5,pct94:15,pct93:25,pct92:35,pct91:50,pct90:62,below90:78,null_pct:80},
+    // Guarantee % — Solar
+    solar_pct99:5, solar_pct98:15, solar_pct97:25, solar_pct96:35,
+    solar_pct95:45, solar_pct94:60, solar_below94:78, solar_null:80,
+    // Guarantee % — Wind
+    wind_pct95:5, wind_pct94:15, wind_pct93:25, wind_pct92:35,
+    wind_pct91:50, wind_pct90:62, wind_below90:78, wind_null:80,
+    // Measurement period
+    period_annual:0, period_rolling2yr:5, period_not_specified:8,
+    // LD rate — Solar ($ per 0.1% shortfall)
+    solar_ld_strong:-5, solar_ld_market:0, solar_ld_weak:8, solar_ld_below_floor:15,
+    // LD rate — Wind ($ per 0.1% shortfall)
+    wind_ld_strong:-5, wind_ld_market:0, wind_ld_weak:8, wind_ld_below_floor:15,
+    // LD present but rate not stated / no LDs
+    ld_present_no_rate:5, ld_none:20, ld_not_specified:10,
+    // Annual LD cap (% of VPPA revenue)
+    cap_very_strong:-3, cap_strong:0, cap_market:5, cap_low_market:10, cap_weak:18, cap_not_stated:5,
+    // Exclusion scope
+    excl_narrow:-3, excl_standard:0, excl_broad:8, excl_not_specified:5,
+    // Termination right
+    term_yes:-5, term_no:5, term_not_specified:3,
   },
   buyerpa: {
     ig:    {unsecured:5,parent_guaranty:15,lc:30,cash:45,lc_plus_mtm:55,cash_plus_mtm:70,not_specified:40},
@@ -746,102 +764,87 @@ function scoreDelay(f) {
  *   Wind:  Weak $1,000–2,000 | Market $2,000–3,500 | Strong $3,500–6,000+
  *   Example: $2,000 per 0.1% × 2% shortfall (20 increments) = $40,000 per year
  *
- * Annual LD cap (% of annual VPPA revenue):
+ * Annual LD cap (% of VPPA revenue):
  *   <10% Weak | 10–15% Low market | 15–25% Market | 25–35% Strong | 35%+ Very strong
  *
  * Guarantee %: solar 94–99%, wind 90–95%
  * Measurement period: annual best for buyer, rolling 2yr is market compromise
- * No guarantee / no LDs = highly unfavorable
  */
 function scoreAvailMech(f) {
   const tech = (f.technology || 'solar').toLowerCase();
   const pct  = f.availGuaranteePct;
-  const AM   = CONFIG.availmech[tech] || CONFIG.availmech.solar;
+  const C    = CONFIG.availmech;
 
   // Base score from guarantee percentage
   let base;
-  if (pct == null) {
-    base = AM.null_pct ?? 80;
-  } else if (tech === 'wind') {
-    if      (pct >= 95) base = AM.pct95 ?? 5;
-    else if (pct >= 94) base = AM.pct94 ?? 15;
-    else if (pct >= 93) base = AM.pct93 ?? 25;
-    else if (pct >= 92) base = AM.pct92 ?? 35;
-    else if (pct >= 91) base = AM.pct91 ?? 50;
-    else if (pct >= 90) base = AM.pct90 ?? 62;
-    else                base = AM.below90 ?? 78;
+  if (tech === 'wind') {
+    if      (pct == null)  base = C.wind_null    ?? 80;
+    else if (pct >= 95)    base = C.wind_pct95   ?? 5;
+    else if (pct >= 94)    base = C.wind_pct94   ?? 15;
+    else if (pct >= 93)    base = C.wind_pct93   ?? 25;
+    else if (pct >= 92)    base = C.wind_pct92   ?? 35;
+    else if (pct >= 91)    base = C.wind_pct91   ?? 50;
+    else if (pct >= 90)    base = C.wind_pct90   ?? 62;
+    else                   base = C.wind_below90 ?? 78;
   } else {
-    // Solar: market standard 94–99%
-    if      (pct >= 99) base = AM.pct99 ?? 5;
-    else if (pct >= 98) base = AM.pct98 ?? 15;
-    else if (pct >= 97) base = AM.pct97 ?? 25;
-    else if (pct >= 96) base = AM.pct96 ?? 35;
-    else if (pct >= 95) base = AM.pct95 ?? 45;
-    else if (pct >= 94) base = AM.pct94 ?? 60;
-    else                base = AM.below94 ?? 78;
+    if      (pct == null)  base = C.solar_null    ?? 80;
+    else if (pct >= 99)    base = C.solar_pct99   ?? 5;
+    else if (pct >= 98)    base = C.solar_pct98   ?? 15;
+    else if (pct >= 97)    base = C.solar_pct97   ?? 25;
+    else if (pct >= 96)    base = C.solar_pct96   ?? 35;
+    else if (pct >= 95)    base = C.solar_pct95   ?? 45;
+    else if (pct >= 94)    base = C.solar_pct94   ?? 60;
+    else                   base = C.solar_below94 ?? 78;
   }
 
   let score = base;
 
-  // Measurement period: annual is most protective for buyer
-  const PERIOD = {
-    annual:        0,
-    rolling_2yr:   5,
-    not_specified: 8,
-  };
-  score += PERIOD[f.measurementPeriod || 'not_specified'] ?? 8;
+  // Measurement period
+  const period = f.measurementPeriod || 'not_specified';
+  if      (period === 'annual')      score += C.period_annual        ?? 0;
+  else if (period === 'rolling_2yr') score += C.period_rolling2yr    ?? 5;
+  else                               score += C.period_not_specified ?? 8;
 
-  // LD rate: $ per each 0.1% of availability shortfall (most common VPPA structure)
+  // LD rate ($ per each 0.1% of shortfall)
   const ldRate = f.ldRatePerTenth;
   if (ldRate != null) {
     if (tech === 'wind') {
-      if      (ldRate >= 3500) score -= 5;  // Strong: $3,500+
-      else if (ldRate >= 2000) score += 0;  // Market: $2,000–3,500
-      else if (ldRate >= 1000) score += 8;  // Weak: $1,000–2,000
-      else                     score += 15; // Below floor
+      if      (ldRate >= 3500) score += C.wind_ld_strong      ?? -5;
+      else if (ldRate >= 2000) score += C.wind_ld_market      ?? 0;
+      else if (ldRate >= 1000) score += C.wind_ld_weak        ?? 8;
+      else                     score += C.wind_ld_below_floor ?? 15;
     } else {
-      // Solar
-      if      (ldRate >= 3000) score -= 5;  // Strong: $3,000+
-      else if (ldRate >= 1500) score += 0;  // Market: $1,500–3,000
-      else if (ldRate >= 800)  score += 8;  // Weak: $800–1,500
-      else                     score += 15; // Below floor
+      if      (ldRate >= 3000) score += C.solar_ld_strong      ?? -5;
+      else if (ldRate >= 1500) score += C.solar_ld_market      ?? 0;
+      else if (ldRate >= 800)  score += C.solar_ld_weak        ?? 8;
+      else                     score += C.solar_ld_below_floor ?? 15;
     }
-  } else if (f.ldPresent === 'yes') {
-    score += 5;  // LDs present but rate not specified
-  } else if (f.ldPresent === 'no') {
-    score += 20; // No LDs — guarantee is toothless
-  } else {
-    score += 10; // Not specified
-  }
+  } else if (f.ldPresent === 'yes')  score += C.ld_present_no_rate ?? 5;
+  else if   (f.ldPresent === 'no')   score += C.ld_none            ?? 20;
+  else                               score += C.ld_not_specified   ?? 10;
 
-  // Annual LD cap as % of annual VPPA revenue
+  // Annual LD cap (% of VPPA revenue)
   const ldCapPct = f.ldAnnualCapPct;
   if (ldCapPct != null) {
-    if      (ldCapPct >= 35) score -= 3;  // Very strong: 35%+
-    else if (ldCapPct >= 25) score += 0;  // Strong: 25–35%
-    else if (ldCapPct >= 15) score += 5;  // Market: 15–25%
-    else if (ldCapPct >= 10) score += 10; // Low market: 10–15%
-    else                     score += 18; // Weak: <10%
-  } else if (f.ldPresent === 'yes') {
-    score += 5;  // LDs present but cap not stated
-  }
+    if      (ldCapPct >= 35) score += C.cap_very_strong ?? -3;
+    else if (ldCapPct >= 25) score += C.cap_strong      ?? 0;
+    else if (ldCapPct >= 15) score += C.cap_market      ?? 5;
+    else if (ldCapPct >= 10) score += C.cap_low_market  ?? 10;
+    else                     score += C.cap_weak        ?? 18;
+  } else if (f.ldPresent === 'yes')  score += C.cap_not_stated ?? 5;
 
-  // Exclusion scope: broad exclusions undermine the guarantee
-  const EXCL = {
-    narrow:        -3,
-    standard:       0,
-    broad:          8,
-    not_specified:  5,
-  };
-  score += EXCL[f.exclusionScope || 'not_specified'] ?? 5;
+  // Exclusion scope
+  const excl = f.exclusionScope || 'not_specified';
+  if      (excl === 'narrow')   score += C.excl_narrow        ?? -3;
+  else if (excl === 'standard') score += C.excl_standard      ?? 0;
+  else if (excl === 'broad')    score += C.excl_broad         ?? 8;
+  else                          score += C.excl_not_specified ?? 5;
 
   // Termination right for chronic shortfall
-  const TRIGHT = {
-    yes:           -5,
-    no:             5,
-    not_specified:  3,
-  };
-  score += TRIGHT[f.terminationRight || 'not_specified'] ?? 3;
+  const tright = f.terminationRight || 'not_specified';
+  if      (tright === 'yes') score += C.term_yes           ?? -5;
+  else if (tright === 'no')  score += C.term_no            ?? 5;
+  else                       score += C.term_not_specified ?? 3;
 
   let flag = null;
   if (pct == null) {
