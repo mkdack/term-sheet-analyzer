@@ -728,7 +728,6 @@ function scoreDelay(f) {
 }
 
 /**
-/**
  * 15. availmech — Availability Guarantee
  *
  * What matters (per market practice):
