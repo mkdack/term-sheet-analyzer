@@ -2538,13 +2538,12 @@ function renderListView(terms, missing, scores, termFlags) {
           <div class="list-row-name">${humanTermName(key)}</div>
           <div class="list-row-content">
             <div class="list-row-snapshot">${isMissing ? 'Not addressed' : escHtml(snapshot || '—')}</div>
-            <div class="list-row-summary">${isMissing ? '' : escHtml(summary || '')}</div>
-            ${flagHtml}
-            ${!isMissing && sourceText ? `
-            <div class="term-source-block">
+            <div class="list-row-summary">${isMissing ? '' : escHtml(summary || '')}${!isMissing && sourceText ? `
+            <div class="term-source-block" style="margin-top:8px">
               <div class="term-source-label">📄 Source text</div>
               <blockquote class="term-source-quote">${escHtml(sourceText)}</blockquote>
-            </div>` : ''}
+            </div>` : ''}</div>
+            ${flagHtml}
           </div>
           <div class="list-row-score">${scoreBadge}</div>
         </div>
