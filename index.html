@@ -2000,32 +2000,35 @@ async function runEngine1() {
   const payload = { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text }) };
 
   try {
-    // Fire both passes simultaneously
-    const [resA, resB] = await Promise.all([
+    // Fire all three passes simultaneously — A (deal + pricing), B1 (project risk), B2 (legal/admin)
+    const [resA, resB1, resB2] = await Promise.all([
       fetch('/api/extract-a', payload),
-      fetch('/api/extract-b', payload)
+      fetch('/api/extract-b1', payload),
+      fetch('/api/extract-b2', payload)
     ]);
 
     // Check content-type before parsing JSON — Netlify returns HTML on timeout/crash
     const parseResponse = async (res, label) => {
       const ct = res.headers.get('content-type') || '';
       if (!ct.includes('application/json')) {
-        throw new Error(`${label} returned HTTP ${res.status} (${res.statusText || 'no body'}) — function may have timed out or crashed`);
+        throw new Error(`${label} returned HTTP ${res.status} — function may have timed out`);
       }
       return res.json();
     };
 
-    const [dataA, dataB] = await Promise.all([
+    const [dataA, dataB1, dataB2] = await Promise.all([
       parseResponse(resA, 'Pass A'),
-      parseResponse(resB, 'Pass B')
+      parseResponse(resB1, 'Pass B1'),
+      parseResponse(resB2, 'Pass B2')
     ]);
 
     if (!resA.ok || !dataA.ok) throw new Error(dataA.message || dataA.error || 'Pass A failed');
-    if (!resB.ok || !dataB.ok) throw new Error(dataB.message || dataB.error || 'Pass B failed');
+    if (!resB1.ok || !dataB1.ok) throw new Error(dataB1.message || dataB1.error || 'Pass B1 failed');
+    if (!resB2.ok || !dataB2.ok) throw new Error(dataB2.message || dataB2.error || 'Pass B2 failed');
 
     const combined = {
       deal: dataA.deal || {},
-      terms: { ...(dataA.terms || {}), ...(dataB.terms || {}) },
+      terms: { ...(dataA.terms || {}), ...(dataB1.terms || {}), ...(dataB2.terms || {}) },
       missing: [],
       lowConfidence: [],
       meta: { chunks: 1, docLength: text.length }
