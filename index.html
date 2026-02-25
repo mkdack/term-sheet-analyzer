@@ -1803,6 +1803,9 @@
       <button class="filter-clear" id="filterClear" style="display:none;" onclick="clearFilters()">Clear filters</button>
     </div>
 
+    <!-- Deal Risk Summary panel — populated by renderRiskPanel after scoring -->
+    <div id="riskPanel"></div>
+
     <div id="termCategories"></div>
 
     <!-- Custom Terms -->
@@ -1989,6 +1992,7 @@ async function runEngine1() {
   document.getElementById('results').classList.remove('visible');
   document.getElementById('results').style.display = 'none';
   document.getElementById('termCategories').innerHTML = '';
+  document.getElementById('riskPanel').innerHTML = '';
 
   setStatus('Scanning term sheet...', true);
   startScanAnimation();
@@ -2910,14 +2914,8 @@ function renderRiskPanel(scores, termFlags, overall, overallLabel, overallCls, i
       </div>
     </div>`).join('') : '<div class="risk-none">No standout strengths identified.</div>';
 
-  let panel = document.getElementById('riskPanel');
-  if (!panel) {
-    panel = document.createElement('div');
-    panel.id = 'riskPanel';
-    panel.className = 'risk-panel';
-    const proceedBar = document.getElementById('proceedBar');
-    proceedBar.insertAdjacentElement('afterend', panel);
-  }
+  const panel = document.getElementById('riskPanel');
+  if (!panel) return;
 
   panel.innerHTML = `
     <div class="risk-panel-header" onclick="toggleRiskPanel()">
