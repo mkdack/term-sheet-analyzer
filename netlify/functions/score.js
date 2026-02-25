@@ -104,7 +104,7 @@ Return ONLY valid JSON. Use null for truly unknown values. Use the exact enum st
     "availGuaranteePct": number (e.g. 95) or null,
     "measurementPeriod": "annual|rolling_2yr|not_specified",
     "ldPresent": "yes|no|not_specified",
-    "ldRatePerMWYear": number ($/MW-year per 0.1% shortfall increment, e.g. 2000 = $2,000/MW-yr per 0.1%) or null,
+    "ldRatePerMWYear": number ($ per each 0.1% of availability shortfall, e.g. 2000 = $2,000 per 0.1% shortfall) or null,
     "ldAnnualCapPct": number (annual LD cap as % of annual VPPA revenue, e.g. 20) or null,
     "exclusionScope": "narrow|standard|broad|not_specified",
     "terminationRight": "yes|no|not_specified"
