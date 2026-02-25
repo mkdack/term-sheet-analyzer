@@ -3040,7 +3040,7 @@ function applyFilters() {
       <div class="model-term-block"><div class="model-term-name">Permits Status</div><div id="permitEd"></div></div>
       <div class="model-term-block"><div class="model-term-name">COD Definition</div><div id="codEd"></div></div>
       <div class="model-term-block"><div class="model-term-name">Delay / COD Extension — Score Matrix</div><div class="model-term-desc">Scores by long-stop date present × delay termination right.</div><div id="delayEd"></div></div>
-      <div class="model-term-block"><div class="model-term-name">Availability Guarantee</div><div class="model-term-desc">Score adjustments for each key outcome. Lower = more favorable for buyer. Guarantee % bands, LD rate strength, annual cap, and measurement period.</div><div id="availmechEd"></div></div>
+      <div class="model-term-block"><div class="model-term-name">Availability Guarantee</div><div class="model-term-desc">Set the % thresholds that define strong vs. market vs. weak, then adjust scores for each band and LD outcome.</div><div id="availmechEd"></div></div>
       <div class="model-term-block"><div class="model-term-name">Seller Performance Assurance — Score Matrix</div><div class="model-term-desc">Scores by credit support type × pre-COD guarantee.</div><div id="sellerpaEd"></div></div>
     </div>
   </div>
@@ -3311,7 +3311,85 @@ function markUnsaved() {
 }
 
 // Weights editor
-function weightsEd() {
+function availmechEd() {
+  const el = document.getElementById('availmechEd'); if (!el) return;
+  const cfg = window.ScoringEngine.getConfig().availmech;
+
+  function threshRow(label, cfgKey, scoreSolarKey, scoreWindKey) {
+    const sT = cfg[cfgKey+'_solar'] !== undefined ? cfg[cfgKey] : cfg[cfgKey];
+    const threshSolar = cfg['solar_'+cfgKey+'_threshold'] ?? cfg[cfgKey+'_solar_threshold'];
+    const threshWind  = cfg['wind_'+cfgKey+'_threshold']  ?? cfg[cfgKey+'_wind_threshold'];
+    return '';
+  }
+
+  const pctInputs = (tech, tKey, sKey) => {
+    const threshold = cfg[`${tech}_${tKey}_threshold`];
+    const score     = cfg[`${tech}_${sKey}`];
+    const tMod = threshold !== defVal(`availmech.${tech}_${tKey}_threshold`);
+    const sMod = score     !== defVal(`availmech.${tech}_${sKey}`);
+    return `<div class="score-row">
+      <span class="score-row-label${tMod||sMod?' mod':''}">
+        ${tech==='solar'?'Solar':'Wind'}: ${sKey.charAt(0).toUpperCase()+sKey.slice(1)}
+        &nbsp;<span style="font-size:10px;color:var(--text-dim)">(≥</span>
+        <input type="number" min="80" max="100" step="0.5" value="${threshold}"
+          style="width:46px;padding:2px 4px;font-size:12px;border:1px solid var(--border);border-radius:4px;background:var(--input-bg);color:var(--text-primary);text-align:center"
+          oninput="updCfg('availmech.${tech}_${tKey}_threshold',+this.value);availmechEd()">
+        <span style="font-size:10px;color:var(--text-dim)">%)</span>
+      </span>
+      <input type="range" class="score-range" min="0" max="100" value="${score}"
+        oninput="updCfg('availmech.${tech}_${sKey}',+this.value);syncR(this)">
+      <input type="number" class="score-num${sMod?' mod':''}" min="0" max="100" value="${score}"
+        oninput="updCfg('availmech.${tech}_${sKey}',+this.value);syncN(this)">
+      <div class="score-preview">${miniBadge(score)}</div>
+    </div>`;
+  };
+
+  const simpleRow = (label, cfgKey) => {
+    const v = cfg[cfgKey];
+    if (v === undefined) return '';
+    const mod = v !== defVal('availmech.'+cfgKey);
+    return `<div class="score-row">
+      <span class="score-row-label${mod?' mod':''}">${label}</span>
+      <input type="range" class="score-range" min="-20" max="100" value="${v}"
+        oninput="updCfg('availmech.${cfgKey}',+this.value);syncR(this)">
+      <input type="number" class="score-num${mod?' mod':''}" min="-20" max="100" value="${v}"
+        oninput="updCfg('availmech.${cfgKey}',+this.value);syncN(this)">
+      <div class="score-preview">${miniBadge(v)}</div>
+    </div>`;
+  };
+
+  const sectionHeader = (label) =>
+    `<div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text-dim);padding:10px 0 4px;border-top:1px solid var(--border);margin-top:6px">${label}</div>`;
+
+  el.innerHTML = [
+    sectionHeader('Guarantee % — Solar'),
+    pctInputs('solar','strong','strong'),
+    pctInputs('solar','market','market'),
+    simpleRow('Solar: Weak (below market threshold)', 'solar_weak'),
+    simpleRow('Solar: No guarantee', 'solar_null'),
+    sectionHeader('Guarantee % — Wind'),
+    pctInputs('wind','strong','strong'),
+    pctInputs('wind','market','market'),
+    simpleRow('Wind: Weak (below market threshold)', 'wind_weak'),
+    simpleRow('Wind: No guarantee', 'wind_null'),
+    sectionHeader('LD Rate ($ per 0.1% shortfall)'),
+    simpleRow('Solar LD: Strong ($3,000+)', 'solar_ld_strong'),
+    simpleRow('Solar LD: Market ($1,500–3,000)', 'solar_ld_market'),
+    simpleRow('Solar LD: Weak ($800–1,500)', 'solar_ld_weak'),
+    simpleRow('Wind LD: Strong ($3,500+)', 'wind_ld_strong'),
+    simpleRow('Wind LD: Market ($2,000–3,500)', 'wind_ld_market'),
+    simpleRow('Wind LD: Weak ($1,000–2,000)', 'wind_ld_weak'),
+    simpleRow('No LDs (guarantee unenforceable)', 'ld_none'),
+    sectionHeader('Annual LD Cap & Measurement'),
+    simpleRow('Annual cap: Strong (25–35%)', 'cap_strong'),
+    simpleRow('Annual cap: Market (15–25%)', 'cap_market'),
+    simpleRow('Annual cap: Weak (<10%)', 'cap_weak'),
+    simpleRow('Measurement: Annual', 'period_annual'),
+    simpleRow('Measurement: Rolling 2yr', 'period_rolling2yr'),
+  ].join('');
+}
+
+
   const el=document.getElementById('weightsEd'); if(!el) return;
   const cfg=window.ScoringEngine.getConfig();
   const w=cfg.weights;
@@ -3399,13 +3477,7 @@ function renderModelPage() {
     {yes:'Long-stop date present',no:'No long-stop date',not_specified:'Not specified'},
     {yes:'Termination right',no:'No termination right',not_specified:'Not specified'});
 
-  simpleEd('availmechEd','availmech',{
-    solar_pct99:'Solar: Strong (≥97%)', solar_pct95:'Solar: Market (94–96%)', solar_below94:'Solar: Weak (<94%)', solar_null:'Solar: No guarantee',
-    wind_pct95:'Wind: Strong (≥93%)', wind_pct91:'Wind: Market (90–92%)', wind_below90:'Wind: Weak (<90%)', wind_null:'Wind: No guarantee',
-    solar_ld_strong:'LD rate: Strong', solar_ld_market:'LD rate: Market', solar_ld_weak:'LD rate: Weak', ld_none:'No LDs',
-    cap_strong:'Annual cap: Strong', cap_market:'Annual cap: Market', cap_weak:'Annual cap: Weak',
-    period_annual:'Measurement: Annual', period_rolling2yr:'Measurement: Rolling 2yr',
-  });
+  availmechEd();
 
   matrixEd('sellerpaEd','sellerpa',
     {ig_sponsor_guaranty:'IG sponsor guaranty',sponsor_guaranty:'Sponsor guaranty',lc:'Letter of credit',cash:'Cash',spv_only:'SPV only',not_specified:'Not specified'},

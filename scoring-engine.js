@@ -116,24 +116,30 @@ const DEFAULT_CONFIG = {
     not_specified:{not_specified:80},
   },
   availmech: {
-    // Guarantee % — Solar (grouped into strong/market/weak/none)
-    solar_pct99:5, solar_pct95:45, solar_below94:78, solar_null:80,
-    // Guarantee % — Wind
-    wind_pct95:5, wind_pct91:50, wind_below90:78, wind_null:80,
-    // LD rate (solar and wind share strong/market/weak labels)
-    solar_ld_strong:-10, solar_ld_market:0, solar_ld_weak:20, ld_none:60,
+    // Guarantee % thresholds — user-adjustable cutoffs
+    solar_strong_threshold:97,  // ≥ this = strong (score: solar_strong)
+    solar_market_threshold:94,  // ≥ this = market (score: solar_market)
+    solar_strong:10,
+    solar_market:40,
+    solar_weak:72,
+    solar_null:80,
+    wind_strong_threshold:93,   // ≥ this = strong (score: wind_strong)
+    wind_market_threshold:90,   // ≥ this = market (score: wind_market)
+    wind_strong:10,
+    wind_market:45,
+    wind_weak:72,
+    wind_null:80,
+    // LD rate adjustments
+    solar_ld_strong:-10, solar_ld_market:0, solar_ld_weak:20, solar_ld_below_floor:30,
+    wind_ld_strong:-10,  wind_ld_market:0,  wind_ld_weak:20,  wind_ld_below_floor:30,
+    ld_none:60, ld_present_no_rate:8, ld_not_specified:20,
     // Annual LD cap
-    cap_strong:0, cap_market:5, cap_weak:18,
+    cap_very_strong:-3, cap_strong:0, cap_market:5, cap_low_market:10, cap_weak:18, cap_not_stated:8,
     // Measurement period
-    period_annual:0, period_rolling2yr:5,
-    // Hidden scoring values (not shown in UI, used by engine only)
-    solar_pct98:15, solar_pct97:25, solar_pct96:35, solar_pct94:60, solar_ld_below_floor:30,
-    wind_pct94:15, wind_pct93:25, wind_pct92:35, wind_pct90:62, wind_below90:78,
-    wind_ld_strong:-10, wind_ld_market:0, wind_ld_weak:20, wind_ld_below_floor:30,
-    cap_very_strong:-3, cap_low_market:10, cap_not_stated:8,
-    ld_present_no_rate:8, ld_not_specified:20, ld_none:60,
-    period_not_specified:8,
+    period_annual:0, period_rolling2yr:5, period_not_specified:8,
+    // Exclusion scope
     excl_narrow:-3, excl_standard:0, excl_broad:8, excl_not_specified:5,
+    // Termination right
     term_yes:-5, term_no:5, term_not_specified:3,
   },
   buyerpa: {
@@ -774,26 +780,18 @@ function scoreAvailMech(f) {
   const pct  = f.availGuaranteePct;
   const C    = CONFIG.availmech;
 
-  // Base score from guarantee percentage
+  // Base score from guarantee percentage — thresholds are user-configurable
   let base;
   if (tech === 'wind') {
-    if      (pct == null)  base = C.wind_null    ?? 80;
-    else if (pct >= 95)    base = C.wind_pct95   ?? 5;
-    else if (pct >= 94)    base = C.wind_pct94   ?? 15;
-    else if (pct >= 93)    base = C.wind_pct93   ?? 25;
-    else if (pct >= 92)    base = C.wind_pct92   ?? 35;
-    else if (pct >= 91)    base = C.wind_pct91   ?? 50;
-    else if (pct >= 90)    base = C.wind_pct90   ?? 62;
-    else                   base = C.wind_below90 ?? 78;
+    if      (pct == null)                              base = C.wind_null   ?? 80;
+    else if (pct >= (C.wind_strong_threshold  ?? 93))  base = C.wind_strong ?? 10;
+    else if (pct >= (C.wind_market_threshold  ?? 90))  base = C.wind_market ?? 45;
+    else                                               base = C.wind_weak   ?? 72;
   } else {
-    if      (pct == null)  base = C.solar_null    ?? 80;
-    else if (pct >= 99)    base = C.solar_pct99   ?? 5;
-    else if (pct >= 98)    base = C.solar_pct98   ?? 15;
-    else if (pct >= 97)    base = C.solar_pct97   ?? 25;
-    else if (pct >= 96)    base = C.solar_pct96   ?? 35;
-    else if (pct >= 95)    base = C.solar_pct95   ?? 45;
-    else if (pct >= 94)    base = C.solar_pct94   ?? 60;
-    else                   base = C.solar_below94 ?? 78;
+    if      (pct == null)                              base = C.solar_null   ?? 80;
+    else if (pct >= (C.solar_strong_threshold ?? 97))  base = C.solar_strong ?? 10;
+    else if (pct >= (C.solar_market_threshold ?? 94))  base = C.solar_market ?? 40;
+    else                                               base = C.solar_weak   ?? 72;
   }
 
   let score = base;
