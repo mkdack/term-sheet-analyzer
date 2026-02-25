@@ -75,7 +75,7 @@ const DEFAULT_CONFIG = {
     not_specified:{all_in:80,partial:80, excluded:80, not_specified:80},
   },
   negprice: { zero_floor:5, seller_curtails:30, full_passthrough:70, not_specified:85 },
-  basis:    { seller_bears:10, shared_collar:35, buyer_bears:65, not_specified:75 },
+  basis:    { seller_bears:10, seller_bears_with_election:45, shared_collar:35, buyer_bears:65, not_specified:75 },
   curtailment:    { seller_bears_deemed:10, shared:40, buyer_bears:65, not_specified:75 },
   nonecocurtail:  { seller_bears_deemed:15, shared:35, buyer_bears:60, not_specified:70 },
   basiscurtail:   { seller_bears_deemed:10, shared:40, buyer_bears:70, not_specified:78 },
@@ -397,7 +397,8 @@ function scoreInvoice(f) {
 
 /**
  * 6. basis — Basis Risk Provisions
- * @param {string} f.basisAllocation     seller_bears | shared_collar | buyer_bears | not_specified
+ * @param {string} f.basisAllocation     seller_bears | seller_bears_with_election | shared_collar | buyer_bears | not_specified
+ * @param {string} f.sellerElectionRight yes | no | not_specified
  * @param {string} f.busbarTransfer      present | absent | not_specified
  * @param {string} f.busbarTrigger       standard_node_plus_ppa | lower_threshold | not_specified
  * @param {number} f.busbarHoursCap      hours/year or null
@@ -406,6 +407,11 @@ function scoreInvoice(f) {
 function scoreBasis(f) {
   const BASE = CONFIG.basis;
   let score = BASE[f.basisAllocation || 'not_specified'] || 75;
+
+  // Seller election right: seller only exercises when it benefits them — one-sided, penalize
+  if (f.sellerElectionRight === 'yes' || f.basisAllocation === 'seller_bears_with_election') {
+    score += 20;
+  }
 
   // Collar band modifier (shared_collar only)
   if (f.basisAllocation === 'shared_collar') {
@@ -438,7 +444,11 @@ function scoreBasis(f) {
   }
 
   let flag = null;
-  if (!f.basisAllocation) flag = 'Basis risk allocation not defined — silence typically means buyer assumes all locational spread risk.';
+  if (f.sellerElectionRight === 'yes' || f.basisAllocation === 'seller_bears_with_election') {
+    flag = 'Seller has a one-sided election right — seller only reprices to nodal when favorable to them, capturing upside while buyer still bears adverse basis exposure.';
+  } else if (!f.basisAllocation || f.basisAllocation === 'not_specified') {
+    flag = 'Basis risk allocation not defined — silence typically means buyer assumes all locational spread risk.';
+  }
 
   return { score: clamp(score), flag };
 }

@@ -44,12 +44,15 @@ const KB = {
     concept: `Basis risk is the difference between the price at the project's delivery node (where generation physically occurs) and the hub or zonal price used for settlement. A solar project in West Texas may generate at a node where prices are $8/MWh lower than the ERCOT hub — that $8 gap is basis. In a VPPA, who bears this gap matters enormously to long-run economics.`,
     whyMatters: `Basis risk is one of the most underestimated risks in corporate PPAs. Nodal-to-hub spreads in ERCOT can exceed $15/MWh on average for congested projects, representing 30–40% of a project's revenue. If the buyer bears this risk, a project that looks favorable at $45/MWh hub price may net to $30/MWh in actual settlement. Always ask for 3-year historical nodal data before signing.`,
     scoring: [
-      { label: 'Seller bears', score: '10', rationale: 'Developer takes on basis exposure. Project revenue is reduced when node prices lag hub, but buyer is fully insulated. Most buyer-favorable allocation.' },
+      { label: 'Seller bears (clean)', score: '10', rationale: 'Developer takes full basis exposure unconditionally. Buyer is fully insulated regardless of spread direction. Most buyer-favorable.' },
+      { label: 'Seller bears with election right', score: '65', rationale: 'Seller nominally bears basis but retains the right to elect nodal settlement when it is favorable to them. One-sided optionality — seller captures upside spread, buyer still bears adverse exposure. Misleading protection.' },
       { label: 'Shared with collar', score: '35', rationale: 'Collar mechanism limits buyer exposure to a defined $/MWh band. Buyer has some risk but it is bounded and quantifiable.' },
       { label: 'Buyer bears', score: '65', rationale: 'Buyer absorbs all nodal price variability. Settlement is based on nodal price, not hub. High risk for congested nodes or projects in transmission-constrained regions.' },
       { label: 'Not specified', score: '75', rationale: 'Silence defaults to buyer bearing basis risk in most standard VPPA structures. A material gap in the term sheet.' },
     ],
     watchFor: [
+      'Seller election right to reprice to nodal — seller only exercises when favorable to them, not a real seller-bears provision',
+      'Language like "seller may elect" or "seller has the option to use nodal price" — asymmetric optionality',
       'Nodal settlement in ERCOT West or South zones — historically severe basis',
       'No historical nodal price data provided in the data room',
       'Collar bands wider than $5/MWh — effectively buyer bears basis',

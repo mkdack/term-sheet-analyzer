@@ -49,7 +49,9 @@ Return ONLY valid JSON. Use null for truly unknown values. Use the exact enum st
     "annualAggregateCap": true|false|null
   },
   "basis": {
-    "basisAllocation": "seller_bears|shared_collar|buyer_bears|not_specified",
+    "basisAllocation": "seller_bears|seller_bears_with_election|shared_collar|buyer_bears|not_specified",
+    // seller_bears_with_election: seller nominally bears basis but has an option/election right to reprice to nodal when favorable — look for language like 'seller may elect', 'seller has the option to use nodal price', 'seller may substitute nodal for hub'
+    "sellerElectionRight": "yes|no|not_specified",
     "collarBand": number ($/MWh width) or null,
     "busbarTransfer": "present|absent|not_specified",
     "busbarTrigger": number ($/MWh threshold) or null,
