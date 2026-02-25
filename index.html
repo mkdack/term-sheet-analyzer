@@ -3040,21 +3040,7 @@ function applyFilters() {
       <div class="model-term-block"><div class="model-term-name">Permits Status</div><div id="permitEd"></div></div>
       <div class="model-term-block"><div class="model-term-name">COD Definition</div><div id="codEd"></div></div>
       <div class="model-term-block"><div class="model-term-name">Delay / COD Extension — Score Matrix</div><div class="model-term-desc">Scores by long-stop date present × delay termination right.</div><div id="delayEd"></div></div>
-      <div class="model-term-block">
-        <div class="model-term-name">Availability Guarantee — Guarantee % (Solar)</div>
-        <div class="model-term-desc">Base score by guaranteed availability %. Market standard: 94–99% for solar.</div>
-        <div id="availmechSolarPctEd"></div>
-      </div>
-      <div class="model-term-block">
-        <div class="model-term-name">Availability Guarantee — Guarantee % (Wind)</div>
-        <div class="model-term-desc">Base score by guaranteed availability %. Market standard: 90–95% for wind.</div>
-        <div id="availmechWindPctEd"></div>
-      </div>
-      <div class="model-term-block">
-        <div class="model-term-name">Availability Guarantee — LD Rate, Measurement Period & Cap</div>
-        <div class="model-term-desc">Score adjustments for LD rate ($ per 0.1% shortfall), measurement period, annual cap, exclusion scope, and termination right.</div>
-        <div id="availmechDetailsEd"></div>
-      </div>
+      <div class="model-term-block"><div class="model-term-name">Availability Guarantee</div><div class="model-term-desc">Score adjustments for each key outcome. Lower = more favorable for buyer. Guarantee % bands, LD rate strength, annual cap, and measurement period.</div><div id="availmechEd"></div></div>
       <div class="model-term-block"><div class="model-term-name">Seller Performance Assurance — Score Matrix</div><div class="model-term-desc">Scores by credit support type × pre-COD guarantee.</div><div id="sellerpaEd"></div></div>
     </div>
   </div>
@@ -3414,24 +3400,19 @@ function renderModelPage() {
     {yes:'Long-stop date present',no:'No long-stop date',not_specified:'Not specified'},
     {yes:'Termination right',no:'No termination right',not_specified:'Not specified'});
 
-  simpleEd('availmechSolarPctEd','availmech',{
-    solar_pct99:'Solar ≥99%', solar_pct98:'Solar 98%', solar_pct97:'Solar 97%',
-    solar_pct96:'Solar 96%', solar_pct95:'Solar 95%', solar_pct94:'Solar 94% (market floor)',
-    solar_below94:'Solar <94%', solar_null:'Solar — no guarantee stated',
-  });
-  simpleEd('availmechWindPctEd','availmech',{
-    wind_pct95:'Wind ≥95%', wind_pct94:'Wind 94%', wind_pct93:'Wind 93%',
-    wind_pct92:'Wind 92%', wind_pct91:'Wind 91%', wind_pct90:'Wind 90% (market floor)',
-    wind_below90:'Wind <90%', wind_null:'Wind — no guarantee stated',
-  });
-  simpleEd('availmechDetailsEd','availmech',{
-    period_annual:'Measurement: Annual', period_rolling2yr:'Measurement: Rolling 2yr', period_not_specified:'Measurement: Not specified',
-    solar_ld_strong:'Solar LD rate: Strong ($3,000+)', solar_ld_market:'Solar LD rate: Market ($1,500–3,000)', solar_ld_weak:'Solar LD rate: Weak ($800–1,500)', solar_ld_below_floor:'Solar LD rate: Below floor (<$800)',
-    wind_ld_strong:'Wind LD rate: Strong ($3,500+)', wind_ld_market:'Wind LD rate: Market ($2,000–3,500)', wind_ld_weak:'Wind LD rate: Weak ($1,000–2,000)', wind_ld_below_floor:'Wind LD rate: Below floor (<$1,000)',
-    ld_present_no_rate:'LDs present, rate not stated', ld_none:'No LDs', ld_not_specified:'LDs not specified',
-    cap_very_strong:'Annual cap: Very strong (≥35%)', cap_strong:'Annual cap: Strong (25–35%)', cap_market:'Annual cap: Market (15–25%)', cap_low_market:'Annual cap: Low market (10–15%)', cap_weak:'Annual cap: Weak (<10%)', cap_not_stated:'Annual cap: Not stated',
-    excl_narrow:'Exclusions: Narrow', excl_standard:'Exclusions: Standard', excl_broad:'Exclusions: Broad', excl_not_specified:'Exclusions: Not specified',
-    term_yes:'Termination right: Yes', term_no:'Termination right: No', term_not_specified:'Termination right: Not specified',
+  simpleEd('availmechEd','availmech',{
+    solar_pct99:'Solar ≥99%', solar_pct97:'Solar 97–98%', solar_pct95:'Solar 95–96%',
+    solar_pct94:'Solar 94% (floor)', solar_below94:'Solar <94%', solar_null:'Solar — no guarantee',
+    wind_pct95:'Wind ≥95%', wind_pct93:'Wind 93–94%', wind_pct91:'Wind 91–92%',
+    wind_pct90:'Wind 90% (floor)', wind_below90:'Wind <90%', wind_null:'Wind — no guarantee',
+    period_annual:'Measurement: Annual', period_rolling2yr:'Measurement: Rolling 2yr',
+    solar_ld_strong:'Solar LD rate: Strong ($3,000+)', solar_ld_market:'Solar LD rate: Market ($1,500–3,000)', solar_ld_weak:'Solar LD rate: Weak ($800–1,500)',
+    wind_ld_strong:'Wind LD rate: Strong ($3,500+)', wind_ld_market:'Wind LD rate: Market ($2,000–3,500)', wind_ld_weak:'Wind LD rate: Weak ($1,000–2,000)',
+    ld_none:'No LDs (guarantee unenforceable)',
+    cap_very_strong:'Annual cap ≥35% of revenue', cap_strong:'Annual cap 25–35%',
+    cap_market:'Annual cap 15–25%', cap_weak:'Annual cap <10%',
+    excl_narrow:'Exclusions: Narrow', excl_broad:'Exclusions: Broad',
+    term_yes:'Termination right: Yes', term_no:'Termination right: No',
   });
 
   matrixEd('sellerpaEd','sellerpa',
