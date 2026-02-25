@@ -3401,18 +3401,11 @@ function renderModelPage() {
     {yes:'Termination right',no:'No termination right',not_specified:'Not specified'});
 
   simpleEd('availmechEd','availmech',{
-    solar_pct99:'Solar ≥99%', solar_pct97:'Solar 97–98%', solar_pct95:'Solar 95–96%',
-    solar_pct94:'Solar 94% (floor)', solar_below94:'Solar <94%', solar_null:'Solar — no guarantee',
-    wind_pct95:'Wind ≥95%', wind_pct93:'Wind 93–94%', wind_pct91:'Wind 91–92%',
-    wind_pct90:'Wind 90% (floor)', wind_below90:'Wind <90%', wind_null:'Wind — no guarantee',
+    solar_pct99:'Solar: Strong (≥97%)', solar_pct95:'Solar: Market (94–96%)', solar_below94:'Solar: Weak (<94%)', solar_null:'Solar: No guarantee',
+    wind_pct95:'Wind: Strong (≥93%)', wind_pct91:'Wind: Market (90–92%)', wind_below90:'Wind: Weak (<90%)', wind_null:'Wind: No guarantee',
+    solar_ld_strong:'LD rate: Strong', solar_ld_market:'LD rate: Market', solar_ld_weak:'LD rate: Weak', ld_none:'No LDs',
+    cap_strong:'Annual cap: Strong', cap_market:'Annual cap: Market', cap_weak:'Annual cap: Weak',
     period_annual:'Measurement: Annual', period_rolling2yr:'Measurement: Rolling 2yr',
-    solar_ld_strong:'Solar LD rate: Strong ($3,000+)', solar_ld_market:'Solar LD rate: Market ($1,500–3,000)', solar_ld_weak:'Solar LD rate: Weak ($800–1,500)',
-    wind_ld_strong:'Wind LD rate: Strong ($3,500+)', wind_ld_market:'Wind LD rate: Market ($2,000–3,500)', wind_ld_weak:'Wind LD rate: Weak ($1,000–2,000)',
-    ld_none:'No LDs (guarantee unenforceable)',
-    cap_very_strong:'Annual cap ≥35% of revenue', cap_strong:'Annual cap 25–35%',
-    cap_market:'Annual cap 15–25%', cap_weak:'Annual cap <10%',
-    excl_narrow:'Exclusions: Narrow', excl_broad:'Exclusions: Broad',
-    term_yes:'Termination right: Yes', term_no:'Termination right: No',
   });
 
   matrixEd('sellerpaEd','sellerpa',
