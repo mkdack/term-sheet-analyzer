@@ -103,8 +103,9 @@ Return ONLY valid JSON. Use null for truly unknown values. Use the exact enum st
   "availmech": {
     "availGuaranteePct": number (e.g. 95) or null,
     "measurementPeriod": "annual|rolling_2yr|not_specified",
-    "ldFormula": "energy_and_rec|energy_only|none|not_specified",
-    "recDamageAlternative": "multiplier_120pct|supplemental_recs|standard_100pct|none|not_specified",
+    "ldPresent": "yes|no|not_specified",
+    "ldRatePerMWYear": number ($/MW-year per % shortfall, e.g. 2000) or null,
+    "ldAnnualCapPct": number (annual LD cap as % of annual VPPA revenue, e.g. 20) or null,
     "exclusionScope": "narrow|standard|broad|not_specified",
     "terminationRight": "yes|no|not_specified"
   },

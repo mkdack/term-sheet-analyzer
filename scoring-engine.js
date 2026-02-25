@@ -741,13 +741,16 @@ function scoreDelay(f) {
 /**
  * 15. availmech — Availability Guarantee
  *
- * What matters (per market practice):
- *  - Guarantee %: solar 94–99%, wind 90–95%
- *  - Measurement period: annual is toughest for seller; rolling 2yr is common market compromise
- *  - LD formula: avg energy + avg REC value × shortfall % is market standard
- *  - REC damages: 120% multiplier or supplemental RECs adds real protection
- *  - Exclusion scope: broad exclusions undermine the guarantee
- *  - No guarantee at all = highly unfavorable
+ * Market standard LD structure: $/MW-year per % shortfall
+ *   Solar: Weak $800–1,500 | Market $1,500–3,000 | Strong $3,000–5,000+
+ *   Wind:  Weak $1,000–2,000 | Market $2,000–3,500 | Strong $3,500–6,000+
+ *
+ * Annual LD cap (% of annual VPPA revenue):
+ *   <10% Weak | 10–15% Low market | 15–25% Market | 25–35% Strong | 35%+ Very strong
+ *
+ * Guarantee %: solar 94–99%, wind 90–95%
+ * Measurement period: annual best for buyer, rolling 2yr is market compromise
+ * No guarantee / no LDs = highly unfavorable
  */
 function scoreAvailMech(f) {
   const tech = (f.technology || 'solar').toLowerCase();
@@ -781,30 +784,46 @@ function scoreAvailMech(f) {
 
   // Measurement period: annual is most protective for buyer
   const PERIOD = {
-    annual:        0,   // toughest for seller, best for buyer
-    rolling_2yr:   5,   // common market compromise
+    annual:        0,
+    rolling_2yr:   5,
     not_specified: 8,
   };
   score += PERIOD[f.measurementPeriod || 'not_specified'] ?? 8;
 
-  // LD formula: energy + REC is market standard and most complete
-  const LD = {
-    energy_and_rec:  0,   // market standard
-    energy_only:     8,   // missing REC component leaves buyer exposed
-    none:           20,   // no damages = guarantee is toothless
-    not_specified:  10,
-  };
-  score += LD[f.ldFormula || 'not_specified'] ?? 10;
+  // LD rate in $/MW-year per % shortfall (most common VPPA structure)
+  const ldRate = f.ldRatePerMWYear;
+  if (ldRate != null) {
+    if (tech === 'wind') {
+      if      (ldRate >= 3500) score -= 5;  // Strong: $3,500+
+      else if (ldRate >= 2000) score += 0;  // Market: $2,000–3,500
+      else if (ldRate >= 1000) score += 8;  // Weak: $1,000–2,000
+      else                     score += 15; // Below floor
+    } else {
+      // Solar
+      if      (ldRate >= 3000) score -= 5;  // Strong: $3,000+
+      else if (ldRate >= 1500) score += 0;  // Market: $1,500–3,000
+      else if (ldRate >= 800)  score += 8;  // Weak: $800–1,500
+      else                     score += 15; // Below floor
+    }
+  } else if (f.ldPresent === 'yes') {
+    score += 5;  // LDs present but rate not specified
+  } else if (f.ldPresent === 'no') {
+    score += 20; // No LDs — guarantee is toothless
+  } else {
+    score += 10; // Not specified
+  }
 
-  // REC damages treatment: multiplier or supplemental RECs adds real protection
-  const REC_DMG = {
-    multiplier_120pct:    -5,  // best — accounts for replacement REC premium
-    supplemental_recs:    -3,  // good — physical replacement
-    standard_100pct:       0,  // market standard
-    none:                  5,  // no REC remedy component
-    not_specified:         3,
-  };
-  score += REC_DMG[f.recDamageAlternative || 'not_specified'] ?? 3;
+  // Annual LD cap as % of annual VPPA revenue
+  const ldCapPct = f.ldAnnualCapPct;
+  if (ldCapPct != null) {
+    if      (ldCapPct >= 35) score -= 3;  // Very strong: 35%+
+    else if (ldCapPct >= 25) score += 0;  // Strong: 25–35%
+    else if (ldCapPct >= 15) score += 5;  // Market: 15–25%
+    else if (ldCapPct >= 10) score += 10; // Low market: 10–15%
+    else                     score += 18; // Weak: <10%
+  } else if (f.ldPresent === 'yes') {
+    score += 5;  // LDs present but cap not stated
+  }
 
   // Exclusion scope: broad exclusions undermine the guarantee
   const EXCL = {
@@ -815,7 +834,7 @@ function scoreAvailMech(f) {
   };
   score += EXCL[f.exclusionScope || 'not_specified'] ?? 5;
 
-  // Termination right if chronic shortfall
+  // Termination right for chronic shortfall
   const TRIGHT = {
     yes:           -5,
     no:             5,
@@ -826,10 +845,12 @@ function scoreAvailMech(f) {
   let flag = null;
   if (pct == null) {
     flag = 'No mechanical availability guarantee — buyer has no assurance of project uptime.';
-  } else if (f.ldFormula === 'none') {
+  } else if (f.ldPresent === 'no') {
     flag = 'Availability guarantee has no LD remedy — guarantee is unenforceable without damages.';
-  } else if (f.ldFormula === 'energy_only') {
-    flag = 'LD formula covers energy value only — buyer exposed on REC shortfall with no remedy.';
+  } else if (ldRate != null && tech === 'solar' && ldRate < 800) {
+    flag = `Availability LD rate ($${ldRate}/MW-year per %) is below the market floor for solar — insufficient compensation for shortfall.`;
+  } else if (ldRate != null && tech === 'wind' && ldRate < 1000) {
+    flag = `Availability LD rate ($${ldRate}/MW-year per %) is below the market floor for wind — insufficient compensation for shortfall.`;
   }
 
   return { score: clamp(score), flag };
