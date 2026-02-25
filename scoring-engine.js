@@ -47,7 +47,7 @@ const STRIKE_THRESHOLDS = {
 const DEFAULT_CONFIG = {
   weights: {
     strike:4, basis:4, negprice:4, eterm:4, floating:4,
-    delay:2, curtailment:2, availmech:2, availguaranteed:2, ia:2, cod:2, fm:2,
+    delay:2, curtailment:2, availmech:2, ia:2, cod:2, fm:2,
     changeinlaw:2, cp:2, nonecocurtail:2, basiscurtail:2, permit:2, marketdisrupt:2,
     sellerpa:1, buyerpa:1, assign:1, eod:1, recs:1, incentives:1, interval:1,
     invoice:1, reputation:1, product:1, govlaw:1, conf:1, excl:1, expenses:1,
@@ -115,14 +115,9 @@ const DEFAULT_CONFIG = {
     no:           {yes:35,no:75,not_specified:60},
     not_specified:{not_specified:80},
   },
-  availguaranteed: {
-    yes:{P50:10,P75:45,P90:65,other:50,not_specified:40},
-    no: {_:82},
-    not_specified:{_:80},
-  },
   availmech: {
-    solar:{pct99:0,pct98:10,pct97:25,pct96:40,pct95:55,below95:80,null_pct:78},
-    wind: {pct97:5,pct96:15,pct95:30,pct94:42,pct93:55,pct92:65,below92:82,null_pct:78},
+    solar:{pct99:5,pct98:15,pct97:25,pct96:35,pct95:45,pct94:60,below94:78,null_pct:80},
+    wind: {pct95:5,pct94:15,pct93:25,pct92:35,pct91:50,pct90:62,below90:78,null_pct:80},
   },
   buyerpa: {
     ig:    {unsecured:5,parent_guaranty:15,lc:30,cash:45,lc_plus_mtm:55,cash_plus_mtm:70,not_specified:40},
@@ -733,89 +728,99 @@ function scoreDelay(f) {
 }
 
 /**
- * 15. availmech — Mechanical Availability Guarantee
+/**
+ * 15. availmech — Availability Guarantee
+ *
+ * What matters (per market practice):
+ *  - Guarantee %: solar 94–99%, wind 90–95%
+ *  - Measurement period: annual is toughest for seller; rolling 2yr is common market compromise
+ *  - LD formula: avg energy + avg REC value × shortfall % is market standard
+ *  - REC damages: 120% multiplier or supplemental RECs adds real protection
+ *  - Exclusion scope: broad exclusions undermine the guarantee
+ *  - No guarantee at all = highly unfavorable
  */
 function scoreAvailMech(f) {
   const tech = (f.technology || 'solar').toLowerCase();
   const pct  = f.availGuaranteePct;
+  const AM   = CONFIG.availmech[tech] || CONFIG.availmech.solar;
 
-  const AM = CONFIG.availmech[tech] || CONFIG.availmech.solar;
+  // Base score from guarantee percentage
   let base;
   if (pct == null) {
-    base = AM.null_pct ?? 78;
+    base = AM.null_pct ?? 80;
   } else if (tech === 'wind') {
-    if      (pct >= 97) base = AM.pct97 ?? 5;
-    else if (pct >= 96) base = AM.pct96 ?? 15;
-    else if (pct >= 95) base = AM.pct95 ?? 30;
-    else if (pct >= 94) base = AM.pct94 ?? 42;
-    else if (pct >= 93) base = AM.pct93 ?? 55;
-    else if (pct >= 92) base = AM.pct92 ?? 65;
-    else                base = AM.below92 ?? 82;
+    if      (pct >= 95) base = AM.pct95 ?? 5;
+    else if (pct >= 94) base = AM.pct94 ?? 15;
+    else if (pct >= 93) base = AM.pct93 ?? 25;
+    else if (pct >= 92) base = AM.pct92 ?? 35;
+    else if (pct >= 91) base = AM.pct91 ?? 50;
+    else if (pct >= 90) base = AM.pct90 ?? 62;
+    else                base = AM.below90 ?? 78;
   } else {
-    if      (pct >= 99) base = AM.pct99 ?? 0;
-    else if (pct >= 98) base = AM.pct98 ?? 10;
+    // Solar: market standard 94–99%
+    if      (pct >= 99) base = AM.pct99 ?? 5;
+    else if (pct >= 98) base = AM.pct98 ?? 15;
     else if (pct >= 97) base = AM.pct97 ?? 25;
-    else if (pct >= 96) base = AM.pct96 ?? 40;
-    else if (pct >= 95) base = AM.pct95 ?? 55;
-    else                base = AM.below95 ?? 80;
+    else if (pct >= 96) base = AM.pct96 ?? 35;
+    else if (pct >= 95) base = AM.pct95 ?? 45;
+    else if (pct >= 94) base = AM.pct94 ?? 60;
+    else                base = AM.below94 ?? 78;
   }
 
-  const MEAS = { time_based: 0, energy_weighted: tech === 'wind' ? -5 : -3, not_specified: 3 };
-  const REMEDY = { deemed_generation: -5, liquidated_damages: -3, none: 15, not_specified: 8 };
-  const EXCL   = { narrow: -3, standard: 0, broad: 5, not_specified: 5 };
-  const TRIGHT = { yes: -5, no: 8, not_specified: 5 };
   let score = base;
-  score += MEAS[f.measurementMethod || 'not_specified'] || 3;
-  score += REMEDY[f.shortfallRemedy || 'not_specified'] || 8;
-  score += EXCL[f.exclusionScope || 'not_specified'] || 5;
-  score += TRIGHT[f.terminationRight || 'not_specified'] || 5;
 
-  const maint = f.maintenanceCapDays;
-  if      (maint != null && maint <= 15) score -= 3;
-  else if (maint != null && maint <= 30) score += 0;
-  else if (maint != null && maint <= 45) score += 3;
-  else if (maint != null)                score += 5;
-  else                                   score += 3;
-
-  let flag = null;
-  if (pct == null) flag = 'No mechanical availability guarantee — buyer has no assurance of project uptime.';
-
-  return { score: clamp(score), flag };
-}
-
-/**
- * 16. availguaranteed — Energy Production Guarantee
- */
-function scoreAvailGuaranteed(f) {
-  const tech = (f.technology || 'solar').toLowerCase();
-  const pg   = f.productionGuarantee || 'not_specified';
-  const pval = f.pValue || 'not_specified';
-
-  const MATRIX = CONFIG.availguaranteed;
-
-  let score;
-  if (pg === 'yes') score = (MATRIX.yes[pval] !== undefined ? MATRIX.yes[pval] : 40);
-  else score = 80;
-
+  // Measurement period: annual is most protective for buyer
   const PERIOD = {
-    annual:     tech === 'wind' ? -5 : -3,
-    rolling_2yr: tech === 'wind' ? 0  : 2,
-    rolling_3yr: tech === 'wind' ? 3  : 5,
-    not_specified: 3,
+    annual:        0,   // toughest for seller, best for buyer
+    rolling_2yr:   5,   // common market compromise
+    not_specified: 8,
   };
-  const RES    = { yes: -3, no: 8, not_specified: 5 };
-  const REMEDY = { deemed_generation: -5, make_whole: -4, liquidated_damages: -2, none: 15, not_specified: 8 };
-  const EXCESS = { buyer_receives_all: -3, capped: 3, clawback: 8, not_specified: 2 };
-  const TRIGHT = { yes: -5, no: 8, not_specified: 5 };
+  score += PERIOD[f.measurementPeriod || 'not_specified'] ?? 8;
 
-  score += PERIOD[f.measurementPeriod || 'not_specified'] || 3;
-  score += RES[f.resourceNormalized || 'not_specified'] || 5;
-  score += REMEDY[f.shortfallRemedy || 'not_specified'] || 8;
-  score += EXCESS[f.excessGenTreatment || 'not_specified'] || 2;
-  score += TRIGHT[f.terminationRight || 'not_specified'] || 5;
+  // LD formula: energy + REC is market standard and most complete
+  const LD = {
+    energy_and_rec:  0,   // market standard
+    energy_only:     8,   // missing REC component leaves buyer exposed
+    none:           20,   // no damages = guarantee is toothless
+    not_specified:  10,
+  };
+  score += LD[f.ldFormula || 'not_specified'] ?? 10;
+
+  // REC damages treatment: multiplier or supplemental RECs adds real protection
+  const REC_DMG = {
+    multiplier_120pct:    -5,  // best — accounts for replacement REC premium
+    supplemental_recs:    -3,  // good — physical replacement
+    standard_100pct:       0,  // market standard
+    none:                  5,  // no REC remedy component
+    not_specified:         3,
+  };
+  score += REC_DMG[f.recDamageAlternative || 'not_specified'] ?? 3;
+
+  // Exclusion scope: broad exclusions undermine the guarantee
+  const EXCL = {
+    narrow:        -3,
+    standard:       0,
+    broad:          8,
+    not_specified:  5,
+  };
+  score += EXCL[f.exclusionScope || 'not_specified'] ?? 5;
+
+  // Termination right if chronic shortfall
+  const TRIGHT = {
+    yes:           -5,
+    no:             5,
+    not_specified:  3,
+  };
+  score += TRIGHT[f.terminationRight || 'not_specified'] ?? 3;
 
   let flag = null;
-  if (pg !== 'yes') flag = 'No energy production guarantee — buyer has no protection against plant underperformance.';
+  if (pct == null) {
+    flag = 'No mechanical availability guarantee — buyer has no assurance of project uptime.';
+  } else if (f.ldFormula === 'none') {
+    flag = 'Availability guarantee has no LD remedy — guarantee is unenforceable without damages.';
+  } else if (f.ldFormula === 'energy_only') {
+    flag = 'LD formula covers energy value only — buyer exposed on REC shortfall with no remedy.';
+  }
 
   return { score: clamp(score), flag };
 }
@@ -1486,8 +1491,7 @@ function checkInteractions(scores, facts) {
   if (s.curtailment > 50 && s.nonecocurtail > 50 && s.basiscurtail > 50)
     flags.push({ terms: ['curtailment','nonecocurtail','basiscurtail'], message: 'Buyer bears majority of curtailment risk across all three categories — cumulative volume loss exposure is significant.' });
 
-  if ((s.availmech < 50) !== (s.availguaranteed < 50))
-    flags.push({ terms: ['availmech','availguaranteed'], message: 'Both mechanical availability and production guarantee needed — one without the other is incomplete protection.' });
+
 
   if (s.product < 25 && s.recs > 50)
     flags.push({ terms: ['product','recs'], message: 'Complete product definition but weak REC delivery mechanics.' });
@@ -1554,7 +1558,6 @@ function scoreAll(facts) {
     cp:            isBlank(f.cp)            ? { score: null } : scoreCP(f.cp),
     delay:         isBlank(f.delay)         ? { score: null } : scoreDelay({ ...ctx, ...f.delay }),
     availmech:     isBlank(f.availmech)     ? { score: null } : scoreAvailMech({ ...ctx, ...f.availmech }),
-    availguaranteed: isBlank(f.availguaranteed) ? { score: null } : scoreAvailGuaranteed({ ...ctx, ...f.availguaranteed }),
     permit:        isBlank(f.permit)        ? { score: null } : scorePermit(f.permit),
     cod:           isBlank(f.cod)           ? { score: null } : scoreCOD(f.cod),
     buyerpa:       isBlank(f.buyerpa)       ? { score: null } : scoreBuyerPA({ ...ctx, ...f.buyerpa }),

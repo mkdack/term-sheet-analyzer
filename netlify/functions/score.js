@@ -102,20 +102,11 @@ Return ONLY valid JSON. Use null for truly unknown values. Use the exact enum st
   },
   "availmech": {
     "availGuaranteePct": number (e.g. 95) or null,
-    "shortfallRemedy": "deemed_generation|liquidated_damages|none|not_specified",
-    "terminationRight": "yes|no|not_specified",
-    "measurementMethod": "time_based|energy_weighted|not_specified",
+    "measurementPeriod": "annual|rolling_2yr|not_specified",
+    "ldFormula": "energy_and_rec|energy_only|none|not_specified",
+    "recDamageAlternative": "multiplier_120pct|supplemental_recs|standard_100pct|none|not_specified",
     "exclusionScope": "narrow|standard|broad|not_specified",
-    "maintenanceCapDays": number or null
-  },
-  "availguaranteed": {
-    "productionGuarantee": "yes|no|not_specified",
-    "pValue": "P50|P75|P90|other|not_specified",
-    "measurementPeriod": "annual|rolling_2yr|rolling_3yr|not_specified",
-    "shortfallRemedy": "deemed_generation|make_whole|liquidated_damages|none|not_specified",
-    "terminationRight": "yes|no|not_specified",
-    "resourceNormalized": "yes|no|not_specified",
-    "excessGenTreatment": "buyer_retains|seller_retains|shared|not_specified"
+    "terminationRight": "yes|no|not_specified"
   },
   "permit": {
     "permitStatus": "all_obtained|major_obtained|in_progress|not_started|not_specified",

@@ -2173,7 +2173,7 @@ const CATEGORIES = [
   },
   {
     name: 'Performance & Guarantees',
-    keys: ['availability', 'production', 'recs']
+    keys: ['availability', 'recs']
   },
   {
     name: 'Credit & Collateral',
@@ -2207,7 +2207,6 @@ const TERM_NAMES = {
   conditions: 'Conditions Precedent',
   delay: 'Delay & COD Damages',
   availability: 'Availability Guarantee',
-  production: 'Production Guarantee',
   permits: 'Permitting Status',
   cod: 'COD Definition',
   buyercredit: 'Buyer Credit Support',
@@ -2630,7 +2629,7 @@ const TERM_KEY_MAP = {
   basis: 'basis', scheduling: 'scheduling', curtailment: 'curtailment',
   nonecocurtail: 'nonecocurtail', interconnection: 'ia', conditions: 'cp',
   delay: 'delay', permits: 'permit', cod: 'cod',
-  availability: 'availmech', production: 'availguaranteed', recs: 'recs',
+  availability: 'availmech', recs: 'recs',
   buyercredit: 'buyerpa', sellercredit: 'sellerpa', invoice: 'invoice',
   assignment: 'assign', forcemajeure: 'fm', default: 'eod',
   termination: 'eterm', marketdisrupt: 'marketdisrupt', changeinlaw: 'changeinlaw',
@@ -2654,7 +2653,6 @@ const TERM_WEIGHTS = {
   delay:        2,
   curtailment:  2,
   availmech:    2,
-  availguaranteed: 2,
   ia:           2,
   cod:          2,
   fm:           2,
@@ -2917,7 +2915,7 @@ function getScoreColor(score) {
 // Which e2keys belong to which tier
 const TIER_MAP = {
   economics: ['strike','basis','negprice','eterm','floating'],
-  risk:      ['delay','curtailment','availmech','availguaranteed','ia','cod','fm','changeinlaw','cp','nonecocurtail','basiscurtail','permit','marketdisrupt'],
+  risk:      ['delay','curtailment','availmech','ia','cod','fm','changeinlaw','cp','nonecocurtail','basiscurtail','permit','marketdisrupt'],
   admin:     ['sellerpa','buyerpa','assign','eod','recs','incentives','interval','invoice','reputation','product','govlaw','conf','excl','expenses','acct','publicity','scheduling'],
 };
 
@@ -3042,8 +3040,7 @@ function applyFilters() {
       <div class="model-term-block"><div class="model-term-name">Permits Status</div><div id="permitEd"></div></div>
       <div class="model-term-block"><div class="model-term-name">COD Definition</div><div id="codEd"></div></div>
       <div class="model-term-block"><div class="model-term-name">Delay / COD Extension — Score Matrix</div><div class="model-term-desc">Scores by long-stop date present × delay termination right.</div><div id="delayEd"></div></div>
-      <div class="model-term-block"><div class="model-term-name">Availability Mechanism — Score Matrix</div><div class="model-term-desc">Scores by availability remedy × availability guaranty present.</div><div id="availmechEd"></div></div>
-      <div class="model-term-block"><div class="model-term-name">Availability Guarantee — Production Basis × P-Value</div><div class="model-term-desc">Scores by guaranty present × P-value basis.</div><div id="availguaranteedEd"></div></div>
+      <div class="model-term-block"><div class="model-term-name">Availability Guarantee — Percentage Thresholds</div><div class="model-term-desc">Scores by guarantee % against market standards (solar 94–99%, wind 90–95%).</div><div id="availmechEd"></div></div>
       <div class="model-term-block"><div class="model-term-name">Seller Performance Assurance — Score Matrix</div><div class="model-term-desc">Scores by credit support type × pre-COD guarantee.</div><div id="sellerpaEd"></div></div>
     </div>
   </div>
@@ -3407,7 +3404,6 @@ function renderModelPage() {
     {deemed_generation:'Deemed generation',liquidated_damages:'Liquidated damages',none:'No remedy',not_specified:'Not specified'},
     {yes:'Guaranty present',no:'No guaranty',not_specified:'Not specified'});
 
-  matrixEd('availguaranteedEd','availguaranteed',
     {yes:'Guaranty present',no:'No guaranty',not_specified:'Not specified'},
     {P50:'P50',P75:'P75',P90:'P90',other:'Other',not_specified:'Not specified',_:'N/A'});
 
