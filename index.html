@@ -3161,10 +3161,10 @@ function simpleEd(id, cfgPath, labels) {
   const cfg=window.ScoringEngine.getConfig();
   let obj=cfg; cfgPath.split('.').forEach(k=>obj=obj?.[k]);
   if(!obj) return;
-  const entries=Object.entries(obj);
-  const ns=entries.filter(([k])=>k==='not_specified');
-  const rest=entries.filter(([k])=>k!=='not_specified');
-  el.innerHTML=[...rest,...ns].map(([k,v])=>{
+  // If labels provided, only show those keys (in label order); otherwise show all
+  const keys = labels ? Object.keys(labels) : Object.keys(obj).filter(k=>k!=='not_specified').concat(Object.keys(obj).filter(k=>k==='not_specified'));
+  el.innerHTML=keys.filter(k=>k in obj).map(k=>{
+    const v=obj[k];
     const lbl=labels?.[k]||k.replace(/_/g,' ');
     const mod=v!==defVal(cfgPath+'.'+k);
     return `<div class="score-row">
@@ -3175,7 +3175,6 @@ function simpleEd(id, cfgPath, labels) {
     </div>`;
   }).join('');
 }
-
 // Matrix editor (row×col → score inputs)
 function matrixEd(id, cfgPath, rowLabels, colLabels) {
   const el=document.getElementById(id); if(!el) return;

@@ -116,25 +116,24 @@ const DEFAULT_CONFIG = {
     not_specified:{not_specified:80},
   },
   availmech: {
-    // Guarantee % — Solar
-    solar_pct99:5, solar_pct98:15, solar_pct97:25, solar_pct96:35,
-    solar_pct95:45, solar_pct94:60, solar_below94:78, solar_null:80,
+    // Guarantee % — Solar (grouped into strong/market/weak/none)
+    solar_pct99:5, solar_pct95:45, solar_below94:78, solar_null:80,
     // Guarantee % — Wind
-    wind_pct95:5, wind_pct94:15, wind_pct93:25, wind_pct92:35,
-    wind_pct91:50, wind_pct90:62, wind_below90:78, wind_null:80,
+    wind_pct95:5, wind_pct91:50, wind_below90:78, wind_null:80,
+    // LD rate (solar and wind share strong/market/weak labels)
+    solar_ld_strong:-5, solar_ld_market:0, solar_ld_weak:8, ld_none:20,
+    // Annual LD cap
+    cap_strong:0, cap_market:5, cap_weak:18,
     // Measurement period
-    period_annual:0, period_rolling2yr:5, period_not_specified:8,
-    // LD rate — Solar ($ per 0.1% shortfall)
-    solar_ld_strong:-5, solar_ld_market:0, solar_ld_weak:8, solar_ld_below_floor:15,
-    // LD rate — Wind ($ per 0.1% shortfall)
+    period_annual:0, period_rolling2yr:5,
+    // Hidden scoring values (not shown in UI, used by engine only)
+    solar_pct98:15, solar_pct97:25, solar_pct96:35, solar_pct94:60, solar_ld_below_floor:15,
+    wind_pct94:15, wind_pct93:25, wind_pct92:35, wind_pct90:62, wind_below90:78,
     wind_ld_strong:-5, wind_ld_market:0, wind_ld_weak:8, wind_ld_below_floor:15,
-    // LD present but rate not stated / no LDs
-    ld_present_no_rate:5, ld_none:20, ld_not_specified:10,
-    // Annual LD cap (% of VPPA revenue)
-    cap_very_strong:-3, cap_strong:0, cap_market:5, cap_low_market:10, cap_weak:18, cap_not_stated:5,
-    // Exclusion scope
+    cap_very_strong:-3, cap_low_market:10, cap_not_stated:5,
+    ld_present_no_rate:5, ld_not_specified:10,
+    period_not_specified:8,
     excl_narrow:-3, excl_standard:0, excl_broad:8, excl_not_specified:5,
-    // Termination right
     term_yes:-5, term_no:5, term_not_specified:3,
   },
   buyerpa: {
