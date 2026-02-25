@@ -10,19 +10,19 @@
   node_bundler = "esbuild"
 
 [functions."extract"]
-  timeout = 30
+  timeout = 60
 
 [functions."extract-a"]
-  timeout = 30
+  timeout = 60
 
 [functions."extract-b"]
-  timeout = 30
+  timeout = 60
 
 [functions."score"]
-  timeout = 30
+  timeout = 60
 
 [functions."extract-custom"]
-  timeout = 30
+  timeout = 60
 
 [[redirects]]
   from = "/api/*"

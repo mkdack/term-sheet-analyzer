@@ -2006,7 +2006,19 @@ async function runEngine1() {
       fetch('/api/extract-b', payload)
     ]);
 
-    const [dataA, dataB] = await Promise.all([resA.json(), resB.json()]);
+    // Check content-type before parsing JSON — Netlify returns HTML on timeout/crash
+    const parseResponse = async (res, label) => {
+      const ct = res.headers.get('content-type') || '';
+      if (!ct.includes('application/json')) {
+        throw new Error(`${label} returned HTTP ${res.status} (${res.statusText || 'no body'}) — function may have timed out or crashed`);
+      }
+      return res.json();
+    };
+
+    const [dataA, dataB] = await Promise.all([
+      parseResponse(resA, 'Pass A'),
+      parseResponse(resB, 'Pass B')
+    ]);
 
     if (!resA.ok || !dataA.ok) throw new Error(dataA.message || dataA.error || 'Pass A failed');
     if (!resB.ok || !dataB.ok) throw new Error(dataB.message || dataB.error || 'Pass B failed');
